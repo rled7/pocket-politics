@@ -1,0 +1,30 @@
+[
+  {
+    "type": "HR", "number": "1042", "congress": 118,
+    "title": "Municipal Transparency in Lobbying Act",
+    "introducedDate": "2024-02-14",
+    "policyArea": { "name": "Government Operations" },
+    "latestAction": { "actionDate": "2024-03-01", "text": "Referred to the Committee on Oversight." }
+  },
+  {
+    "type": "HR", "number": "0887", "congress": 118,
+    "title": "Local Election Accessibility Act",
+    "introducedDate": "2024-01-30",
+    "policyArea": { "name": "Elections" },
+    "latestAction": { "actionDate": "2024-02-10", "text": "Referred to the Committee on House Administration." }
+  },
+  {
+    "type": "HR", "number": "0511", "congress": 118,
+    "title": "Affordable Housing Data Standardization Act",
+    "introducedDate": "2023-11-09",
+    "policyArea": { "name": "Housing and Community Development" },
+    "latestAction": { "actionDate": "2023-12-01", "text": "Subcommittee hearings held." }
+  },
+  {
+    "type": "HR", "number": "0203", "congress": 118,
+    "title": "Public Records Modernization Act",
+    "introducedDate": "2023-09-21",
+    "policyArea": { "name": "Government Operations" },
+    "latestAction": { "actionDate": "2023-10-05", "text": "Passed House, referred to Senate." }
+  }
+]

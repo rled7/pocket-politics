@@ -1,0 +1,7 @@
+{
+  "bioguideId": "S000XXX",
+  "directOrderName": "Sample Member (DEMO FIXTURE — not a real record)",
+  "state": "New York",
+  "partyHistory": [{ "partyName": "Independent" }],
+  "terms": [{ "chamber": "House of Representatives" }]
+}

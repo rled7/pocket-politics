@@ -1,0 +1,17 @@
+{
+  "name": "pocket-politics",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Pocket Politics — Phase 0: verified politician profile from Congress.gov",
+  "scripts": {
+    "demo": "tsx src/demo.ts",
+    "demo:live": "USE_LIVE=1 tsx src/demo.ts",
+    "serve": "tsx src/serve.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

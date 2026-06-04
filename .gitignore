@@ -1,0 +1,5 @@
+node_modules/
+web/profile.json
+.env
+*.log
+.DS_Store
