@@ -12,6 +12,16 @@ export interface ApiMember {
   state?: string;
   partyHistory?: { partyName: string }[];
   terms?: { item?: { chamber: string }[] } | { chamber: string }[];
+  addressInformation?: {
+    officeAddress?: string;
+    city?: string;
+    district?: string;
+    zipCode?: string;
+    phoneNumber?: string;
+  };
+  officialWebsiteUrl?: string;
+  depiction?: { imageUrl?: string };
+  leadership?: { type?: string }[];
 }
 
 export interface ApiSponsored {
@@ -22,6 +32,28 @@ export interface ApiSponsored {
   introducedDate: string;
   policyArea?: { name: string };
   latestAction?: { actionDate: string; text: string };
+}
+
+// One row of the "everyone in Congress" directory (Congress.gov /member list shape).
+export interface MemberSummary {
+  bioguideId: string;
+  name: string;
+  party: string;
+  state: string;
+  district?: number | string;
+  chamber: string;
+  photo?: string;
+}
+
+// One bill currently moving through Congress (Congress.gov /bill list shape).
+export interface ApiBill {
+  congress: number;
+  type: string;
+  number: string;
+  title: string;
+  originChamber?: string;
+  latestAction?: { actionDate: string; text: string };
+  updateDate?: string;
 }
 
 async function get<T>(path: string, key: string): Promise<T> {
@@ -40,4 +72,24 @@ export async function fetchSponsored(bioguideId: string, key: string): Promise<A
   const data = await get<{ sponsoredLegislation: ApiSponsored[] }>(
     `/member/${bioguideId}/sponsored-legislation?limit=50`, key);
   return data.sponsoredLegislation ?? [];
+}
+
+// Every current member of Congress (House + Senate) as a directory.
+export async function fetchMembers(key: string, limit = 250): Promise<MemberSummary[]> {
+  const data = await get<{ members: any[] }>(`/member?currentMember=true&limit=${limit}`, key);
+  return (data.members ?? []).map((m) => ({
+    bioguideId: m.bioguideId,
+    name: m.name ?? m.directOrderName ?? m.bioguideId,
+    party: m.partyName ?? 'Unknown',
+    state: m.state ?? 'Unknown',
+    district: m.district,
+    chamber: m.district != null && m.district !== '' ? 'House of Representatives' : 'Senate',
+    photo: m.depiction?.imageUrl,
+  }));
+}
+
+// Bills currently in Congress, most recently acted-on first.
+export async function fetchBills(key: string, limit = 20): Promise<ApiBill[]> {
+  const data = await get<{ bills: ApiBill[] }>(`/bill?limit=${limit}&sort=updateDate+desc`, key);
+  return data.bills ?? [];
 }

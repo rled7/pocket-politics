@@ -1,0 +1,5 @@
+[
+  { "congress": 118, "type": "HR", "number": "1", "title": "Lower Energy Costs Act", "originChamber": "House", "latestAction": { "actionDate": "2023-03-30", "text": "Passed/agreed to in House." }, "updateDate": "2023-03-30" },
+  { "congress": 118, "type": "HR", "number": "5376", "title": "Build for the Future Act (demo placeholder)", "originChamber": "House", "latestAction": { "actionDate": "2024-01-18", "text": "Referred to the Committee on Ways and Means." }, "updateDate": "2024-01-18" },
+  { "congress": 118, "type": "S", "number": "2226", "title": "National Defense Authorization Act (demo placeholder)", "originChamber": "Senate", "latestAction": { "actionDate": "2023-12-14", "text": "Resolving differences — Senate agreed to conference report." }, "updateDate": "2023-12-14" }
+]

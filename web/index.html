@@ -24,12 +24,23 @@
     .title { margin:4px 0 2px; font-weight:600; }
     .action { color:var(--muted); font-size:13px; }
     .src { color:var(--muted); font-size:12px; margin-top:16px; }
+    .phead { display:flex; gap:14px; align-items:center; }
+    .photo { width:64px; height:64px; border-radius:12px; object-fit:cover; border:1px solid var(--line); flex:none; background:#eef; }
+    .facts { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+    .fact { font-size:13px; background:#f1f5ff; color:#1e3a8a; border:1px solid #dbe4ff; border-radius:999px; padding:5px 11px; }
+    .fact b { font-weight:700; }
+    .contact { margin-top:12px; font-size:14px; color:var(--ink); }
+    .contact div { margin-top:4px; }
+    .contact a { color:var(--accent); text-decoration:none; }
+    .sec-title { font-size:13px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); font-weight:700; margin-top:8px; }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="brand">Pocket Politics</div>
     <div class="card" id="card">Loading profile…</div>
+    <div class="sec-title" style="margin-top:22px">Bills currently in Congress</div>
+    <div class="card" id="bills">Loading bills…</div>
   </div>
   <script>
     const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
@@ -55,17 +66,46 @@
           ${r.latestAction ? `<div class="action">${esc(r.latestAction)}</div>` : ""}
         </div>`).join("");
       const badge = p.live === false ? ` <span class="bill">· demo data</span>` : (p.live ? ` <span class="bill">· live</span>` : "");
+      const c = p.contact || {};
+      const photo = c.photo ? `<img class="photo" src="${esc(c.photo)}" alt="" onerror="this.style.display='none'">` : "";
+      const pay = p.salary ? `<span class="fact">💵 <b>$${Number(p.salary.amount).toLocaleString()}</b>/yr · ${esc(p.salary.role)}</span>` : "";
+      const contact = (c.office || c.phone || c.website) ? `
+        <div class="contact">
+          <div class="sec-title">Contact</div>
+          ${c.office ? `<div>📍 ${esc(c.office)}</div>` : ""}
+          ${c.phone ? `<div>📞 ${esc(c.phone)}</div>` : ""}
+          ${c.website ? `<div>🔗 <a href="${esc(c.website)}" target="_blank" rel="noopener noreferrer">${esc(c.website)}</a></div>` : ""}
+        </div>` : "";
       document.getElementById("card").innerHTML = `
-        <h1>${esc(p.name)}${badge}</h1>
-        <div class="meta">${esc(p.party)} · ${esc(p.state)} · ${esc(p.chamber)}</div>
+        <div class="phead">${photo}<div>
+          <h1>${esc(p.name)}${badge}</h1>
+          <div class="meta">${esc(p.party)} · ${esc(p.state)} · ${esc(p.chamber)}</div>
+        </div></div>
+        <div class="facts">${pay}</div>
+        ${contact}
         <div class="tabs">
           <span class="tab on">Past · record</span>
-          <span class="tab soon">Present · live bills (soon)</span>
+          <span class="tab soon">Present · votes (soon)</span>
           <span class="tab soon">Future · schedule (soon)</span>
         </div>
         <div style="margin-top:8px">${items || "<p>No records.</p>"}</div>
         <div class="src">Source: ${esc((p.sources||[]).join("; "))} · generated ${new Date(p.generatedAt).toLocaleString()}</div>`;
     }).catch(e => { document.getElementById("card").textContent = "Could not load profile (" + e + ")"; });
+
+    // Bills currently in Congress (separate endpoint; same API).
+    (async () => {
+      let data;
+      try { const r = await fetch("/api/bills"); data = r.ok ? await r.json() : null; } catch (_) {}
+      const el = document.getElementById("bills");
+      if (!data || !(data.bills || []).length) { el.textContent = "No bills loaded."; return; }
+      el.innerHTML = data.bills.map(b => `
+        <div class="item">
+          <span class="date">${fmt(b.latestAction && b.latestAction.actionDate)}</span><span class="bill">${esc(b.type)} ${esc(b.number)} (${esc(b.congress)}th)${b.originChamber ? " · " + esc(b.originChamber) : ""}</span>
+          <div class="title">${esc(b.title)}</div>
+          ${b.latestAction ? `<div class="action">${esc(b.latestAction.text)}</div>` : ""}
+        </div>`).join("") +
+        `<div class="src">${data.live === false ? "Demo data — set CONGRESS_API_KEY for live bills. " : ""}Source: Congress.gov</div>`;
+    })();
   </script>
 </body>
 </html>

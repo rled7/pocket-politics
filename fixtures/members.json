@@ -1,0 +1,6 @@
+[
+  { "bioguideId": "O000172", "name": "Ocasio-Cortez, Alexandria", "party": "Democratic", "state": "NY", "district": 14, "chamber": "House of Representatives" },
+  { "bioguideId": "S000033", "name": "Sanders, Bernard", "party": "Independent", "state": "VT", "chamber": "Senate" },
+  { "bioguideId": "P000197", "name": "Pelosi, Nancy", "party": "Democratic", "state": "CA", "district": 11, "chamber": "House of Representatives" },
+  { "bioguideId": "C001098", "name": "Cruz, Ted", "party": "Republican", "state": "TX", "chamber": "Senate" }
+]
