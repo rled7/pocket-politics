@@ -32,25 +32,40 @@
     <div class="card" id="card">Loading profile…</div>
   </div>
   <script>
-    fetch("./profile.json").then(r => r.json()).then(p => {
-      const fmt = d => d || "—";
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    const fmt = d => esc(d) || "—";
+
+    // Hit the shared backend API first (works on Cloudflare with the live record, or
+    // the demo fixture when no key is set). Fall back to the static profile.json so the
+    // plain `npm run demo` + `npm run serve` local flow keeps working with no backend.
+    async function loadProfile() {
+      try {
+        const r = await fetch("/api/profile" + location.search);
+        if (r.ok) return await r.json();
+      } catch (_) { /* no backend (static serve) → fall through */ }
+      return (await fetch("./profile.json")).json();
+    }
+
+    loadProfile().then(p => {
+      if (p.error) throw new Error(p.error);
       const items = (p.record || []).map(r => `
         <div class="item">
-          <span class="date">${fmt(r.date)}</span><span class="bill">${r.id}${r.policyArea ? " · " + r.policyArea : ""}</span>
-          <div class="title">${r.title}</div>
-          ${r.latestAction ? `<div class="action">${r.latestAction}</div>` : ""}
+          <span class="date">${fmt(r.date)}</span><span class="bill">${esc(r.id)}${r.policyArea ? " · " + esc(r.policyArea) : ""}</span>
+          <div class="title">${esc(r.title)}</div>
+          ${r.latestAction ? `<div class="action">${esc(r.latestAction)}</div>` : ""}
         </div>`).join("");
+      const badge = p.live === false ? ` <span class="bill">· demo data</span>` : (p.live ? ` <span class="bill">· live</span>` : "");
       document.getElementById("card").innerHTML = `
-        <h1>${p.name}</h1>
-        <div class="meta">${p.party} · ${p.state} · ${p.chamber}</div>
+        <h1>${esc(p.name)}${badge}</h1>
+        <div class="meta">${esc(p.party)} · ${esc(p.state)} · ${esc(p.chamber)}</div>
         <div class="tabs">
           <span class="tab on">Past · record</span>
           <span class="tab soon">Present · live bills (soon)</span>
           <span class="tab soon">Future · schedule (soon)</span>
         </div>
         <div style="margin-top:8px">${items || "<p>No records.</p>"}</div>
-        <div class="src">Source: ${(p.sources||[]).join("; ")} · generated ${new Date(p.generatedAt).toLocaleString()}</div>`;
-    }).catch(e => { document.getElementById("card").textContent = "Could not load profile.json — run `npm run demo` first. (" + e + ")"; });
+        <div class="src">Source: ${esc((p.sources||[]).join("; "))} · generated ${new Date(p.generatedAt).toLocaleString()}</div>`;
+    }).catch(e => { document.getElementById("card").textContent = "Could not load profile (" + e + ")"; });
   </script>
 </body>
 </html>
