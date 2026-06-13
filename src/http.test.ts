@@ -6,6 +6,8 @@
 import { cacheControl, etagFor, jsonCached, jsonError, jsonImmutable, jsonPointer, DEFAULT_SMAXAGE } from "./http.ts";
 import { dataVersion } from "./version.ts";
 import { getProfile, getMembers, getBills, clampLimit, isBioguide } from "./handlers.ts";
+import { buildProfile } from "./profile.ts";
+import type { ApiMember, ApiSponsored } from "./congress.ts";
 
 let pass = 0;
 const fails: string[] = [];
@@ -81,6 +83,20 @@ const mem = await getMembers(250);
 check("getMembers fixture: members[] + count matches", Array.isArray(mem.members) && mem.count === mem.members.length && mem.live === false);
 const bil = await getBills(20);
 check("getBills fixture: bills[] + count matches", Array.isArray(bil.bills) && bil.count === bil.bills.length && bil.live === false);
+
+// buildProfile — robust against real-world malformed sponsored entries (live-data regression)
+const member = { bioguideId: "T000001", directOrderName: "Test Member", state: "NY" } as ApiMember;
+const messy = [
+  { type: "HR", number: "2664", congress: 117, title: "Clean Bill", introducedDate: "2021-04-19" },
+  { type: null, number: undefined, congress: 116, title: undefined, introducedDate: "2020-07-30" }, // junk row that caused "null undefined"
+  { type: "S", number: "100", congress: 118, title: "Has Title No Action", introducedDate: "2023-01-01" },
+] as unknown as ApiSponsored[];
+const built = buildProfile(member, messy);
+check("buildProfile drops the titleless junk row", built.record.length === 2);
+check("buildProfile never emits 'null'/'undefined' in id/title",
+  built.record.every((r) => !/null|undefined/.test(r.id) && !/null|undefined/.test(r.title)));
+check("buildProfile keeps the contract id format for clean bills",
+  built.record.some((r) => r.id === "HR 2664 (117th)"));
 
 // summary
 console.log(`\n  ${pass} passed, ${fails.length} failed`);

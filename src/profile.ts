@@ -43,14 +43,22 @@ function chamberOf(m: ApiMember): string {
 }
 
 export function buildProfile(member: ApiMember, sponsored: ApiSponsored[]): Profile {
-  const record: RecordItem[] = sponsored.map((b) => ({
-    id: `${b.type} ${b.number} (${b.congress}th)`,
-    title: b.title,
-    date: b.introducedDate,
-    policyArea: b.policyArea?.name,
-    latestAction: b.latestAction ? `${b.latestAction.actionDate}: ${b.latestAction.text}` : undefined,
-    role: "sponsored",
-  }));
+  const record: RecordItem[] = sponsored
+    // Real Congress.gov sponsored-legislation lists include non-bill entries (amendments,
+    // or items with null type/number/title). Skip anything without a title or date so we
+    // never render "null undefined". Clean bills are unaffected (contract-stable).
+    .filter((b) => b && b.title && b.introducedDate)
+    .map((b) => ({
+      // Build the id defensively: "HR 1042 (118th)" for clean bills, but tolerate a missing
+      // type or number rather than emitting "null"/"undefined".
+      id: [[b.type, b.number].filter(Boolean).join(" "), b.congress ? `(${b.congress}th)` : ""]
+        .filter(Boolean).join(" "),
+      title: b.title,
+      date: b.introducedDate,
+      policyArea: b.policyArea?.name,
+      latestAction: b.latestAction ? `${b.latestAction.actionDate}: ${b.latestAction.text}` : undefined,
+      role: "sponsored",
+    }));
   record.sort((a, b) => (a.date < b.date ? 1 : -1)); // newest first
 
   const addr = member.addressInformation;

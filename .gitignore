@@ -1,5 +1,7 @@
 node_modules/
 web/profile.json
 .env
+.dev.vars
+.dev.vars.*
 *.log
 .DS_Store
