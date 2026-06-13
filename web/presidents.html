@@ -33,10 +33,13 @@
     const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
     const pc = p => /^D/i.test(p) ? "D" : /^R/i.test(p) ? "R" : "U";
     const term = p => `${esc(p.start)}–${p.end == null ? "present" : esc(p.end)}`;
+    const initials = name => name.split(/\s+/).filter(w => !/^(Jr|Sr|II|III|IV)\.?$/i.test(w)).map(w => w[0]).slice(0, 2).join("");
+    const avatar = (p, big) => `<div class="av" style="display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--forest);background:var(--paper);${big ? "width:54px;height:54px;font-size:18px" : "font-size:13px"}">${esc(initials(p.name))}</div>`;
     let PREZ = [];
 
     function rowHtml(p) {
       return `<div class="row" style="cursor:default">
+        ${avatar(p)}
         <div>
           <div class="nm"><span class="dot ${pc(p.party)}"></span>#${esc(p.n)} · ${esc(p.name)}</div>
           <div class="sub">${esc(p.party)} · ${term(p)}${p.note ? " · " + esc(p.note) : ""}</div>
@@ -56,9 +59,9 @@
       PREZ = data;
       const cur = data.find(p => p.end == null) || data[data.length - 1];
       document.getElementById("current").innerHTML = `
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <span class="dot ${pc(cur.party)}" style="width:12px;height:12px"></span>
-          <div><div style="font-weight:700;font-size:20px">${esc(cur.name)}</div>
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+          ${avatar(cur, true)}
+          <div><div style="font-weight:700;font-size:20px"><span class="dot ${pc(cur.party)}"></span>${esc(cur.name)}</div>
             <div class="meta" style="margin-top:2px">${esc(cur.party)} · ${esc(cur.n)}th president · since ${esc(cur.start)}</div></div>
         </div>`;
       render();
