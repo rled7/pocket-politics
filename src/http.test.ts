@@ -181,6 +181,18 @@ const demandSel = selectToPregenerate(
   1, { views });
 check("optimizer picks the high-traffic member over the proxy default", demandSel.chosen[0].bioguideId === "H1");
 
+// comments — add/get over a Store + validation
+const { getComments, addComment, validBillId } = await import("./comments.ts");
+const cstore = new MemoryStore();
+check("comments empty initially", (await getComments(cstore, "118-hr-1")).length === 0);
+const after = await addComment(cstore, "118-hr-1", "Rene", "Strongly support this.");
+check("addComment returns the list with the new comment", after.length === 1 && after[0].text === "Strongly support this.");
+check("addComment defaults blank author to Anonymous", (await addComment(cstore, "118-hr-1", "", "x")).find(c => c.author === "Anonymous") !== undefined);
+check("addComment newest-first", (await getComments(cstore, "118-hr-1"))[0].author === "Anonymous");
+let threw = false; try { await addComment(cstore, "118-hr-1", "a", "   "); } catch { threw = true; }
+check("addComment rejects empty text", threw);
+check("validBillId accepts 118-hr-1, rejects junk", validBillId("118-hr-1") && !validBillId("../etc"));
+
 // summary
 console.log(`\n  ${pass} passed, ${fails.length} failed`);
 if (fails.length) { console.error("  FAILED: " + fails.join(", ")); process.exit(1); }

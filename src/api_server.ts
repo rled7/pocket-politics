@@ -14,9 +14,24 @@ import { dirname, join, extname, normalize } from "node:path";
 import { getMembers, getBills, getProfile, getBillVotes, clampLimit, isBioguide, DEFAULT_BIOGUIDE } from "./handlers.ts";
 import { jsonCached, jsonImmutable, jsonPointer, jsonError } from "./http.ts";
 import { dataVersion } from "./version.ts";
+import { MemoryStore } from "./store.ts";
+import { getComments, addComment, validBillId } from "./comments.ts";
 
 const KEY = process.env.CONGRESS_API_KEY || undefined;
 const PORT = Number(process.env.PORT ?? 8788);
+const store = new MemoryStore(); // single shared store for the process (comments persist while up)
+
+function readBody(req: http.IncomingMessage): Promise<string> {
+  return new Promise((resolve) => {
+    let d = ""; req.on("data", (c) => (d += c)); req.on("end", () => resolve(d)); req.on("error", () => resolve(""));
+  });
+}
+function sendJson(res: http.ServerResponse, status: number, obj: unknown): void {
+  res.statusCode = status;
+  res.setHeader("Content-Type", "application/json");
+  res.setHeader("Cache-Control", "no-store");
+  res.end(JSON.stringify(obj));
+}
 
 // In-memory response cache (the L-1 tier the persistent server unlocks — serverless can't).
 // First request hits Congress.gov; subsequent ones within the TTL serve from memory instantly.
@@ -85,6 +100,21 @@ const server = http.createServer(async (req, res) => {
     if (!url.pathname.startsWith("/api") && url.pathname !== "/healthz") {
       return await serveStatic(url.pathname, res);
     }
+
+    // Bill comments — read + write, never cached.
+    if (url.pathname === "/api/comments") {
+      if (req.method === "POST") {
+        const payload = JSON.parse((await readBody(req)) || "{}");
+        const bill = String(payload.bill ?? "");
+        if (!validBillId(bill)) return sendJson(res, 400, { error: "invalid bill id" });
+        try { return sendJson(res, 200, { comments: await addComment(store, bill, payload.author, payload.text) }); }
+        catch (e) { return sendJson(res, 400, { error: e instanceof Error ? e.message : "bad request" }); }
+      }
+      const bill = url.searchParams.get("bill") ?? "";
+      if (!validBillId(bill)) return sendJson(res, 400, { error: "invalid bill id" });
+      return sendJson(res, 200, { comments: await getComments(store, bill) });
+    }
+
     const ckey = url.pathname + url.search;
     const now = Date.now();
     const hit = apiCache.get(ckey);
