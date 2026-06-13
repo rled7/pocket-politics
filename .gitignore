@@ -1,5 +1,6 @@
 node_modules/
 web/profile.json
+web/members.json
 .env
 .dev.vars
 .dev.vars.*

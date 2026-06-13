@@ -9,7 +9,7 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { buildProfile, type Profile } from "./profile.ts";
-import { fetchMember, fetchSponsored } from "./congress.ts";
+import { fetchMember, fetchSponsored, fetchMembers } from "./congress.ts";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const useLive = process.env.USE_LIVE === "1";
@@ -30,9 +30,21 @@ async function load(): Promise<Profile> {
   return buildProfile(member, sponsored);
 }
 
+// Also populate the Explore directory (web/members.json) so the static viewer can browse.
+async function loadMembers() {
+  if (useLive && KEY) {
+    const members = await fetchMembers(KEY, 250);
+    return { members, count: members.length, live: true };
+  }
+  const members = JSON.parse(await readFile(join(root, "fixtures/members.json"), "utf8"));
+  return { members, count: members.length, live: false, note: "Demo data — set CONGRESS_API_KEY for all 535 members." };
+}
+
 const profile = await load();
+const directory = await loadMembers();
 await mkdir(join(root, "web"), { recursive: true });
 await writeFile(join(root, "web/profile.json"), JSON.stringify(profile, null, 2));
+await writeFile(join(root, "web/members.json"), JSON.stringify(directory));
 
 console.log("\n  ───────────────────────────────────────────");
 console.log(`  ${profile.name}`);
@@ -41,4 +53,5 @@ console.log(`  ─────────────────────�
 console.log(`  Legislative record (sponsored): ${profile.record.length} items\n`);
 for (const r of profile.record) console.log(`   • ${r.date}  ${r.id}\n     ${r.title}`);
 console.log(`\n  Source: ${profile.sources.join("; ")}`);
-console.log("  → wrote web/profile.json   (run `npm run serve` to view)\n");
+console.log(`  → wrote web/profile.json + web/members.json (${directory.count} members)`);
+console.log("  → run `npm run serve`, open /explore.html to browse\n");

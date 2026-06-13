@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocket Politics — Explore</title>
+  <style>
+    :root { --ink:#1a1a2e; --muted:#6b7280; --line:#e5e7eb; --accent:#2563eb; }
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, system-ui, sans-serif; margin:0; background:#f7f8fa; color:var(--ink); }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 24px 16px 64px; }
+    .brand { font-size: 13px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); font-weight:700; }
+    h1 { margin:.15em 0 2px; font-size: 26px; }
+    .meta { color:var(--muted); font-size:15px; }
+    .search { width:100%; margin-top:16px; padding:12px 14px; font-size:16px; border:1px solid var(--line); border-radius:12px; background:#fff; }
+    .search:focus { outline:none; border-color:var(--accent); }
+    .chips { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+    .chip { padding:6px 13px; border-radius:999px; font-size:13px; border:1px solid var(--line); background:#fff; color:var(--muted); cursor:pointer; }
+    .chip.on { background:var(--accent); color:#fff; border-color:var(--accent); }
+    .count { color:var(--muted); font-size:13px; margin-top:14px; }
+    .list { margin-top:8px; background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+    .row { display:flex; gap:13px; align-items:center; padding:13px 16px; border-bottom:1px solid var(--line); text-decoration:none; color:var(--ink); }
+    .row:last-child { border-bottom:0; }
+    .row:hover { background:#f1f5ff; }
+    .av { width:42px; height:42px; border-radius:9px; object-fit:cover; border:1px solid var(--line); flex:none; background:#eef; }
+    .nm { font-weight:600; }
+    .sub { color:var(--muted); font-size:13px; margin-top:1px; }
+    .dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; vertical-align:middle; }
+    .D { background:#2563eb; } .R { background:#dc2626; } .I { background:#7c3aed; } .U { background:#9ca3af; }
+    .empty { padding:28px 16px; color:var(--muted); text-align:center; }
+    .src { color:var(--muted); font-size:12px; margin-top:14px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand">Pocket Politics</div>
+    <h1>Explore Congress</h1>
+    <div class="meta">Find your representatives — search by name, state, or party.</div>
+
+    <input id="q" class="search" type="search" placeholder="Search 535 members… (e.g. “Ocasio”, “Texas”, “Sanders”)" autocomplete="off" />
+    <div class="chips" id="chips">
+      <span class="chip on" data-chamber="">All</span>
+      <span class="chip" data-chamber="House of Representatives">House</span>
+      <span class="chip" data-chamber="Senate">Senate</span>
+    </div>
+    <div class="count" id="count">Loading members…</div>
+    <div class="list" id="list"></div>
+    <div class="src" id="src"></div>
+  </div>
+
+  <script>
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    const partyClass = p => /^Democrat/i.test(p) ? "D" : /^Republican/i.test(p) ? "R" : /^Independent/i.test(p) ? "I" : "U";
+
+    let MEMBERS = [];
+    let chamber = "";
+
+    // Shared backend first (all 535 with a live key, or the demo fixture); static fallback
+    // so `npm run serve` works with no backend.
+    async function loadMembers() {
+      try {
+        const r = await fetch("/api/members");
+        if (r.ok) return await r.json();
+      } catch (_) {}
+      try { return await (await fetch("./members.json")).json(); } catch (_) { return null; }
+    }
+
+    function render() {
+      const q = document.getElementById("q").value.trim().toLowerCase();
+      const rows = MEMBERS.filter(m => {
+        if (chamber && m.chamber !== chamber) return false;
+        if (!q) return true;
+        return [m.name, m.state, m.party].some(f => String(f ?? "").toLowerCase().includes(q));
+      });
+      document.getElementById("count").textContent =
+        `${rows.length} ${rows.length === 1 ? "member" : "members"}${q || chamber ? " match" : ""}`;
+      const list = document.getElementById("list");
+      if (!rows.length) { list.innerHTML = `<div class="empty">No members match “${esc(q)}”.</div>`; return; }
+      list.innerHTML = rows.map(m => {
+        const av = m.photo ? `<img class="av" src="${esc(m.photo)}" alt="" onerror="this.style.visibility='hidden'">`
+                           : `<div class="av"></div>`;
+        const dist = (m.district !== undefined && m.district !== null && m.district !== "") ? ` · District ${esc(m.district)}` : "";
+        return `<a class="row" href="./index.html?bioguide=${encodeURIComponent(m.bioguideId)}">
+          ${av}
+          <div>
+            <div class="nm">${esc(m.name)}</div>
+            <div class="sub"><span class="dot ${partyClass(m.party)}"></span>${esc(m.party)} · ${esc(m.state)}${dist} · ${esc(m.chamber)}</div>
+          </div>
+        </a>`;
+      }).join("");
+    }
+
+    document.getElementById("q").addEventListener("input", render);
+    document.getElementById("chips").addEventListener("click", e => {
+      const chip = e.target.closest(".chip"); if (!chip) return;
+      chamber = chip.dataset.chamber;
+      document.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c === chip));
+      render();
+    });
+
+    loadMembers().then(data => {
+      if (!data || !(data.members || []).length) {
+        document.getElementById("count").textContent = "Could not load members.";
+        return;
+      }
+      MEMBERS = data.members;
+      document.getElementById("src").textContent =
+        (data.live === false ? "Demo data — set CONGRESS_API_KEY for all 535 members. " : "") + "Source: Congress.gov";
+      render();
+    });
+  </script>
+</body>
+</html>
