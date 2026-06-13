@@ -15,5 +15,11 @@
   "cosponsorsCount": 23,
   "originChamber": "House",
   "latestAction": { "actionDate": "2023-03-30", "text": "Passed/agreed to in House." },
-  "summary": "This bill addresses domestic energy production and regulation. Among other provisions, it expands oil and gas leasing on federal lands and waters, streamlines permitting for energy and mineral projects, and repeals or modifies certain fees and restrictions on fossil fuel development. (Demo summary — set CONGRESS_API_KEY for the live CRS text.)"
+  "summary": "This bill addresses domestic energy production and regulation. Among other provisions, it expands oil and gas leasing on federal lands and waters, streamlines permitting for energy and mineral projects, and repeals or modifies certain fees and restrictions on fossil fuel development. (Demo summary — set CONGRESS_API_KEY for the live CRS text.)",
+  "cosponsorsTotal": 3,
+  "cosponsors": [
+    { "bioguideId": "M001159", "fullName": "Rep. McMorris Rodgers, Cathy [R-WA-5]", "party": "R", "state": "WA", "district": 5, "sponsorshipDate": "2023-03-14", "isOriginalCosponsor": true },
+    { "bioguideId": "G000565", "fullName": "Rep. Graves, Garret [R-LA-6]", "party": "R", "state": "LA", "district": 6, "sponsorshipDate": "2023-03-14", "isOriginalCosponsor": true },
+    { "bioguideId": "W000821", "fullName": "Rep. Westerman, Bruce [R-AR-4]", "party": "R", "state": "AR", "district": 4, "sponsorshipDate": "2023-03-20", "isOriginalCosponsor": false }
+  ]
 }

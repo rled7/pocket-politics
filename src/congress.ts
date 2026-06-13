@@ -143,6 +143,26 @@ export async function fetchBillDetail(
   };
 }
 
+export interface Cosponsor {
+  bioguideId: string; fullName: string; party?: string; state?: string;
+  district?: number | string; sponsorshipDate?: string; isOriginalCosponsor?: boolean;
+}
+
+/** EVERY cosponsor on a bill (the full backing roster). One page holds up to 250 — enough for
+ *  all but a handful of bills; `total` lets the UI note when there are more. */
+export async function fetchBillCosponsors(
+  congress: number, type: string, number: string, key: string,
+): Promise<{ cosponsors: Cosponsor[]; total: number }> {
+  const data = await get<{ cosponsors?: any[]; pagination?: { count?: number } }>(
+    `/bill/${congress}/${type.toLowerCase()}/${number}/cosponsors?limit=250`, key);
+  const cosponsors = (data.cosponsors ?? []).map((c) => ({
+    bioguideId: c.bioguideId, fullName: c.fullName, party: c.party, state: c.state,
+    district: c.district, sponsorshipDate: c.sponsorshipDate,
+    isOriginalCosponsor: c.isOriginalCosponsor,
+  }));
+  return { cosponsors, total: data.pagination?.count ?? cosponsors.length };
+}
+
 /** The most recent CRS plain-English summary, if Congress.gov has published one yet. */
 export async function fetchBillSummary(
   congress: number, type: string, number: string, key: string,

@@ -110,11 +110,28 @@
         : `<div style="margin-top:12px"><strong>What it does</strong>
              <div class="meta" style="margin-top:4px">An official plain-English summary hasn't been published for this bill yet${d.policyArea ? ` — it concerns <strong>${esc(d.policyArea)}</strong>` : ""}. Until then, the latest action below tells you where it stands.</div></div>`;
 
+      const cos = d.cosponsors || [];
+      const total = d.cosponsorsTotal ?? cos.length;
+      const rosterRows = cos.map(c =>
+        `<div class="mv"><span class="dot ${pc(c.party)}"></span>` +
+        `<a href="./index.html?bioguide=${encodeURIComponent(c.bioguideId)}" style="color:inherit;text-decoration:none;font-weight:600">${esc(c.fullName)}</a>` +
+        (c.isOriginalCosponsor ? ` <span class="pill">original</span>` : "") +
+        (c.sponsorshipDate ? ` <span style="color:var(--muted);font-size:12px">· joined ${esc(c.sponsorshipDate)}</span>` : "") +
+        `</div>`
+      ).join("");
+      const roster = total > 0
+        ? `<div style="margin-top:16px"><strong>Cosponsors (${esc(total)})</strong>
+             <div class="meta" style="margin-top:2px;font-size:13px">Everyone who has signed on to back this bill.</div>
+             <div style="margin-top:8px;max-height:340px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:8px 10px">${rosterRows || '<div class="meta" style="margin-top:0">—</div>'}</div>
+             ${cos.length < total ? `<div class="meta" style="margin-top:6px;font-size:12px">Showing the first ${esc(cos.length)} of ${esc(total)}.</div>` : ""}</div>`
+        : `<div style="margin-top:16px"><strong>Cosponsors</strong><div class="meta" style="margin-top:2px">No cosponsors — only the sponsor has signed on.</div></div>`;
+
       document.getElementById("sponsor").innerHTML =
         who +
         (facts.length ? `<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">${facts.join("")}</div>` : "") +
         what +
-        `<div class="src" style="margin-top:12px">Sponsor &amp; summary: ${esc(d.source || "Congress.gov API")}${d.live === false ? " · demo data" : ""}</div>`;
+        roster +
+        `<div class="src" style="margin-top:12px">Sponsor, cosponsors &amp; summary: ${esc(d.source || "Congress.gov API")}${d.live === false ? " · demo data" : ""}</div>`;
     })();
 
     // ── Voter comments ──
