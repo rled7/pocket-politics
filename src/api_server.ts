@@ -11,7 +11,7 @@ import http from "node:http";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join, extname, normalize } from "node:path";
-import { getMembers, getBills, getProfile, getBillVotes, getReps, clampLimit, isBioguide, DEFAULT_BIOGUIDE } from "./handlers.ts";
+import { getMembers, getBills, getBill, getProfile, getBillVotes, getReps, clampLimit, isBioguide, DEFAULT_BIOGUIDE } from "./handlers.ts";
 import { getMoney } from "./money.ts";
 import { jsonCached, jsonImmutable, jsonPointer, jsonError } from "./http.ts";
 import { dataVersion } from "./version.ts";
@@ -80,6 +80,10 @@ async function route(url: URL, request: Request): Promise<Response> {
   if (segs[0] === "api" && segs[1] === "votes") {
     const congress = parseInt(q.get("congress") ?? "118", 10) || 118;
     return jsonCached(await getBillVotes(congress, q.get("type") ?? "hr", q.get("number") ?? "1", KEY), { request });
+  }
+  if (segs[0] === "api" && segs[1] === "bill") {
+    const congress = parseInt(q.get("congress") ?? "118", 10) || 118;
+    return jsonCached(await getBill(congress, q.get("type") ?? "hr", q.get("number") ?? "1", KEY), { request });
   }
   if (segs[0] === "api" && segs[1] === "money") {
     const b = (q.get("bioguide") || DEFAULT_BIOGUIDE).toUpperCase();

@@ -11,6 +11,7 @@
 import {
   fetchMember, fetchSponsored, fetchMembers, fetchBills,
   fetchBillRecordedVotes, fetchHouseVoteMembers, type MemberVote,
+  fetchBillDetail, fetchBillSummary,
 } from "./congress.ts";
 import { buildProfile } from "./profile.ts";
 import type { ApiMember, ApiSponsored } from "./congress.ts";
@@ -19,6 +20,7 @@ import sponsoredFixture from "../fixtures/sponsored.json";
 import membersFixture from "../fixtures/members.json";
 import billsFixture from "../fixtures/bills.json";
 import votesFixture from "../fixtures/bill_votes.json";
+import billDetailFixture from "../fixtures/bill_detail.json";
 
 export const DEFAULT_BIOGUIDE = "O000172"; // Rep. Alexandria Ocasio-Cortez (NY-14)
 
@@ -52,6 +54,23 @@ export async function getBills(limit: number, key?: string) {
   }
   const bills = await fetchBills(key, limit);
   return { bills, count: bills.length, live: true };
+}
+
+/**
+ * "Who introduced this bill — and what it does." The sponsor (who introduced it) is always
+ * present; the CRS summary often is NOT yet for very recent bills, so `summary` may be absent
+ * and the UI must show an honest "summary pending" state. Source: Congress.gov (the same
+ * CONGRESS_API_KEY already wired) — no additional API/key needed.
+ */
+export async function getBill(congress: number, type: string, number: string, key?: string) {
+  if (!key) {
+    return { ...billDetailFixture, source: "Congress.gov (demo)", live: false, note: note("the live sponsor & summary") };
+  }
+  const [detail, summary] = await Promise.all([
+    fetchBillDetail(congress, type, number, key),
+    fetchBillSummary(congress, type, number, key),
+  ]);
+  return { ...detail, summary, source: "Congress.gov API", live: true };
 }
 
 /**

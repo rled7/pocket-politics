@@ -1,0 +1,19 @@
+{
+  "congress": 118,
+  "type": "HR",
+  "number": "1",
+  "title": "Lower Energy Costs Act",
+  "sponsor": {
+    "bioguideId": "S001176",
+    "fullName": "Rep. Scalise, Steve [R-LA-1]",
+    "party": "R",
+    "state": "LA",
+    "district": 1
+  },
+  "introducedDate": "2023-03-14",
+  "policyArea": "Energy",
+  "cosponsorsCount": 23,
+  "originChamber": "House",
+  "latestAction": { "actionDate": "2023-03-30", "text": "Passed/agreed to in House." },
+  "summary": "This bill addresses domestic energy production and regulation. Among other provisions, it expands oil and gas leasing on federal lands and waters, streamlines permitting for energy and mineral projects, and repeals or modifies certain fees and restrictions on fossil fuel development. (Demo summary — set CONGRESS_API_KEY for the live CRS text.)"
+}
