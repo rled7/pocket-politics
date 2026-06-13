@@ -17,7 +17,10 @@
     .chips { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
     .chip { padding:6px 13px; border-radius:999px; font-size:13px; border:1px solid var(--line); background:#fff; color:var(--muted); cursor:pointer; }
     .chip.on { background:var(--accent); color:#fff; border-color:var(--accent); }
+    .grp { font-size:13px; color:var(--muted); display:inline-flex; align-items:center; gap:5px; margin-left:4px; cursor:pointer; }
     .count { color:var(--muted); font-size:13px; margin-top:14px; }
+    .state-h { font-size:13px; font-weight:700; letter-spacing:.04em; color:var(--ink); background:#f1f5ff; padding:8px 16px; border-bottom:1px solid var(--line); position:sticky; top:0; }
+    .state-h .n { color:var(--muted); font-weight:500; }
     .list { margin-top:8px; background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden; }
     .row { display:flex; gap:13px; align-items:center; padding:13px 16px; border-bottom:1px solid var(--line); text-decoration:none; color:var(--ink); }
     .row:last-child { border-bottom:0; }
@@ -50,6 +53,7 @@
       <span class="chip on" data-chamber="">All</span>
       <span class="chip" data-chamber="House of Representatives">House</span>
       <span class="chip" data-chamber="Senate">Senate</span>
+      <label class="grp"><input type="checkbox" id="byState"> 🗺️ Group by state</label>
     </div>
     <div class="count" id="count">Loading members…</div>
     <div class="list" id="list"></div>
@@ -91,21 +95,38 @@
         `${rows.length} ${rows.length === 1 ? "member" : "members"}${q || chamber ? " match" : ""}`;
       const list = document.getElementById("list");
       if (!rows.length) { list.innerHTML = `<div class="empty">No members match “${esc(q)}”.</div>`; return; }
-      list.innerHTML = rows.map(m => {
-        const av = m.photo ? `<img class="av" src="${esc(m.photo)}" alt="" onerror="this.style.visibility='hidden'">`
-                           : `<div class="av"></div>`;
-        const dist = (m.district !== undefined && m.district !== null && m.district !== "") ? ` · District ${esc(m.district)}` : "";
-        return `<a class="row" href="./index.html?bioguide=${encodeURIComponent(m.bioguideId)}">
-          ${av}
-          <div>
-            <div class="nm">${esc(m.name)}</div>
-            <div class="sub"><span class="dot ${partyClass(m.party)}"></span>${esc(m.party)} · ${esc(m.state)}${dist} · ${esc(m.chamber)}</div>
-          </div>
-        </a>`;
-      }).join("");
+
+      if (document.getElementById("byState").checked) {
+        // Organize members into states: alphabetical state sections, members by name within.
+        const byState = {};
+        for (const m of rows) (byState[m.state || "—"] ||= []).push(m);
+        const states = Object.keys(byState).sort();
+        document.getElementById("count").textContent =
+          `${rows.length} members across ${states.length} ${states.length === 1 ? "state" : "states"}`;
+        list.innerHTML = states.map(st => {
+          const ppl = byState[st].sort((a, b) => String(a.name).localeCompare(String(b.name)));
+          return `<div class="state-h">${esc(st)} <span class="n">· ${ppl.length}</span></div>` + ppl.map(rowHtml).join("");
+        }).join("");
+        return;
+      }
+      list.innerHTML = rows.map(rowHtml).join("");
+    }
+
+    function rowHtml(m) {
+      const av = m.photo ? `<img class="av" src="${esc(m.photo)}" alt="" onerror="this.style.visibility='hidden'">`
+                         : `<div class="av"></div>`;
+      const dist = (m.district !== undefined && m.district !== null && m.district !== "") ? ` · District ${esc(m.district)}` : "";
+      return `<a class="row" href="./index.html?bioguide=${encodeURIComponent(m.bioguideId)}">
+        ${av}
+        <div>
+          <div class="nm">${esc(m.name)}</div>
+          <div class="sub"><span class="dot ${partyClass(m.party)}"></span>${esc(m.party)} · ${esc(m.state)}${dist} · ${esc(m.chamber)}</div>
+        </div>
+      </a>`;
     }
 
     document.getElementById("q").addEventListener("input", render);
+    document.getElementById("byState").addEventListener("change", render);
     document.getElementById("chips").addEventListener("click", e => {
       const chip = e.target.closest(".chip"); if (!chip) return;
       chamber = chip.dataset.chamber;
