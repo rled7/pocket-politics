@@ -1,0 +1,15 @@
+[package]
+name = "pocket-politics-rs"
+version = "0.1.0"
+edition = "2021"
+description = "Pocket Politics — Rust backend (bake-off contender vs the TypeScript backend)"
+
+[[bin]]
+name = "pp-server"
+path = "src/main.rs"
+
+[dependencies]
+serde_json = "1"
+
+[profile.release]
+opt-level = 3
