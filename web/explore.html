@@ -18,6 +18,7 @@
       <span class="chip" data-chamber="House of Representatives">House</span>
       <span class="chip" data-chamber="Senate">Senate</span>
       <label class="grp"><input type="checkbox" id="byState" checked> 🗺️ Group by state</label>
+      <select id="stateSel" class="chip" style="padding:7px 12px"><option value="">All states</option></select>
     </div>
     <div class="count" id="count">Loading members…</div>
     <div class="list" id="list"></div>
@@ -50,8 +51,10 @@
 
     function render() {
       const q = document.getElementById("q").value.trim().toLowerCase();
+      const st = document.getElementById("stateSel").value;
       const rows = MEMBERS.filter(m => {
         if (chamber && m.chamber !== chamber) return false;
+        if (st && m.state !== st) return false;            // load one state at a time (perf)
         if (!q) return true;
         return [m.name, m.state, m.party].some(f => String(f ?? "").toLowerCase().includes(q));
       });
@@ -78,7 +81,7 @@
     }
 
     function rowHtml(m) {
-      const av = m.photo ? `<img class="av" src="${esc(m.photo)}" alt="" onerror="this.style.visibility='hidden'">`
+      const av = m.photo ? `<img class="av" loading="lazy" src="${esc(m.photo)}" alt="" onerror="this.style.visibility='hidden'">`
                          : `<div class="av"></div>`;
       const dist = (m.district !== undefined && m.district !== null && m.district !== "") ? ` · District ${esc(m.district)}` : "";
       return `<a class="row" href="./index.html?bioguide=${encodeURIComponent(m.bioguideId)}">
@@ -92,6 +95,7 @@
 
     document.getElementById("q").addEventListener("input", render);
     document.getElementById("byState").addEventListener("change", render);
+    document.getElementById("stateSel").addEventListener("change", render);
     document.getElementById("chips").addEventListener("click", e => {
       const chip = e.target.closest(".chip"); if (!chip) return;
       chamber = chip.dataset.chamber;
@@ -108,6 +112,10 @@
         return;
       }
       MEMBERS = data.members;
+      // Populate the state picker so users can load one state at a time.
+      const states = [...new Set(MEMBERS.map(m => m.state).filter(Boolean))].sort();
+      document.getElementById("stateSel").insertAdjacentHTML("beforeend",
+        states.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join(""));
       document.getElementById("src").textContent =
         (data.live === false ? "Demo data — set CONGRESS_API_KEY for all 535 members. " : "") + "Source: Congress.gov";
       render();
