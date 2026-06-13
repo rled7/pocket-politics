@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocket Politics — Every Office in Government</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <a href="./home.html" class="brand">Pocket Politics</a>
+    <nav class="nav">
+      <a href="./home.html">My Government</a>
+      <a href="./explore.html">Browse Congress</a>
+      <a href="./bills.html">Bills</a>
+      <a href="./presidents.html">Presidents</a>
+      <a href="./scotus.html">Justices</a>
+      <a href="./howto.html">Take Action</a>
+    </nav>
+    <h1>Every office in government</h1>
+    <div class="meta">A map of the roles that run the country — federal, state, county, and local — across the three branches. (Many local seats are elected and routinely go unfilled — see <a href="./howto.html">Take Action</a> to run.)</div>
+    <input id="q" class="search" type="search" placeholder="Search offices… (e.g. “sheriff”, “senator”, “judge”)" autocomplete="off" />
+    <div id="out"></div>
+    <div class="src">A reference of office titles, not a live roster. Curated &amp; stable — no API key needed.</div>
+  </div>
+  <script>
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    const DATA = [
+      { level: "Federal — Executive", items: ["President", "Vice President", "Cabinet secretaries (State, Treasury, Defense, Justice/Attorney General, Interior, Agriculture, Commerce, Labor, HHS, HUD, Transportation, Energy, Education, Veterans Affairs, Homeland Security)", "Agency administrators & directors (EPA, FBI, CIA, etc.)", "Ambassadors", "U.S. Attorneys"] },
+      { level: "Federal — Legislative", items: ["U.S. Senators (2 per state)", "U.S. Representatives (by district)", "Delegates / Resident Commissioner (territories & D.C.)", "Congressional leadership (Speaker, Majority/Minority Leaders, Whips)"] },
+      { level: "Federal — Judicial", items: ["Supreme Court justices", "U.S. Courts of Appeals judges (circuit)", "U.S. District Court judges", "Magistrate & bankruptcy judges", "Administrative law judges (federal agencies)"] },
+      { level: "State — Executive", items: ["Governor", "Lieutenant Governor", "Attorney General", "Secretary of State", "State Treasurer / Comptroller", "State Auditor", "Superintendent of Public Instruction", "Insurance / Agriculture / Labor commissioners"] },
+      { level: "State — Legislative", items: ["State Senators", "State Representatives / Assembly members"] },
+      { level: "State — Judicial", items: ["State Supreme Court justices", "Appellate court judges", "Trial / superior court judges", "State administrative law judges"] },
+      { level: "County", items: ["County Commissioners / Supervisors / Board of Legislators", "Sheriff", "District Attorney / Prosecutor", "County Clerk", "Treasurer / Assessor / Auditor", "Coroner / Medical Examiner", "Public Defender", "County / probate judges"] },
+      { level: "City & Town", items: ["Mayor", "City / Town Council members", "City Manager", "City Attorney", "City Clerk", "Comptroller", "Municipal court judges", "Hearing officers / administrative law judges (parking, code, licensing disputes)"] },
+      { level: "Special districts & boards", items: ["School board members", "Water / fire / utility / transit district boards", "Planning & zoning commissions", "Library, parks, ethics & other appointed boards", "Soil & water conservation districts"] },
+    ];
+    function render() {
+      const q = document.getElementById("q").value.trim().toLowerCase();
+      const groups = DATA.map(g => ({ level: g.level, items: g.items.filter(i => !q || i.toLowerCase().includes(q) || g.level.toLowerCase().includes(q)) }))
+        .filter(g => g.items.length);
+      document.getElementById("out").innerHTML = groups.length ? groups.map(g => `
+        <div class="sec-title">${esc(g.level)}</div>
+        <div class="list">${g.items.map(i => `<div class="row" style="cursor:default"><div><div class="nm">${esc(i)}</div></div></div>`).join("")}</div>`).join("")
+        : `<div class="empty">No offices match “${esc(q)}”.</div>`;
+    }
+    document.getElementById("q").addEventListener("input", render);
+    render();
+  </script>
+</body>
+</html>
