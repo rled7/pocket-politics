@@ -141,11 +141,11 @@
       const el = document.getElementById("bills");
       if (!data || !(data.bills || []).length) { el.textContent = "No bills loaded."; return; }
       el.innerHTML = data.bills.map(b => `
-        <div class="item">
-          <span class="date">${fmt(b.latestAction && b.latestAction.actionDate)}</span><span class="bill">${esc(b.type)} ${esc(b.number)} (${esc(b.congress)}th)${b.originChamber ? " · " + esc(b.originChamber) : ""}</span>
+        <a class="item" style="display:block;text-decoration:none;color:inherit" href="./bill.html?congress=${esc(b.congress)}&type=${esc(b.type)}&number=${esc(b.number)}">
+          <span class="date">${fmt(b.latestAction && b.latestAction.actionDate)}</span><span class="bill">${esc(b.type)} ${esc(b.number)} (${esc(b.congress)}th)${b.originChamber ? " · " + esc(b.originChamber) : ""} · see who voted →</span>
           <div class="title">${esc(b.title)}</div>
           ${b.latestAction ? `<div class="action">${esc(b.latestAction.text)}</div>` : ""}
-        </div>`).join("") +
+        </a>`).join("") +
         `<div class="src">${data.live === false ? "Demo data — set CONGRESS_API_KEY for live bills. " : ""}Source: Congress.gov</div>`;
     })();
   </script>
