@@ -1,0 +1,11 @@
+[
+  { "name": "John G. Roberts Jr.", "role": "Chief Justice", "appointedBy": "George W. Bush", "since": 2005 },
+  { "name": "Clarence Thomas", "role": "Associate Justice", "appointedBy": "George H. W. Bush", "since": 1991 },
+  { "name": "Samuel A. Alito Jr.", "role": "Associate Justice", "appointedBy": "George W. Bush", "since": 2006 },
+  { "name": "Sonia Sotomayor", "role": "Associate Justice", "appointedBy": "Barack Obama", "since": 2009 },
+  { "name": "Elena Kagan", "role": "Associate Justice", "appointedBy": "Barack Obama", "since": 2010 },
+  { "name": "Neil M. Gorsuch", "role": "Associate Justice", "appointedBy": "Donald J. Trump", "since": 2017 },
+  { "name": "Brett M. Kavanaugh", "role": "Associate Justice", "appointedBy": "Donald J. Trump", "since": 2018 },
+  { "name": "Amy Coney Barrett", "role": "Associate Justice", "appointedBy": "Donald J. Trump", "since": 2020 },
+  { "name": "Ketanji Brown Jackson", "role": "Associate Justice", "appointedBy": "Joe Biden", "since": 2022 }
+]

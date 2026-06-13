@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocket Politics — Supreme Court</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <a href="./home.html" class="brand">Pocket Politics</a>
+    <nav class="nav">
+      <a href="./home.html">My Government</a>
+      <a href="./explore.html">Browse Congress</a>
+      <a href="./bills.html">Bills</a>
+      <a href="./presidents.html">Presidents</a>
+      <a href="./scotus.html" class="on">Justices</a>
+      <a href="./howto.html">Take Action</a>
+    </nav>
+    <h1>The Supreme Court</h1>
+    <div class="meta">The nine justices of the highest court in the United States — who they are, who appointed them, and when they joined.</div>
+    <div class="count" id="count"></div>
+    <div class="list" id="list">Loading justices…</div>
+    <div class="src">Source: public record (curated, no API key needed). Composition as of the current term.</div>
+  </div>
+  <script>
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    fetch("./scotus.json").then(r => r.json()).then(js => {
+      document.getElementById("count").textContent = `${js.length} justices`;
+      // Chief first, then associates by seniority (year joined).
+      js.sort((a, b) => (a.role === "Chief Justice" ? -1 : b.role === "Chief Justice" ? 1 : a.since - b.since));
+      document.getElementById("list").innerHTML = js.map(j => `
+        <div class="row" style="cursor:default">
+          <div>
+            <div class="nm">${esc(j.name)}${j.role === "Chief Justice" ? ' <span class="pill">Chief</span>' : ""}</div>
+            <div class="sub">${esc(j.role)} · appointed by ${esc(j.appointedBy)} · since ${esc(j.since)}</div>
+          </div>
+        </div>`).join("");
+    }).catch(() => { document.getElementById("list").textContent = "Could not load justices."; });
+  </script>
+</body>
+</html>
