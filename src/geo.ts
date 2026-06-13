@@ -32,4 +32,21 @@ export async function geocodeDistrict(address: string): Promise<District | null>
   return { state, stateName: STATES[state] ?? state, district };
 }
 
+/** Lat/long → congressional district, for "use my location" (browser geolocation). Same free
+ *  Census geocoder, coordinates endpoint. */
+export async function geocodeCoords(lat: number, lon: number): Promise<District | null> {
+  const url = "https://geocoding.geo.census.gov/geocoder/geographies/coordinates" +
+    `?x=${lon}&y=${lat}&benchmark=Public_AR_Current&vintage=Current_Current&layers=all&format=json`;
+  const data = await fetch(url).then((r) => r.json()).catch(() => null);
+  const geos = data?.result?.geographies ?? {};
+  const stKey = Object.keys(geos).find((k) => /^States$/i.test(k) || /States/i.test(k));
+  const st = stKey && Array.isArray(geos[stKey]) ? geos[stKey][0] : null;
+  const state: string = st ? String(st.STUSAB ?? "") : "";
+  const cdKey = Object.keys(geos).find((k) => /Congressional Districts/i.test(k));
+  const cd = cdKey && Array.isArray(geos[cdKey]) ? geos[cdKey][0] : null;
+  const district = cd ? String(cd.BASENAME ?? "") : "";
+  if (!state) return null;
+  return { state, stateName: STATES[state] ?? state, district };
+}
+
 export const stateName = (abbr: string) => STATES[abbr] ?? abbr;

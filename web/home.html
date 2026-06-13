@@ -21,11 +21,15 @@
     <div class="hero">
       <span class="eyebrow">Your representatives, your power</span>
       <h1>See who governs you — and what they do with your vote.</h1>
-      <p class="lead">Enter your address to meet your representatives. Then follow their votes, money, and record.</p>
+      <p class="lead">Meet your representatives — by your location or address. Then follow their votes, money, and record. We'll remember your home for next time.</p>
       <form id="repform" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
         <input id="addr" class="search" style="flex:1;min-width:240px;margin-top:0" placeholder="Your address or ZIP — e.g. 1600 Pennsylvania Ave, Washington DC" autocomplete="street-address" />
         <button class="btn" type="submit">Find my reps</button>
       </form>
+      <div style="margin-top:8px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center">
+        <button id="geo" class="btn" style="background:transparent;color:var(--forest);border:1px solid var(--line)">📍 Use my location</button>
+        <span id="homeNote" class="meta" style="margin-top:0;display:none"></span>
+      </div>
     </div>
 
     <div id="reps"></div>
@@ -71,25 +75,60 @@
       `<a style="grid-row:${r};grid-column:${c}" title="${esc(NAME[ab])}" href="./explore.html?state=${encodeURIComponent(NAME[ab])}">${ab}</a>`
     ).join("");
 
-    document.getElementById("repform").addEventListener("submit", async (e) => {
+    // ── Smart, remembered home ──────────────────────────────────────────────────────────────
+    // "Home" is relative: your saved district (by address or location) if we have one, else the
+    // address/location prompt. We remember your choice in localStorage; you can change it anytime.
+    const box = document.getElementById("reps");
+    const noteEl = document.getElementById("homeNote");
+    const getHome = () => { try { return JSON.parse(localStorage.getItem("pp_home") || "null"); } catch { return null; } };
+    const setHome = (h) => localStorage.setItem("pp_home", JSON.stringify(h));
+    const clearHome = () => { localStorage.removeItem("pp_home"); noteEl.style.display = "none"; box.innerHTML = ""; };
+
+    function showReps(d, home) {
+      if (!d || !d.found || !(d.representatives || []).length) {
+        box.innerHTML = `<div class="card"><div class="meta" style="margin-top:0">${esc((d && d.note) || "No representatives found — try a fuller address.")}</div></div>`;
+        return;
+      }
+      box.innerHTML = `<div class="sec-title">Your representatives — ${esc(d.state)}${d.district ? `, District ${esc(d.district)}` : ""}</div>
+        <div class="list">${d.representatives.map(repRow).join("")}</div>
+        ${d.note ? `<div class="src">${esc(d.note)}</div>` : ""}`;
+      if (home) { setHome(home); noteEl.textContent = `📍 Saved as your home`; noteEl.style.display = ""; }
+    }
+    async function byAddress(addr, remember) {
+      box.innerHTML = `<div class="card"><div class="meta" style="margin-top:0">Finding your district…</div></div>`;
+      try { showReps(await (await fetch("/api/reps?address=" + encodeURIComponent(addr))).json(), remember ? { t: "a", v: addr } : null); }
+      catch (_) { box.innerHTML = `<div class="card"><div class="meta" style="margin-top:0">Lookup unavailable right now.</div></div>`; }
+    }
+    async function byCoords(lat, lon, remember) {
+      box.innerHTML = `<div class="card"><div class="meta" style="margin-top:0">Finding your district from your location…</div></div>`;
+      try { showReps(await (await fetch(`/api/reps?lat=${lat}&lon=${lon}`)).json(), remember ? { t: "c", lat, lon } : null); }
+      catch (_) { box.innerHTML = `<div class="card"><div class="meta" style="margin-top:0">Lookup unavailable right now.</div></div>`; }
+    }
+
+    document.getElementById("repform").addEventListener("submit", (e) => {
       e.preventDefault();
       const addr = document.getElementById("addr").value.trim();
-      if (!addr) return;
-      const box = document.getElementById("reps");
-      box.innerHTML = `<div class="card"><div class="meta" style="margin-top:0">Finding your district…</div></div>`;
-      try {
-        const d = await (await fetch("/api/reps?address=" + encodeURIComponent(addr))).json();
-        if (!d.found || !(d.representatives || []).length) {
-          box.innerHTML = `<div class="card"><div class="meta" style="margin-top:0">${esc(d.note || "No representatives found — try a fuller address.")}</div></div>`;
-          return;
-        }
-        box.innerHTML = `<div class="sec-title">Your representatives — ${esc(d.state)}${d.district ? `, District ${esc(d.district)}` : ""}</div>
-          <div class="list">${d.representatives.map(repRow).join("")}</div>
-          ${d.note ? `<div class="src">${esc(d.note)}</div>` : ""}`;
-      } catch (_) {
-        box.innerHTML = `<div class="card"><div class="meta" style="margin-top:0">Lookup unavailable right now.</div></div>`;
-      }
+      if (addr) byAddress(addr, true);
     });
+    document.getElementById("geo").addEventListener("click", () => {
+      if (!navigator.geolocation) { noteEl.textContent = "Location isn't available — enter an address instead."; noteEl.style.display = ""; return; }
+      noteEl.textContent = "Asking your browser for your location…"; noteEl.style.display = "";
+      navigator.geolocation.getCurrentPosition(
+        (p) => byCoords(p.coords.latitude.toFixed(5), p.coords.longitude.toFixed(5), true),
+        () => { noteEl.textContent = "Location permission denied — enter an address instead."; }
+      );
+    });
+
+    // On load: if a home is saved, land on the user's reps automatically (with a way to change it).
+    (function initHome() {
+      const h = getHome();
+      if (!h) return;
+      noteEl.innerHTML = `📍 Showing your saved home · <a href="#" id="chg">change</a>`;
+      noteEl.style.display = "";
+      noteEl.querySelector("#chg").addEventListener("click", (e) => { e.preventDefault(); clearHome(); });
+      if (h.t === "a") byAddress(h.v, false);
+      else if (h.t === "c") byCoords(h.lat, h.lon, false);
+    })();
   </script>
 </body>
 </html>

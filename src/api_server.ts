@@ -11,7 +11,7 @@ import http from "node:http";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join, extname, normalize } from "node:path";
-import { getMembers, getBills, getBillsWithSponsors, getBill, getProfile, getBillVotes, getReps, clampLimit, isBioguide, DEFAULT_BIOGUIDE } from "./handlers.ts";
+import { getMembers, getBills, getBillsWithSponsors, getBill, getProfile, getBillVotes, getReps, getRepsByCoords, clampLimit, isBioguide, DEFAULT_BIOGUIDE } from "./handlers.ts";
 import { getMoney } from "./money.ts";
 import { jsonCached, jsonImmutable, jsonPointer, jsonError } from "./http.ts";
 import { dataVersion } from "./version.ts";
@@ -112,8 +112,10 @@ async function route(url: URL, request: Request): Promise<Response> {
     return jsonCached(await getMoney(b, FEC_KEY), { request });
   }
   if (segs[0] === "api" && segs[1] === "reps") {
+    const lat = parseFloat(q.get("lat") ?? ""), lon = parseFloat(q.get("lon") ?? "");
+    if (Number.isFinite(lat) && Number.isFinite(lon)) return jsonCached(await getRepsByCoords(lat, lon, KEY), { request });
     const addr = (q.get("address") ?? "").trim();
-    if (!addr) return jsonError("address required", 400);
+    if (!addr) return jsonError("address or lat/lon required", 400);
     return jsonCached(await getReps(addr, KEY), { request });
   }
   // immutable, version-addressed: /api/v/{ver}/...
