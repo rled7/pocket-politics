@@ -59,9 +59,12 @@ data layer once, consume everywhere.
 **Product / web**
 | Area | State | Notes |
 |---|---|---|
-| Profile viewer | ✅ | `web/index.html` — photo, salary, contact, record, web presence |
-| Explore directory + search | ✅ | `web/explore.html` — browse 250, filter, click-through |
+| Profile viewer | ✅ | `web/index.html` — photo, salary, contact, record, web presence, money |
+| Explore directory + search | ✅ | `web/explore.html` — browse, filter, **group by state**, click-through |
 | Web-presence research | ✅ | official site + socials (@unitedstates dataset) |
+| Voting records | ✅ | `/api/votes` + `web/bill.html` — who voted (House live; Senate=LIS XML next) |
+| Voter comments on bills | ✅ | `/api/comments` (Store/KV) + form on `bill.html`; voter-verification future |
+| Campaign finance (money) | ✅ | `/api/money` (FEC) + profile card; Senate LDA lobbying next |
 | Ad slot (free-user revenue) | ✅ | `web/explore.html` — neutral zone; `$0.99` remove-ads model |
 | Deploy | ⬜ | Cloudflare Pages — see `DEPLOY.md` (needs the account) |
 | iOS (Swift) / Android | ⬜ | native clients on the same API (future) |

@@ -3,6 +3,35 @@
 All notable changes to Pocket Politics. Format follows [Keep a Changelog](https://keepachangelog.com);
 this project uses date-stamped milestones while pre-1.0.
 
+## [0.7.0] — 2026-06-13 — Votes, comments, money, state organization, perf
+### Added
+- **Voting records** — `GET /api/votes?congress=&type=&number=`: each roll call on a bill with
+  per-member Yea/Nay/Present/Not-Voting + tallies. House positions via Congress.gov's
+  `house-vote` JSON (verified live: HR 3424/119 → 397-1-32); Senate roll calls listed,
+  per-member needs LIS XML (flagged). **`web/bill.html`** shows who voted (Yea/Nay columns);
+  bills on the profile link to it.
+- **Voter comments on bills** — `GET/POST /api/comments` over the graceful `Store` (KV in prod,
+  in-memory locally). Comment form + list on `bill.html`. Self-attested USER OPINION, separate
+  from the official record; registered-voter verification is future work (needs an identity provider).
+- **Campaign finance (money)** — `GET /api/money?bioguide=`: maps bioguide → FEC candidate id
+  via the @unitedstates dataset, then FEC totals (raised/spent/cash). Profile "Campaign finance"
+  card. Demo fixture without `FEC_API_KEY`. Senate **LDA lobbying** is the next money layer.
+- **Organize members by state** — `web/explore.html` "Group by state" view (alphabetical state
+  sections, counts), alongside search + House/Senate filters.
+
+### Performance
+- **Parallel ingest** — profile fetches now run with bounded concurrency (was sequential).
+- **In-memory cache tier** in the persistent server (`api_server.ts`) — first request hits
+  Congress.gov, subsequent ones within TTL serve from memory (`X-Cache: HIT/MISS`). The real fix
+  for slow Congress fetches = ingest-don't-proxy + cache.
+
+### Ops / docs
+- `wrangler.toml` + `DEPLOY.md` (turnkey Cloudflare steps); `.github/workflows/ci.yml`
+  (typecheck + tests + Rust build + conformance gate); README/tracker refreshed.
+- `src/api_server.ts` also serves the static web client → `npm run api` runs the whole app.
+- Data-source answers recorded: votes (House Clerk/Senate LIS/Congress.gov), money (FEC),
+  lobbying (Senate LDA, OpenSecrets). Tests 67/67.
+
 ## [0.6.0] — 2026-06-13 — Bake-off, caching engine, optimizer, web presence, ads
 A big build day: a second backend, the full caching architecture, an optimization function,
 the Explore UI, web-presence research, and a benchmark harness. All green (TS 56/56 tests,
@@ -84,6 +113,7 @@ Rust↔TS conformance 4/4), pushed to `master`.
 - Minimal web viewer (`web/index.html`, served by `src/serve.ts`) with past/present/future tabs.
 - Project scaffolding, ROADMAP, and the honest data-source reality check.
 
+[0.7.0]: https://github.com/rled7/pocket-politics
 [0.6.0]: https://github.com/rled7/pocket-politics
 [0.3.0]: https://github.com/rled7/pocket-politics
 [0.2.0]: https://github.com/rled7/pocket-politics
