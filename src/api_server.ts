@@ -17,6 +17,7 @@ import { jsonCached, jsonImmutable, jsonPointer, jsonError } from "./http.ts";
 import { dataVersion } from "./version.ts";
 import { MemoryStore } from "./store.ts";
 import { getComments, addComment, validBillId } from "./comments.ts";
+import { SwrCache, mapLimit, type LoadResult } from "./swr_cache.ts";
 
 const KEY = process.env.CONGRESS_API_KEY || undefined;
 const FEC_KEY = process.env.FEC_API_KEY || undefined;
@@ -35,10 +36,27 @@ function sendJson(res: http.ServerResponse, status: number, obj: unknown): void 
   res.end(JSON.stringify(obj));
 }
 
-// In-memory response cache (the L-1 tier the persistent server unlocks — serverless can't).
-// First request hits Congress.gov; subsequent ones within the TTL serve from memory instantly.
-type Cached = { exp: number; status: number; headers: [string, string][]; body: string };
-const apiCache = new Map<string, Cached>();
+// In-memory stale-while-revalidate cache (the L1 tier the persistent server unlocks — serverless
+// can't). Cold first request hits Congress.gov; after that EVERY request serves from memory at
+// ~1ms (fresh → HIT, expired → STALE + background refresh). warm()/backgroundFill() below
+// pre-populate it so even first navigation is instant. See swr_cache.ts + CACHING_ARCHITECTURE.md.
+const apiCache = new SwrCache();
+
+/** Loader for a cache key (pathname+search): run the route, return the cacheable response + TTL. */
+async function runRoute(ckey: string): Promise<LoadResult> {
+  const url = new URL("http://localhost" + ckey);
+  const out = await route(url, new Request("http://x" + ckey));
+  const body = await out.text();
+  const headers: [string, string][] = [];
+  out.headers.forEach((v, k) => headers.push([k, v]));
+  const cc = out.headers.get("Cache-Control") ?? "";
+  if (out.status === 200 && cc.includes("public")) {
+    const m = cc.match(/s-maxage=(\d+)/) ?? cc.match(/max-age=(\d+)/);
+    const ttlMs = (m ? parseInt(m[1], 10) : 300) * 1000;
+    return { resp: { status: 200, headers, body, etag: out.headers.get("ETag") ?? undefined }, ttlMs };
+  }
+  return null; // not publicly cacheable (errors, no-store) → caller serves it live, uncached
+}
 const WEB = join(dirname(fileURLToPath(import.meta.url)), "..", "web");
 const MIME: Record<string, string> = {
   ".html": "text/html", ".js": "text/javascript", ".json": "application/json",
@@ -132,33 +150,44 @@ const server = http.createServer(async (req, res) => {
     }
 
     const ckey = url.pathname + url.search;
-    const now = Date.now();
-    const hit = apiCache.get(ckey);
-    if (hit && hit.exp > now) {
-      res.statusCode = hit.status;
-      for (const [k, v] of hit.headers) res.setHeader(k, v);
-      res.setHeader("X-Cache", "HIT");
-      res.end(hit.body);
+    const inm = req.headers["if-none-match"] ? String(req.headers["if-none-match"]) : undefined;
+
+    // Serve any entry we already have INSTANTLY (fresh or stale). A stale entry is served
+    // immediately and refreshed in the background — the reader never waits on a refetch.
+    const peek = apiCache.peek(ckey);
+    if (peek) {
+      if (!peek.fresh) apiCache.revalidate(ckey, () => runRoute(ckey)); // background, single-flight
+      const e = peek.entry;
+      if (inm && e.etag && inm === e.etag) { // client already has this version
+        res.statusCode = 304;
+        for (const [k, v] of e.headers) if (k.toLowerCase() === "cache-control" || k.toLowerCase() === "etag") res.setHeader(k, v);
+        res.setHeader("X-Cache", peek.fresh ? "HIT" : "STALE");
+        res.end();
+        return;
+      }
+      res.statusCode = e.status;
+      for (const [k, v] of e.headers) res.setHeader(k, v);
+      res.setHeader("X-Cache", peek.fresh ? "HIT" : "STALE");
+      res.end(e.body);
       return;
     }
 
-    const inm = req.headers["if-none-match"];
-    const request = new Request("http://x" + url.pathname + url.search,
-      { headers: inm ? { "If-None-Match": String(inm) } : {} });
-    const out = await route(url, request);
+    // Cold miss — the only blocking path. Load once (single-flight) and cache if cacheable.
+    const entry = await apiCache.load(ckey, () => runRoute(ckey));
+    if (entry) {
+      res.statusCode = entry.status;
+      for (const [k, v] of entry.headers) res.setHeader(k, v);
+      res.setHeader("X-Cache", "MISS");
+      res.end(entry.body);
+      return;
+    }
+
+    // Not publicly cacheable (errors / no-store) — serve live, honoring If-None-Match.
+    const out = await route(url, new Request("http://x" + ckey, { headers: inm ? { "If-None-Match": inm } : {} }));
     const body = await out.text();
     res.statusCode = out.status;
-    const hdrs: [string, string][] = [];
-    out.headers.forEach((v, k) => { res.setHeader(k, v); hdrs.push([k, v]); });
-
-    // Cache successful, publicly-cacheable responses in memory for their TTL.
-    const cc = out.headers.get("Cache-Control") ?? "";
-    if (out.status === 200 && cc.includes("public")) {
-      const m = cc.match(/s-maxage=(\d+)/) ?? cc.match(/max-age=(\d+)/);
-      const ttl = m ? parseInt(m[1], 10) : 300;
-      apiCache.set(ckey, { exp: now + ttl * 1000, status: 200, headers: hdrs, body });
-    }
-    res.setHeader("X-Cache", "MISS");
+    out.headers.forEach((v, k) => res.setHeader(k, v));
+    res.setHeader("X-Cache", "BYPASS");
     res.end(body);
   } catch (err) {
     res.statusCode = 500;
@@ -168,3 +197,43 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => console.log(`pp api-server (TypeScript) listening on :${PORT}`));
+
+// ── Make it feel static: warm the cache so navigation is instant from the first click ─────────
+// 1) Warm the common entry points NOW (directory + bills) so the landing pages are instant.
+// 2) Then background-fill every member profile (bounded concurrency) so the long tail — the
+//    slowest path (profile ≈ 2s cold) — becomes instant within a couple minutes, no one waiting.
+// 3) A refresh loop re-pulls cached keys before they go stale, so data stays fresh (~daily-changing
+//    congressional data; a few-minute freshness window is invisible). Disable with PREWARM=0.
+const PREWARM = process.env.PREWARM !== "0";
+const COMMON_KEYS = ["/api/members?limit=540", "/api/bills?limit=50", "/api/latest"];
+
+async function warm(): Promise<void> {
+  if (!PREWARM) return;
+  const t0 = Date.now();
+  await Promise.all(COMMON_KEYS.map((k) => apiCache.load(k, () => runRoute(k))));
+  console.log(`  cache warm: entry points ready (${apiCache.size()} keys, ${Date.now() - t0}ms)`);
+
+  // Background-fill all profiles — slowest cold path → instant once filled.
+  const peek = apiCache.peek("/api/members?limit=540");
+  if (!peek) return;
+  let ids: string[] = [];
+  try { ids = (JSON.parse(peek.entry.body).members ?? []).map((m: { bioguideId: string }) => m.bioguideId).filter(Boolean); }
+  catch { /* leave empty */ }
+  if (!ids.length) return;
+  const t1 = Date.now();
+  await mapLimit(ids, 6, async (id) => {
+    const k = `/api/profile?bioguide=${id}`;
+    await apiCache.load(k, () => runRoute(k));
+  });
+  console.log(`  cache warm: ${ids.length} profiles filled in ${Math.round((Date.now() - t1) / 1000)}s — every page now sub-ms`);
+}
+
+// Keep warm entries fresh: re-pull each cached key on an interval shorter than its TTL.
+function startRefreshLoop(): void {
+  if (!PREWARM) return;
+  setInterval(() => {
+    for (const k of apiCache.keys()) apiCache.revalidate(k, () => runRoute(k));
+  }, 240_000).unref(); // every 4 min; unref so it never holds the process open
+}
+
+void warm().then(startRefreshLoop).catch((e) => console.warn("prewarm error:", e));

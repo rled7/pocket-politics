@@ -3,6 +3,25 @@
 All notable changes to Pocket Politics. Format follows [Keep a Changelog](https://keepachangelog.com);
 this project uses date-stamped milestones while pre-1.0.
 
+## [0.9.0] — 2026-06-13 — Sub-ms navigation: stale-while-revalidate cache + prewarm
+### Added
+- **`src/swr_cache.ts` — `SwrCache`**: the in-memory stale-while-revalidate tier that makes
+  every cached API response serve at static-page speed (~1ms) instead of blocking on a live
+  Congress.gov call. FRESH → serve instantly; STALE → serve the stale copy instantly **and**
+  refresh in the background (single-flight, so revalidations never stampede the gov API); cold
+  MISS is the only blocking path. Honors the `stale-while-revalidate` directive our responses
+  already declared in Cache-Control but the local server previously ignored.
+- **Boot-time cache warming** (`api_server.ts`): warms the common entry points (members + bills)
+  immediately, then **background-fills all 537 member profiles** with bounded concurrency
+  (`mapLimit`, 6-wide) so the slowest cold path (profile ≈ 2s) becomes instant within ~3 min of
+  boot. A 4-minute refresh loop re-pulls cached keys before they go stale so data stays fresh.
+  Disable with `PREWARM=0`.
+### Performance (measured, live key)
+- `/api/members` **848ms → ~6ms**, `/api/bills` **125ms → ~2ms**, `/api/profile` **2.2s → ~1ms**
+  once warm. `X-Cache` header reports HIT / STALE / MISS / BYPASS.
+### Preserved
+- `no-store` paths and `/api/comments` (writes) remain uncached. Tests 67/67, typecheck clean.
+
 ## [0.8.0] — 2026-06-13 — "Take Action" (How-To v1)
 ### Added
 - **`web/howto.html` — "Take Action"** page: an evergreen, location-agnostic guide to actually

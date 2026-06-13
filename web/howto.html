@@ -20,7 +20,7 @@
     <p class="lead">Everything you can actually do, with the official place to do it. (Soon: personalized to your address.)</p>
 
     <div id="howto"></div>
-    <div class="src">Sources: vote.gov · USA.gov · USAJOBS · regulations.gov · FEC · your state election office.</div>
+    <div class="src">Sources: vote.gov · USA.gov · USAJOBS · regulations.gov · FEC · SBA · SAM.gov · your state election office.</div>
   </div>
   <script>
     const SECTIONS = [
@@ -47,6 +47,14 @@
         ["Start a nonprofit or civic org", "501(c)(3)/(c)(4) basics, state incorporation, EIN.", "https://www.usa.gov/start-nonprofit"],
         ["Form a PAC", "When/why, and how to register (FEC / state).", "https://www.fec.gov/help-candidates-and-committees/registering-pac/"],
         ["Organize locally", "Neighborhood associations, community boards, issue groups.", "https://www.usa.gov/local-governments"],
+      ]},
+      { t: "Start or grow a business with government", items: [
+        ["Start a business (SBA guide)", "Plan, fund, launch, and manage — the official playbook.", "https://www.sba.gov/business-guide"],
+        ["Get funding (SBA loans & programs)", "SBA-backed loans, investment, and disaster assistance.", "https://www.sba.gov/funding-programs"],
+        ["Sell to the government (contracting)", "How small businesses win federal contracts.", "https://www.sba.gov/federal-contracting"],
+        ["Register your business (SAM.gov)", "Required to do business with the federal government.", "https://sam.gov/"],
+        ["Find contract opportunities", "Search open federal solicitations and awards.", "https://sam.gov/opportunities"],
+        ["Free local help (SBDC / SCORE)", "In-person advising, mentoring, and training near you.", "https://www.sba.gov/local-assistance"],
       ]},
     ];
     const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
