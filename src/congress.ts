@@ -93,3 +93,47 @@ export async function fetchBills(key: string, limit = 20): Promise<ApiBill[]> {
   const data = await get<{ bills: ApiBill[] }>(`/bill?limit=${limit}&sort=updateDate+desc`, key);
   return data.bills ?? [];
 }
+
+// ── Voting records ───────────────────────────────────────────────────────────
+// "Who voted on this bill." House per-member positions come from Congress.gov's JSON
+// house-vote endpoint; Senate per-member positions need the LIS XML (not yet wired).
+
+export interface RecordedVoteRef {
+  chamber: string; congress: number; session: number; rollNumber: number; date?: string; url?: string;
+}
+export interface MemberVote {
+  bioguideId: string; name: string; vote: string; party?: string; state?: string;
+}
+
+/** Roll-call references attached to a bill's actions (chamber, roll number, link to the tally). */
+export async function fetchBillRecordedVotes(
+  congress: number, type: string, number: string, key: string,
+): Promise<RecordedVoteRef[]> {
+  const data = await get<{ actions?: { recordedVotes?: any[] }[] }>(
+    `/bill/${congress}/${type.toLowerCase()}/${number}/actions?limit=250`, key);
+  const out: RecordedVoteRef[] = [];
+  for (const a of data.actions ?? []) {
+    for (const rv of a.recordedVotes ?? []) {
+      out.push({
+        chamber: rv.chamber, congress: rv.congress, session: rv.sessionNumber,
+        rollNumber: rv.rollNumber, date: rv.date, url: rv.url,
+      });
+    }
+  }
+  return out;
+}
+
+/** Every House member's position on a given roll call (Yea/Nay/Present/Not Voting). */
+export async function fetchHouseVoteMembers(
+  congress: number, session: number, rollNumber: number, key: string,
+): Promise<MemberVote[]> {
+  const data = await get<{ houseRollCallVoteMemberVotes?: { results?: any[] } }>(
+    `/house-vote/${congress}/${session}/${rollNumber}/members`, key);
+  return (data.houseRollCallVoteMemberVotes?.results ?? []).map((r) => ({
+    bioguideId: r.bioguideID,
+    name: [r.lastName, r.firstName].filter(Boolean).join(", "),
+    vote: r.voteCast,
+    party: r.voteParty,
+    state: r.voteState,
+  }));
+}

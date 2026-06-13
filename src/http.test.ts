@@ -5,7 +5,7 @@
  */
 import { cacheControl, etagFor, jsonCached, jsonError, jsonImmutable, jsonPointer, DEFAULT_SMAXAGE } from "./http.ts";
 import { dataVersion } from "./version.ts";
-import { getProfile, getMembers, getBills, clampLimit, isBioguide } from "./handlers.ts";
+import { getProfile, getMembers, getBills, getBillVotes, clampLimit, isBioguide } from "./handlers.ts";
 import { buildProfile } from "./profile.ts";
 import { planSnapshot } from "./ingest.ts";
 import { knapsack, selectToPregenerate, popularityValue } from "./optimize.ts";
@@ -86,6 +86,11 @@ const mem = await getMembers(250);
 check("getMembers fixture: members[] + count matches", Array.isArray(mem.members) && mem.count === mem.members.length && mem.live === false);
 const bil = await getBills(20);
 check("getBills fixture: bills[] + count matches", Array.isArray(bil.bills) && bil.count === bil.bills.length && bil.live === false);
+const votes = await getBillVotes(118, "hr", "1");
+check("getBillVotes fixture: rollCalls + live false", Array.isArray(votes.rollCalls) && votes.live === false);
+check("getBillVotes fixture: roll call has per-member positions + totals",
+  votes.rollCalls[0].members.length > 0 && typeof votes.rollCalls[0].totals === "object" &&
+  votes.rollCalls[0].members.every((m: { bioguideId: string; vote: string }) => !!m.bioguideId && !!m.vote));
 
 // buildProfile — robust against real-world malformed sponsored entries (live-data regression)
 const member = { bioguideId: "T000001", directOrderName: "Test Member", state: "NY" } as ApiMember;

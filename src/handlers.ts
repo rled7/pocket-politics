@@ -8,13 +8,17 @@
  * Each function works with or without a Congress.gov key: no key → the bundled demo fixture
  * (so the site always demonstrates the product), key → the live record.
  */
-import { fetchMember, fetchSponsored, fetchMembers, fetchBills } from "./congress.ts";
+import {
+  fetchMember, fetchSponsored, fetchMembers, fetchBills,
+  fetchBillRecordedVotes, fetchHouseVoteMembers, type MemberVote,
+} from "./congress.ts";
 import { buildProfile } from "./profile.ts";
 import type { ApiMember, ApiSponsored } from "./congress.ts";
 import memberFixture from "../fixtures/member.json";
 import sponsoredFixture from "../fixtures/sponsored.json";
 import membersFixture from "../fixtures/members.json";
 import billsFixture from "../fixtures/bills.json";
+import votesFixture from "../fixtures/bill_votes.json";
 
 export const DEFAULT_BIOGUIDE = "O000172"; // Rep. Alexandria Ocasio-Cortez (NY-14)
 
@@ -48,6 +52,28 @@ export async function getBills(limit: number, key?: string) {
   }
   const bills = await fetchBills(key, limit);
   return { bills, count: bills.length, live: true };
+}
+
+/**
+ * "Who voted on this bill." Returns each roll call with per-member positions + tallies.
+ * House positions come from Congress.gov's JSON house-vote endpoint; Senate roll calls are
+ * listed but per-member positions need the LIS XML (not yet wired) — members will be empty.
+ */
+export async function getBillVotes(congress: number, type: string, number: string, key?: string) {
+  if (!key) {
+    return { ...votesFixture, live: false, note: "Demo data — set CONGRESS_API_KEY for live votes." };
+  }
+  const refs = await fetchBillRecordedVotes(congress, type, number, key);
+  const rollCalls = await Promise.all(refs.map(async (ref) => {
+    let members: MemberVote[] = [];
+    if (ref.chamber === "House" && ref.rollNumber) {
+      try { members = await fetchHouseVoteMembers(ref.congress, ref.session, ref.rollNumber, key); } catch { /* leave empty */ }
+    }
+    const totals: Record<string, number> = {};
+    for (const m of members) totals[m.vote] = (totals[m.vote] ?? 0) + 1;
+    return { ...ref, totals, members };
+  }));
+  return { bill: `${type.toUpperCase()} ${number} (${congress}th)`, rollCalls, live: true };
 }
 
 /** Shared param parsing so every route clamps identically. */

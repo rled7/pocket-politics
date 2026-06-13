@@ -1,0 +1,20 @@
+{
+  "bill": "HR 1 (118th)",
+  "rollCalls": [
+    {
+      "chamber": "House",
+      "congress": 118,
+      "session": 1,
+      "rollNumber": 182,
+      "date": "2023-03-30",
+      "result": "Passed",
+      "question": "On Passage",
+      "totals": { "Yea": 2, "Nay": 1 },
+      "members": [
+        { "bioguideId": "O000172", "name": "Ocasio-Cortez, Alexandria", "vote": "Nay", "party": "D", "state": "NY" },
+        { "bioguideId": "S001230", "name": "Sample, Rep", "vote": "Yea", "party": "R", "state": "TX" },
+        { "bioguideId": "E000456", "name": "Example, Member", "vote": "Yea", "party": "R", "state": "FL" }
+      ]
+    }
+  ]
+}
