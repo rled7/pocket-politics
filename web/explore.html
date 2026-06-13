@@ -4,43 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pocket Politics — Explore</title>
-  <style>
-    :root { --ink:#1a1a2e; --muted:#6b7280; --line:#e5e7eb; --accent:#2563eb; }
-    * { box-sizing: border-box; }
-    body { font-family: -apple-system, system-ui, sans-serif; margin:0; background:#f7f8fa; color:var(--ink); }
-    .wrap { max-width: 720px; margin: 0 auto; padding: 24px 16px 64px; }
-    .brand { font-size: 13px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); font-weight:700; }
-    h1 { margin:.15em 0 2px; font-size: 26px; }
-    .meta { color:var(--muted); font-size:15px; }
-    .search { width:100%; margin-top:16px; padding:12px 14px; font-size:16px; border:1px solid var(--line); border-radius:12px; background:#fff; }
-    .search:focus { outline:none; border-color:var(--accent); }
-    .chips { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
-    .chip { padding:6px 13px; border-radius:999px; font-size:13px; border:1px solid var(--line); background:#fff; color:var(--muted); cursor:pointer; }
-    .chip.on { background:var(--accent); color:#fff; border-color:var(--accent); }
-    .grp { font-size:13px; color:var(--muted); display:inline-flex; align-items:center; gap:5px; margin-left:4px; cursor:pointer; }
-    .count { color:var(--muted); font-size:13px; margin-top:14px; }
-    .state-h { font-size:13px; font-weight:700; letter-spacing:.04em; color:var(--ink); background:#f1f5ff; padding:8px 16px; border-bottom:1px solid var(--line); position:sticky; top:0; }
-    .state-h .n { color:var(--muted); font-weight:500; }
-    .list { margin-top:8px; background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden; }
-    .row { display:flex; gap:13px; align-items:center; padding:13px 16px; border-bottom:1px solid var(--line); text-decoration:none; color:var(--ink); }
-    .row:last-child { border-bottom:0; }
-    .row:hover { background:#f1f5ff; }
-    .av { width:42px; height:42px; border-radius:9px; object-fit:cover; border:1px solid var(--line); flex:none; background:#eef; }
-    .nm { font-weight:600; }
-    .sub { color:var(--muted); font-size:13px; margin-top:1px; }
-    .dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; vertical-align:middle; }
-    .D { background:#2563eb; } .R { background:#dc2626; } .I { background:#7c3aed; } .U { background:#9ca3af; }
-    .empty { padding:28px 16px; color:var(--muted); text-align:center; }
-    .src { color:var(--muted); font-size:12px; margin-top:14px; }
-    /* Ad slot: a single, LIGHT, clearly-labeled revenue placeholder in a NEUTRAL zone (never
-       beside a politician's record — that would read as pay-to-influence and break trust). The
-       $0.99 "remove ads" model just hides this. Swap the body for a privacy-respecting/contextual
-       network or a direct civic-org sponsor; load async so it never reintroduces lag. */
-    .ad { margin-top:18px; border:1px dashed var(--line); border-radius:12px; padding:12px 14px; background:#fff; display:flex; align-items:center; gap:10px; }
-    .ad-label { font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); border:1px solid var(--line); border-radius:6px; padding:2px 6px; flex:none; }
-    .ad-body { font-size:13px; color:var(--muted); }
-    .ad-body a { color:var(--accent); text-decoration:none; }
-  </style>
+  <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
   <div class="wrap">
