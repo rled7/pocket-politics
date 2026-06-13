@@ -185,12 +185,17 @@ check("optimizer picks the high-traffic member over the proxy default", demandSe
 const { getComments, addComment, validBillId } = await import("./comments.ts");
 const cstore = new MemoryStore();
 check("comments empty initially", (await getComments(cstore, "118-hr-1")).length === 0);
-const after = await addComment(cstore, "118-hr-1", "Rene", "Strongly support this.");
+const valid = { author: "Rene", district: "14", email: "rene@example.com", text: "Strongly support this." };
+const after = await addComment(cstore, "118-hr-1", valid);
 check("addComment returns the list with the new comment", after.length === 1 && after[0].text === "Strongly support this.");
-check("addComment defaults blank author to Anonymous", (await addComment(cstore, "118-hr-1", "", "x")).find(c => c.author === "Anonymous") !== undefined);
-check("addComment newest-first", (await getComments(cstore, "118-hr-1"))[0].author === "Anonymous");
-let threw = false; try { await addComment(cstore, "118-hr-1", "a", "   "); } catch { threw = true; }
-check("addComment rejects empty text", threw);
+check("addComment stores district + starts unverified", after[0].district === "14" && after[0].verified === false);
+check("addComment keeps email PRIVATE (not in public list)", !("email" in after[0]));
+check("addComment newest-first", (await getComments(cstore, "118-hr-1"))[0].author === "Rene");
+const rejects = async (c: object) => { try { await addComment(cstore, "118-hr-1", c as any); return false; } catch { return true; } };
+check("addComment requires a name", await rejects({ ...valid, author: "" }));
+check("addComment requires a district", await rejects({ ...valid, district: "" }));
+check("addComment requires a valid email", await rejects({ ...valid, email: "not-an-email" }));
+check("addComment rejects empty text", await rejects({ ...valid, text: "   " }));
 check("validBillId accepts 118-hr-1, rejects junk", validBillId("118-hr-1") && !validBillId("../etc"));
 
 // money — fixture mode (no FEC key) returns demo totals

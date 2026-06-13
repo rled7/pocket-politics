@@ -26,12 +26,19 @@
 
     <div class="brand" style="margin-top:26px">Voter comments</div>
     <div class="card">
-      <div class="meta" style="margin-top:0">Share your view on this bill. Public &amp; unverified — registered-voter verification is coming.</div>
+      <div class="meta" style="margin-top:0">To keep the conversation real, commenting requires your <strong>name, district, and a valid email</strong> (no anonymous comments). Your email stays private &amp; starts <strong>unverified</strong> — verify it to remove the warning on your comments.</div>
       <form id="cform" style="margin-top:12px;display:grid;gap:8px">
-        <input id="cauthor" placeholder="Your name (optional)" maxlength="60"
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input id="cauthor" placeholder="Your name" maxlength="60" required
+            style="flex:2;min-width:160px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;font-size:14px" />
+          <input id="cdistrict" placeholder="District # (e.g. 14)" maxlength="12" required
+            style="flex:1;min-width:120px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;font-size:14px" />
+        </div>
+        <input id="cemail" type="email" placeholder="Your email (kept private)" maxlength="120" required
           style="padding:9px 11px;border:1px solid var(--line);border-radius:9px;font-size:14px" />
         <textarea id="ctext" placeholder="Your comment on this bill…" maxlength="2000" rows="3" required
           style="padding:9px 11px;border:1px solid var(--line);border-radius:9px;font-size:14px;font-family:inherit"></textarea>
+        <div id="cerror" class="meta" style="margin-top:0;color:var(--p-r,#b3261e);display:none"></div>
         <button type="submit" style="justify-self:start;background:var(--accent);color:#fff;border:0;border-radius:9px;padding:9px 16px;font-size:14px;cursor:pointer">Post comment</button>
       </form>
       <div id="clist" style="margin-top:14px"></div>
@@ -140,6 +147,8 @@
       const el = document.getElementById("clist");
       el.innerHTML = (list || []).length
         ? list.map(c => `<div class="mv"><strong>${esc(c.author)}</strong>
+            ${c.district ? `<span class="pill">District ${esc(c.district)}</span>` : ""}
+            ${c.verified ? `<span class="pill" style="color:var(--forest)">✓ verified</span>` : `<span class="pill" title="This commenter hasn't verified their email yet">⚠ unverified</span>`}
             <span style="color:var(--muted)">· ${new Date(c.ts).toLocaleDateString()}</span>
             <div>${esc(c.text)}</div></div>`).join("")
         : `<div class="meta">No comments yet — be the first.</div>`;
@@ -150,16 +159,23 @@
     }
     document.getElementById("cform").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const author = document.getElementById("cauthor").value;
-      const text = document.getElementById("ctext").value.trim();
-      if (!text) return;
+      const errEl = document.getElementById("cerror");
+      errEl.style.display = "none";
+      const body = {
+        bill: billId,
+        author: document.getElementById("cauthor").value,
+        district: document.getElementById("cdistrict").value,
+        email: document.getElementById("cemail").value,
+        text: document.getElementById("ctext").value.trim(),
+      };
       try {
-        const d = await (await fetch("/api/comments", {
-          method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ bill: billId, author, text }),
-        })).json();
+        const res = await fetch("/api/comments", {
+          method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+        });
+        const d = await res.json();
+        if (!res.ok) { errEl.textContent = d.error || "Could not post comment."; errEl.style.display = "block"; return; }
         if (d.comments) { renderComments(d.comments); document.getElementById("ctext").value = ""; }
-      } catch (_) {}
+      } catch (_) { errEl.textContent = "Network error — try again."; errEl.style.display = "block"; }
     });
     loadComments();
   </script>

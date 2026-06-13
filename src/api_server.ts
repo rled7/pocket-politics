@@ -142,8 +142,12 @@ const server = http.createServer(async (req, res) => {
         const payload = JSON.parse((await readBody(req)) || "{}");
         const bill = String(payload.bill ?? "");
         if (!validBillId(bill)) return sendJson(res, 400, { error: "invalid bill id" });
-        try { return sendJson(res, 200, { comments: await addComment(store, bill, payload.author, payload.text) }); }
-        catch (e) { return sendJson(res, 400, { error: e instanceof Error ? e.message : "bad request" }); }
+        try {
+          const comments = await addComment(store, bill, {
+            author: payload.author, district: payload.district, email: payload.email, text: payload.text,
+          });
+          return sendJson(res, 200, { comments });
+        } catch (e) { return sendJson(res, 400, { error: e instanceof Error ? e.message : "bad request" }); }
       }
       const bill = url.searchParams.get("bill") ?? "";
       if (!validBillId(bill)) return sendJson(res, 400, { error: "invalid bill id" });
