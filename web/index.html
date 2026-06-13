@@ -44,6 +44,8 @@
     <div class="card" id="card">Loading profile…</div>
     <div class="sec-title" style="margin-top:22px">Web presence</div>
     <div class="card" id="web">Loading links…</div>
+    <div class="sec-title" style="margin-top:22px">Campaign finance</div>
+    <div class="card" id="money">Loading money…</div>
     <div class="sec-title" style="margin-top:22px">Bills currently in Congress</div>
     <div class="card" id="bills">Loading bills…</div>
   </div>
@@ -99,7 +101,23 @@
       // the public @unitedstates dataset (keyed by bioguide). Graceful — if it fails, the
       // official site still shows.
       renderWebPresence(p);
+      renderMoney(p.bioguideId);
     }).catch(e => { document.getElementById("card").textContent = "Could not load profile (" + e + ")"; });
+
+    async function renderMoney(bioguide) {
+      const el = document.getElementById("money");
+      try {
+        const m = await (await fetch("/api/money?bioguide=" + encodeURIComponent(bioguide))).json();
+        if (!m.totals) { el.innerHTML = `<div class="meta">${esc(m.note || "No campaign-finance data.")}</div>`; return; }
+        const usd = n => "$" + Number(n).toLocaleString();
+        el.innerHTML = `<div class="facts">
+            <span class="fact">💰 Raised <b>${usd(m.totals.raised)}</b></span>
+            <span class="fact">💸 Spent <b>${usd(m.totals.spent)}</b></span>
+            <span class="fact">🏦 Cash on hand <b>${usd(m.totals.cashOnHand)}</b></span>
+          </div>
+          <div class="src">${m.live === false ? "Demo data — set FEC_API_KEY for live. " : `Cycle ${esc(m.cycle)} · `}Source: ${esc(m.source)}</div>`;
+      } catch (_) { el.innerHTML = `<div class="meta">Campaign finance unavailable.</div>`; }
+    }
 
     const SOCIAL_DS = "https://unitedstates.github.io/congress-legislators/legislators-social-media.json";
     async function loadSocials(bioguide) {

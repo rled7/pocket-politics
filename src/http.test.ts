@@ -193,6 +193,14 @@ let threw = false; try { await addComment(cstore, "118-hr-1", "a", "   "); } cat
 check("addComment rejects empty text", threw);
 check("validBillId accepts 118-hr-1, rejects junk", validBillId("118-hr-1") && !validBillId("../etc"));
 
+// money — fixture mode (no FEC key) returns demo totals
+const { getMoney } = await import("./money.ts");
+const money = await getMoney("O000172");
+check("getMoney fixture: live false + note + totals", money.live === false && !!money.note && !!money.totals);
+check("getMoney fixture: totals have raised/spent/cashOnHand",
+  typeof money.totals!.raised === "number" && typeof money.totals!.spent === "number" && typeof money.totals!.cashOnHand === "number");
+check("getMoney echoes the requested bioguide", money.bioguide === "O000172");
+
 // summary
 console.log(`\n  ${pass} passed, ${fails.length} failed`);
 if (fails.length) { console.error("  FAILED: " + fails.join(", ")); process.exit(1); }

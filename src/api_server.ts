@@ -12,12 +12,14 @@ import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join, extname, normalize } from "node:path";
 import { getMembers, getBills, getProfile, getBillVotes, clampLimit, isBioguide, DEFAULT_BIOGUIDE } from "./handlers.ts";
+import { getMoney } from "./money.ts";
 import { jsonCached, jsonImmutable, jsonPointer, jsonError } from "./http.ts";
 import { dataVersion } from "./version.ts";
 import { MemoryStore } from "./store.ts";
 import { getComments, addComment, validBillId } from "./comments.ts";
 
 const KEY = process.env.CONGRESS_API_KEY || undefined;
+const FEC_KEY = process.env.FEC_API_KEY || undefined;
 const PORT = Number(process.env.PORT ?? 8788);
 const store = new MemoryStore(); // single shared store for the process (comments persist while up)
 
@@ -78,6 +80,11 @@ async function route(url: URL, request: Request): Promise<Response> {
   if (segs[0] === "api" && segs[1] === "votes") {
     const congress = parseInt(q.get("congress") ?? "118", 10) || 118;
     return jsonCached(await getBillVotes(congress, q.get("type") ?? "hr", q.get("number") ?? "1", KEY), { request });
+  }
+  if (segs[0] === "api" && segs[1] === "money") {
+    const b = (q.get("bioguide") || DEFAULT_BIOGUIDE).toUpperCase();
+    if (!isBioguide(b)) return jsonError("Invalid bioguide id (expected e.g. O000172)", 400);
+    return jsonCached(await getMoney(b, FEC_KEY), { request });
   }
   // immutable, version-addressed: /api/v/{ver}/...
   if (segs[0] === "api" && segs[1] === "v") {

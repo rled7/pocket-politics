@@ -1,0 +1,6 @@
+{
+  "bioguide": "DEMO",
+  "cycle": 2024,
+  "totals": { "raised": 12500000, "spent": 9800000, "cashOnHand": 2700000 },
+  "source": "FEC — api.open.fec.gov (demo fixture)"
+}
