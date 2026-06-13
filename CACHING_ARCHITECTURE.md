@@ -52,6 +52,13 @@ A user request can, at worst, reach L2 (KV, single-digit ms). It can **never** r
 upstream gov API — that is the "ingest, don't proxy" rule, and it's what makes 1M concurrent
 trivial: gov APIs only ever see our handful of ingest calls.
 
+> **L-1 (in-process in-memory LRU) — exists ONLY on a persistent-server deployment.** This is
+> the fastest tier of all (nanoseconds, no network) but it requires a long-lived process to
+> hold the map. On stateless serverless Workers, isolates are ephemeral and this tier barely
+> exists; on a **persistent Node/Rust server or a Durable Object** it's enormous. Whether L-1
+> is in the cake is decided by the deployment-model fork (§8 / open decision) — it materially
+> changes the Rust target and the bench harness, so it's a user call, not an assumption.
+
 ---
 
 ## 2. L0 — Precomputed static JSON (the biggest lag-killer)
@@ -94,6 +101,18 @@ revalidation.)
 interfere with SWR**. We enable Tiered Cache (§6) but add a conformance test that asserts a
 post-expiry request returns instantly with stale data; if Tiered Cache breaks SWR in our
 account, we choose one deliberately rather than discover it in prod.
+
+> ⚠️ **L1 is UNVERIFIED until we curl it — do not treat as load-bearing yet.** Async SWR is
+> documented for `Cache-Control` "set by your origin." A **Pages Function** response is
+> *dynamic* and is **not** automatically stored in the CDN cache the way a static asset is —
+> it may return `cf-cache-status: DYNAMIC` (never cached, never SWR). The standard way to
+> cache a dynamic Function response is the Cache API, which (per §3) does **not** support SWR.
+> **Discriminating test (= build-order step 1):** deploy one Function with the header above,
+> `curl -sI` it twice past `s-maxage`, read `cf-cache-status`. HIT→UPDATING = L1 works as
+> written. MISS/DYNAMIC = dynamic responses aren't edge-cached → we push that data onto the
+> **L0 / immutable path (§2, §4), which is real static-asset caching where `Cache-Control`
+> genuinely applies** and which already carries the hot path. Net: lean on L0/immutable;
+> keep dynamic-L1-SWR provisional until the curl passes.
 
 ---
 
