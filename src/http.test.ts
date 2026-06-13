@@ -9,6 +9,7 @@ import { getProfile, getMembers, getBills, clampLimit, isBioguide } from "./hand
 import { buildProfile } from "./profile.ts";
 import { planSnapshot } from "./ingest.ts";
 import { knapsack, selectToPregenerate, popularityValue } from "./optimize.ts";
+import { MemoryStore, getStore, kvStore, readViews } from "./store.ts";
 import type { ApiMember, ApiSponsored } from "./congress.ts";
 
 let pass = 0;
@@ -144,6 +145,36 @@ check("selectToPregenerate honors real view data over the proxy",
 check("popularityValue uses real views when present", popularityValue({ bioguideId: "X" }, { X: 99 }) === 100);
 check("popularityValue proxy: Senate > House",
   popularityValue({ bioguideId: "S", chamber: "Senate" }) > popularityValue({ bioguideId: "H", chamber: "House of Representatives" }));
+
+// store — MemoryStore get/put/incr
+const ms = new MemoryStore();
+check("MemoryStore get missing → null", (await ms.get("nope")) === null);
+await ms.put("k", "v");
+check("MemoryStore put/get round-trips", (await ms.get("k")) === "v");
+check("MemoryStore incr starts at 1", (await ms.incr("views:X")) === 1);
+check("MemoryStore incr accumulates", (await ms.incr("views:X")) === 2);
+
+// store — getStore graceful fallback (no binding → MemoryStore)
+check("getStore() with no env → a working Store", (await getStore().incr("a")) === 1);
+
+// store — kvStore adapter incr (read-modify-write over a fake KV)
+const fakeKV = new Map<string, string>();
+const kv = kvStore({
+  get: async (k) => (fakeKV.has(k) ? fakeKV.get(k)! : null),
+  put: async (k, v) => { fakeKV.set(k, v); },
+});
+check("kvStore incr 0→1", (await kv.incr("views:Y")) === 1);
+check("kvStore incr 1→2", (await kv.incr("views:Y")) === 2);
+
+// store + optimizer — real views drive the selection
+const vstore = new MemoryStore();
+await vstore.incr("views:H1"); await vstore.incr("views:H1"); await vstore.incr("views:H1"); // H1 popular
+const views = await readViews(vstore, ["H1", "S1"]);
+check("readViews returns recorded counts", views.H1 === 3);
+const demandSel = selectToPregenerate(
+  [{ bioguideId: "H1", chamber: "House of Representatives" }, { bioguideId: "S1", chamber: "Senate" }],
+  1, { views });
+check("optimizer picks the high-traffic member over the proxy default", demandSel.chosen[0].bioguideId === "H1");
 
 // summary
 console.log(`\n  ${pass} passed, ${fails.length} failed`);

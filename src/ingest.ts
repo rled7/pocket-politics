@@ -22,6 +22,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { dirname, join } from "node:path";
 import { getProfile, getMembers, getBills } from "./handlers.ts";
 import { selectToPregenerate, type ScorableMember } from "./optimize.ts";
+import { getStore, readViews } from "./store.ts";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -74,7 +75,9 @@ async function main(): Promise<void> {
   // expected cache hits within PREGEN_BUDGET (0/1 knapsack — see src/optimize.ts). With real
   // view counts this becomes demand-driven; for now it uses a transparent popularity proxy.
   const directory = ((members as { members: ScorableMember[] }).members ?? []).filter((m) => m.bioguideId);
-  const selection = selectToPregenerate(directory, PREGEN_BUDGET /*, { views } when we have logs */);
+  // Demand-driven: read real view counts from the store (KV in prod; empty locally → proxy).
+  const views = await readViews(getStore(), directory.map((m) => m.bioguideId));
+  const selection = selectToPregenerate(directory, PREGEN_BUDGET, { views });
   console.log(`  optimizer: baking ${selection.chosen.length}/${directory.length} profiles ` +
     `(budget ${PREGEN_BUDGET}, expected-value ${selection.totalValue})`);
 
