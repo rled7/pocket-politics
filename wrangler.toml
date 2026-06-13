@@ -1,0 +1,15 @@
+# Cloudflare Pages config for Pocket Politics.
+# Static client lives in web/; the API is the Pages Functions in functions/.
+name = "pocket-politics"
+pages_build_output_dir = "web"
+compatibility_date = "2026-06-01"
+
+# Hot store for the caching layer (L2) + view instrumentation that drives the optimizer.
+# Create it once:  wrangler kv namespace create POCKETPOL_KV
+# then paste the returned id below. Until bound, the app gracefully runs without it.
+[[kv_namespaces]]
+binding = "POCKETPOL_KV"
+id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+
+# Secrets are NOT set here — set CONGRESS_API_KEY via the dashboard or:
+#   wrangler pages secret put CONGRESS_API_KEY

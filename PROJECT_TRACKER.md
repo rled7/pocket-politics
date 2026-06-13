@@ -25,17 +25,46 @@ data layer once, consume everywhere.
 
 ---
 
-## 2. Build state
+## 2. Build state (updated 2026-06-13, `v0.6.0`)
 
+**Data + API**
 | Area | State | Notes |
 |---|---|---|
 | Congress.gov client | ✅ | `src/congress.ts` — member, sponsored, members list, bills |
-| Profile normalizer | ✅ | `src/profile.ts` — record + contact + salary |
+| Profile normalizer | ✅ | `src/profile.ts` — record + contact + salary; robust vs non-bill entries |
+| Shared data layer | ✅ | `src/handlers.ts` — getProfile/getMembers/getBills (parity spec for Rust) |
 | `/api/profile` `/api/members` `/api/bills` | ✅ | server-side, fixture fallback, validated, cached |
-| Salary | ✅ | `src/salary.ts` — public schedule |
-| Web client | ✅ | profile + photo + salary + contact + bills |
-| Deploy | ⬜ | Cloudflare Pages: output `web`, set `CONGRESS_API_KEY` |
-| iOS (Swift) / Android | ⬜ | native clients on the same API |
+| `/api/latest` + `/api/v/{version}/…` | ✅ | version-pointer; immutable version-addressed payloads |
+| Salary | ✅ | `src/salary.ts` — public schedule + leadership tiers |
+| Live key | ✅ | `CONGRESS_API_KEY` verified live (gitignored `.dev.vars`) |
+
+**Caching engine (eliminate lag)**
+| Area | State | Notes |
+|---|---|---|
+| Cache headers + ETag/304 | ✅ | `src/http.ts` — async SWR + stale-if-error; immutable; pointer |
+| Ingest / L0 pre-generation | ✅ | `src/ingest.ts` — static snapshot tree; verified live |
+| Graceful Store (L2) | ✅ | `src/store.ts` — Memory/KV/getStore; view instrumentation |
+| Cache-admission optimizer | ✅ | `src/optimize.ts` — 0/1 knapsack; demand-driven via view counts |
+| Tiered Cache / Cache Reserve / KV binding | ⬜ | needs the Cloudflare account (DEPLOY.md) |
+
+**The bake-off (two backends, one contract)**
+| Area | State | Notes |
+|---|---|---|
+| API contract | ✅ | `API_CONTRACT.md` (frozen v1) |
+| TypeScript backend | ✅ | `functions/` (Pages) + `src/api_server.ts` (standalone + static) |
+| Rust backend | ✅ | `rust/` — std HTTP + serde_json, keep-alive |
+| Conformance gate | ✅ | `bench/conformance.ts` — Rust JSON == TS (4/4) |
+| Benchmark harness | ✅ | `bench/load.ts` + `bench/run_all.sh` |
+
+**Product / web**
+| Area | State | Notes |
+|---|---|---|
+| Profile viewer | ✅ | `web/index.html` — photo, salary, contact, record, web presence |
+| Explore directory + search | ✅ | `web/explore.html` — browse 250, filter, click-through |
+| Web-presence research | ✅ | official site + socials (@unitedstates dataset) |
+| Ad slot (free-user revenue) | ✅ | `web/explore.html` — neutral zone; `$0.99` remove-ads model |
+| Deploy | ⬜ | Cloudflare Pages — see `DEPLOY.md` (needs the account) |
+| iOS (Swift) / Android | ⬜ | native clients on the same API (future) |
 
 ---
 

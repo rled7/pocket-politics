@@ -28,14 +28,41 @@ The API key lives **only** on the server — no client ever sees it. The web app
 (Swift) app, and the Android app all consume the same JSON. Build the data layer once,
 ship it everywhere.
 
-## What works today (`v0.3.0`)
+## What works today
 
-- **Member profiles** — name, party, state, chamber, **photo**, **salary**, **contact**
-  (office, phone, website), and full **sponsored-legislation record**.
-- **`/api/members`** — the whole "everyone in Congress" directory.
-- **`/api/bills`** — bills currently moving through Congress.
+- **Explore directory + search** — browse all current members of Congress, filter by
+  name / state / party (House/Senate), click into any profile.
+- **Member profiles** — name, party, state, chamber, **photo**, **salary**, **contact**,
+  full **sponsored-legislation record**, and a **Web presence** card (official site +
+  Twitter/Facebook/Instagram/YouTube, researched from the public @unitedstates dataset).
+- **`/api/members`**, **`/api/bills`**, **`/api/profile`**, plus the version-pointer
+  caching scheme (`/api/latest` + immutable `/api/v/{version}/…`).
+- **Aggressive caching** to eliminate read lag — see [`CACHING_ARCHITECTURE.md`](./CACHING_ARCHITECTURE.md):
+  edge cache + async SWR, immutable version-addressed payloads, a once-running **ingest** job
+  that pre-generates static L0 snapshots, and a **cache-admission optimizer** (0/1 knapsack)
+  that bakes the highest-value profiles within a budget.
+- **Two backends, one contract (the bake-off)** — identical behavior in **TypeScript** and
+  **Rust**, proven by a conformance gate and benchmarked head-to-head. See below.
+- **Light ad slot** for free users (the `$0.99` remove-ads model), in a neutral zone.
 - **Works with or without a key** — set `CONGRESS_API_KEY` for the live record; without
   one, every endpoint serves a clearly-labeled demo fixture so the site always works.
+
+## Two backends — the bake-off
+
+The same [`API_CONTRACT.md`](./API_CONTRACT.md) is implemented twice and compared:
+
+| | TypeScript | Rust |
+|---|---|---|
+| Server | `src/api_server.ts` (Cloudflare Functions in prod) | `rust/` (`pp-server`, std HTTP + serde_json) |
+| Run | `npm run api` (:8788) | `cd rust && cargo run --release` (:8787) |
+
+```bash
+npm run bench        # conformance gate (JSON must match) + load test, TS vs Rust
+```
+
+Finding (see [`bench/README.md`](./bench/README.md)): on this cache-frontable read workload
+the language gap is modest — the **caching** dominates, so choose the backend by developer
+experience. The shared web frontend points at either via a base-URL switch.
 
 See [`CHANGELOG.md`](./CHANGELOG.md) for history and [`PROJECT_TRACKER.md`](./PROJECT_TRACKER.md)
 for the **full plan** — every level (federal → state → city), the data-source reality for
@@ -80,29 +107,41 @@ npm run serve
 CONGRESS_API_KEY=xxxx npm run demo:live
 ```
 
-To run the **full backend (Functions + web)** locally exactly as it deploys:
+Run the **full app locally** (web client + live API in one server):
 
 ```bash
-npx wrangler pages dev web   # serves /web + auto-loads /functions
-# → http://localhost:8788  (set CONGRESS_API_KEY in the Pages env for live data)
+CONGRESS_API_KEY=xxxx npm run api      # http://localhost:8788  (lands on the directory)
 ```
 
-## Deploy (Cloudflare Pages)
+Other commands:
 
-1. Connect this repo as a Cloudflare **Pages** project.
-2. **Build command:** *(none)* · **Build output directory:** `web` · Functions are
-   auto-discovered from `/functions`.
-3. Add an environment variable **`CONGRESS_API_KEY`** (free, from Congress.gov).
-4. Attach your domain. The same backend now serves the web app and, later, the
-   iOS/Android clients.
+```bash
+npm test          # TypeScript unit suite (56 tests)
+npm run typecheck # tsc --noEmit
+npm run ingest    # run the ingest job → static L0 snapshots in dist/
+npm run bench     # the bake-off: conformance + load test, TypeScript vs Rust
+```
+
+## Deploy
+
+Full turnkey steps in **[`DEPLOY.md`](./DEPLOY.md)** (Cloudflare Pages: set the
+`CONGRESS_API_KEY` secret, bind `POCKETPOL_KV`, schedule ingest, turn on Tiered Cache).
+`wrangler.toml` holds the Pages config + KV binding. The persistent-server path (off
+Cloudflare) is in [`PERSISTENT_SERVER_DEPLOYMENT.md`](./PERSISTENT_SERVER_DEPLOYMENT.md).
 
 ## Project structure
 
 ```
-src/         congress.ts (API client) · profile.ts (normalizer) · salary.ts · demo.ts · serve.ts
-functions/   api/profile.ts · api/members.ts · api/bills.ts   (Cloudflare Pages Functions = the backend)
-web/         index.html  (the web client; static)
+src/         http.ts (caching) · handlers.ts (shared data layer) · congress.ts · profile.ts ·
+             salary.ts · version.ts · store.ts · optimize.ts (knapsack) · ingest.ts ·
+             api_server.ts (TS standalone server) · demo.ts · serve.ts · http.test.ts
+functions/   api/{profile,members,bills,latest}.ts · api/v/[version]/…   (Cloudflare Pages Functions)
+rust/        src/main.rs (Rust backend — bake-off contender) · Cargo.toml
+bench/       conformance.ts · load.ts · run_all.sh · README.md   (the bake-off harness)
+web/         explore.html (directory+search) · index.html (profile + web presence)
 fixtures/    demo data so the no-key build still works
+docs:        API_CONTRACT · CACHING_ARCHITECTURE · PERSISTENT_SERVER_DEPLOYMENT ·
+             BLUEPRINT · ROADMAP · PROJECT_TRACKER · CHANGELOG · DEPLOY
 ```
 
 ## Docs

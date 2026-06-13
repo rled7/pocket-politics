@@ -8,12 +8,35 @@
  *   PORT=8788 npx tsx src/api_server.ts        # fixtures, or set CONGRESS_API_KEY for live
  */
 import http from "node:http";
+import { readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
+import { dirname, join, extname, normalize } from "node:path";
 import { getMembers, getBills, getProfile, clampLimit, isBioguide, DEFAULT_BIOGUIDE } from "./handlers.ts";
 import { jsonCached, jsonImmutable, jsonPointer, jsonError } from "./http.ts";
 import { dataVersion } from "./version.ts";
 
 const KEY = process.env.CONGRESS_API_KEY || undefined;
 const PORT = Number(process.env.PORT ?? 8788);
+const WEB = join(dirname(fileURLToPath(import.meta.url)), "..", "web");
+const MIME: Record<string, string> = {
+  ".html": "text/html", ".js": "text/javascript", ".json": "application/json",
+  ".css": "text/css", ".svg": "image/svg+xml", ".ico": "image/x-icon",
+};
+
+// Serve the static web client (so this one server = the whole app locally, like Pages does).
+async function serveStatic(pathname: string, res: http.ServerResponse): Promise<void> {
+  const rel = pathname === "/" ? "/explore.html" : pathname; // land on the directory
+  const full = normalize(join(WEB, rel));
+  if (!full.startsWith(WEB)) { res.statusCode = 403; res.end("forbidden"); return; }
+  try {
+    const body = await readFile(full);
+    res.statusCode = 200;
+    res.setHeader("Content-Type", MIME[extname(full)] ?? "application/octet-stream");
+    res.end(body);
+  } catch {
+    res.statusCode = 404; res.setHeader("Content-Type", "text/plain"); res.end("Not found");
+  }
+}
 
 async function route(url: URL, request: Request): Promise<Response> {
   const segs = url.pathname.replace(/^\/+|\/+$/g, "").split("/");
@@ -49,6 +72,10 @@ async function route(url: URL, request: Request): Promise<Response> {
 const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url ?? "/", "http://localhost");
+    // Static web client for everything that isn't the API.
+    if (!url.pathname.startsWith("/api") && url.pathname !== "/healthz") {
+      return await serveStatic(url.pathname, res);
+    }
     const inm = req.headers["if-none-match"];
     const request = new Request("http://x" + url.pathname + url.search,
       { headers: inm ? { "If-None-Match": String(inm) } : {} });
