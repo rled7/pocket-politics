@@ -17,6 +17,11 @@ import { dataVersion } from "./version.ts";
 
 const KEY = process.env.CONGRESS_API_KEY || undefined;
 const PORT = Number(process.env.PORT ?? 8788);
+
+// In-memory response cache (the L-1 tier the persistent server unlocks — serverless can't).
+// First request hits Congress.gov; subsequent ones within the TTL serve from memory instantly.
+type Cached = { exp: number; status: number; headers: [string, string][]; body: string };
+const apiCache = new Map<string, Cached>();
 const WEB = join(dirname(fileURLToPath(import.meta.url)), "..", "web");
 const MIME: Record<string, string> = {
   ".html": "text/html", ".js": "text/javascript", ".json": "application/json",
@@ -76,13 +81,35 @@ const server = http.createServer(async (req, res) => {
     if (!url.pathname.startsWith("/api") && url.pathname !== "/healthz") {
       return await serveStatic(url.pathname, res);
     }
+    const ckey = url.pathname + url.search;
+    const now = Date.now();
+    const hit = apiCache.get(ckey);
+    if (hit && hit.exp > now) {
+      res.statusCode = hit.status;
+      for (const [k, v] of hit.headers) res.setHeader(k, v);
+      res.setHeader("X-Cache", "HIT");
+      res.end(hit.body);
+      return;
+    }
+
     const inm = req.headers["if-none-match"];
     const request = new Request("http://x" + url.pathname + url.search,
       { headers: inm ? { "If-None-Match": String(inm) } : {} });
     const out = await route(url, request);
+    const body = await out.text();
     res.statusCode = out.status;
-    out.headers.forEach((v, k) => res.setHeader(k, v));
-    res.end(await out.text());
+    const hdrs: [string, string][] = [];
+    out.headers.forEach((v, k) => { res.setHeader(k, v); hdrs.push([k, v]); });
+
+    // Cache successful, publicly-cacheable responses in memory for their TTL.
+    const cc = out.headers.get("Cache-Control") ?? "";
+    if (out.status === 200 && cc.includes("public")) {
+      const m = cc.match(/s-maxage=(\d+)/) ?? cc.match(/max-age=(\d+)/);
+      const ttl = m ? parseInt(m[1], 10) : 300;
+      apiCache.set(ckey, { exp: now + ttl * 1000, status: 200, headers: hdrs, body });
+    }
+    res.setHeader("X-Cache", "MISS");
+    res.end(body);
   } catch (err) {
     res.statusCode = 500;
     res.setHeader("Content-Type", "application/json");

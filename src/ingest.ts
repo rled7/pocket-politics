@@ -54,6 +54,20 @@ export function planSnapshot(
   ];
 }
 
+/** Run `fn` over items with at most `limit` in flight at once (bounded concurrency). */
+async function mapLimit<T, R>(items: T[], limit: number, fn: (t: T) => Promise<R>): Promise<R[]> {
+  const out: R[] = new Array(items.length);
+  let i = 0;
+  async function worker() {
+    while (i < items.length) {
+      const idx = i++;
+      out[idx] = await fn(items[idx]);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  return out;
+}
+
 /** Derive a version for this snapshot: a content hash so identical data → identical version. */
 function versionFor(payload: unknown): string {
   const s = JSON.stringify(payload);
@@ -81,10 +95,12 @@ async function main(): Promise<void> {
   console.log(`  optimizer: baking ${selection.chosen.length}/${directory.length} profiles ` +
     `(budget ${PREGEN_BUDGET}, expected-value ${selection.totalValue})`);
 
-  const profiles: { bioguide: string; data: unknown }[] = [];
-  for (const m of selection.chosen) {
-    profiles.push({ bioguide: m.bioguideId, data: await getProfile(m.bioguideId, key) });
-  }
+  // Fetch the chosen profiles with bounded concurrency (not one-at-a-time) — ~Nx faster
+  // ingest while staying polite to the gov API.
+  const profiles = await mapLimit(selection.chosen, 6, async (m) => ({
+    bioguide: m.bioguideId,
+    data: await getProfile(m.bioguideId, key),
+  }));
 
   const version = versionFor({ members, bills, profiles });
   const files = planSnapshot(version, members, bills, profiles);
