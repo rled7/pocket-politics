@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocket Politics — My Government</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand">Pocket Politics</div>
+    <nav class="nav">
+      <a href="./home.html" class="on">My Government</a>
+      <a href="./explore.html">Browse Congress</a>
+      <a href="./bills.html">Bills</a>
+    </nav>
+
+    <div class="hero">
+      <span class="eyebrow">Your representatives, your power</span>
+      <h1>See who governs you — and what they do with your vote.</h1>
+      <p class="lead">Enter your address to meet your representatives. Then follow their votes, money, and record.</p>
+      <form id="repform" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+        <input id="addr" class="search" style="flex:1;min-width:240px;margin-top:0" placeholder="Your address or ZIP — e.g. 1600 Pennsylvania Ave, Washington DC" autocomplete="street-address" />
+        <button class="btn" type="submit">Find my reps</button>
+      </form>
+    </div>
+
+    <div id="reps"></div>
+
+    <div class="sec-title">Explore everything</div>
+    <div class="list">
+      <a class="row" href="./explore.html"><div><div class="nm">🏛️ Browse all of Congress</div><div class="sub">All 535 members — grouped by state, searchable</div></div></a>
+      <a class="row" href="./bills.html"><div><div class="nm">📜 Bills in Congress</div><div class="sub">See what's moving — and who voted</div></div></a>
+      <a class="row" href="https://www.opencase.com/" target="_blank" rel="noopener noreferrer"><div><div class="nm">📖 Understand the law (OpenCase)</div><div class="sub">Free AI that explains U.S. law in plain English ↗</div></div></a>
+    </div>
+
+    <div class="src" id="src"></div>
+  </div>
+
+  <script>
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    const pc = p => /^Democrat/i.test(p) ? "D" : /^Republican/i.test(p) ? "R" : /^Independent/i.test(p) ? "I" : "U";
+
+    function repRow(m) {
+      const dist = (m.district !== undefined && m.district !== null && m.district !== "") ? ` · District ${esc(m.district)}` : "";
+      const av = m.photo ? `<img class="av" src="${esc(m.photo)}" alt="" onerror="this.style.visibility='hidden'">` : `<div class="av"></div>`;
+      return `<a class="row" href="./index.html?bioguide=${encodeURIComponent(m.bioguideId)}">${av}
+        <div><div class="nm">${esc(m.name)}</div>
+        <div class="sub"><span class="dot ${pc(m.party)}"></span>${esc(m.party)} · ${esc(m.chamber)}${dist}</div></div></a>`;
+    }
+
+    document.getElementById("repform").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const addr = document.getElementById("addr").value.trim();
+      if (!addr) return;
+      const box = document.getElementById("reps");
+      box.innerHTML = `<div class="card"><div class="meta" style="margin-top:0">Finding your district…</div></div>`;
+      try {
+        const d = await (await fetch("/api/reps?address=" + encodeURIComponent(addr))).json();
+        if (!d.found || !(d.representatives || []).length) {
+          box.innerHTML = `<div class="card"><div class="meta" style="margin-top:0">${esc(d.note || "No representatives found — try a fuller address.")}</div></div>`;
+          return;
+        }
+        box.innerHTML = `<div class="sec-title">Your representatives — ${esc(d.state)}${d.district ? `, District ${esc(d.district)}` : ""}</div>
+          <div class="list">${d.representatives.map(repRow).join("")}</div>
+          ${d.note ? `<div class="src">${esc(d.note)}</div>` : ""}`;
+      } catch (_) {
+        box.innerHTML = `<div class="card"><div class="meta" style="margin-top:0">Lookup unavailable right now.</div></div>`;
+      }
+    });
+  </script>
+</body>
+</html>

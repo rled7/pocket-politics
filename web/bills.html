@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocket Politics — Bills</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand">Pocket Politics</div>
+    <nav class="nav">
+      <a href="./home.html">My Government</a>
+      <a href="./explore.html">Browse Congress</a>
+      <a href="./bills.html" class="on">Bills</a>
+    </nav>
+    <h1>Bills in Congress</h1>
+    <div class="meta">What's moving through Congress — click any bill to see who voted and weigh in.</div>
+    <input id="q" class="search" type="search" placeholder="Search bills by title…" autocomplete="off" />
+    <div class="count" id="count">Loading bills…</div>
+    <div class="list" id="list"></div>
+    <div class="src" id="src"></div>
+  </div>
+  <script>
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    let BILLS = [];
+
+    async function load() {
+      try { const r = await fetch("/api/bills?limit=50"); if (r.ok) return await r.json(); } catch (_) {}
+      try { return await (await fetch("./bills.json")).json(); } catch (_) { return null; }
+    }
+    function render() {
+      const q = document.getElementById("q").value.trim().toLowerCase();
+      const rows = BILLS.filter(b => !q || String(b.title ?? "").toLowerCase().includes(q));
+      document.getElementById("count").textContent = `${rows.length} bill${rows.length === 1 ? "" : "s"}${q ? " match" : ""}`;
+      const list = document.getElementById("list");
+      list.innerHTML = rows.length ? rows.map(b => `
+        <a class="row" href="./bill.html?congress=${esc(b.congress)}&type=${esc(b.type)}&number=${esc(b.number)}">
+          <div>
+            <div class="nm">${esc(b.title)}</div>
+            <div class="sub">${esc(b.type)} ${esc(b.number)} (${esc(b.congress)}th)${b.latestAction ? " · " + esc(b.latestAction.actionDate) : ""} · see who voted →</div>
+          </div>
+        </a>`).join("") : `<div class="empty">No bills match “${esc(q)}”.</div>`;
+    }
+    document.getElementById("q").addEventListener("input", render);
+    load().then(d => {
+      if (!d || !(d.bills || []).length) { document.getElementById("count").textContent = "Could not load bills."; return; }
+      BILLS = d.bills;
+      document.getElementById("src").textContent = (d.live === false ? "Demo data — set CONGRESS_API_KEY for live bills. " : "") + "Source: Congress.gov";
+      render();
+    });
+  </script>
+</body>
+</html>

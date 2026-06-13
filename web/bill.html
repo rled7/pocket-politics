@@ -43,7 +43,9 @@
 
     function mlist(members) {
       return members.map(m =>
-        `<div class="mv"><span class="dot ${pc(m.party)}"></span>${esc(m.name)} <span style="color:var(--muted)">${esc(m.party)}-${esc(m.state)}</span></div>`
+        `<div class="mv"><span class="dot ${pc(m.party)}"></span>` +
+        `<a href="./index.html?bioguide=${encodeURIComponent(m.bioguideId)}" style="color:inherit;text-decoration:none;font-weight:600">${esc(m.name)}</a>` +
+        ` <span style="color:var(--muted)">${esc(m.party)}-${esc(m.state)}</span></div>`
       ).join("") || `<div class="mv" style="color:var(--muted)">—</div>`;
     }
 

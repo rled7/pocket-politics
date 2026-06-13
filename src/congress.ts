@@ -74,10 +74,18 @@ export async function fetchSponsored(bioguideId: string, key: string): Promise<A
   return data.sponsoredLegislation ?? [];
 }
 
-// Every current member of Congress (House + Senate) as a directory.
-export async function fetchMembers(key: string, limit = 250): Promise<MemberSummary[]> {
-  const data = await get<{ members: any[] }>(`/member?currentMember=true&limit=${limit}`, key);
-  return (data.members ?? []).map((m) => ({
+// Every current member of Congress (House + Senate) as a directory. Congress.gov caps a
+// single page at 250, but there are 535 members — so we paginate to get them all.
+export async function fetchMembers(key: string, limit = 540): Promise<MemberSummary[]> {
+  const PAGE = 250;
+  const all: any[] = [];
+  for (let offset = 0; all.length < limit; offset += PAGE) {
+    const data = await get<{ members: any[] }>(`/member?currentMember=true&limit=${PAGE}&offset=${offset}`, key);
+    const batch = data.members ?? [];
+    all.push(...batch);
+    if (batch.length < PAGE || offset > 600) break;
+  }
+  return all.slice(0, limit).map((m) => ({
     bioguideId: m.bioguideId,
     name: m.name ?? m.directOrderName ?? m.bioguideId,
     party: m.partyName ?? 'Unknown',

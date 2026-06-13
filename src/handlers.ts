@@ -76,6 +76,28 @@ export async function getBillVotes(congress: number, type: string, number: strin
   return { bill: `${type.toUpperCase()} ${number} (${congress}th)`, rollCalls, live: true };
 }
 
+/**
+ * Your representatives, by address. Geocodes → congressional district, then returns the
+ * state's two senators + the district's House member. (Live needs CONGRESS_API_KEY for the
+ * full 535; fixture mode only has the demo members.)
+ */
+export async function getReps(address: string, key?: string) {
+  const { geocodeDistrict } = await import("./geo.ts");
+  const dist = await geocodeDistrict(address);
+  if (!dist) return { input: address, found: false, note: "Couldn't locate that address — try a full street address or ZIP.", representatives: [] as unknown[] };
+  const dir = await getMembers(540, key);
+  const members = ((dir as { members: any[] }).members) ?? [];
+  const inState = members.filter((m) => m.state === dist.stateName || m.state === dist.state);
+  const senators = inState.filter((m) => m.chamber === "Senate");
+  const rep = inState.find((m) => m.chamber === "House of Representatives" && String(m.district) === String(dist.district));
+  return {
+    input: address, found: true, state: dist.stateName, district: dist.district,
+    representatives: [...senators, ...(rep ? [rep] : [])],
+    live: (dir as { live?: boolean }).live !== false,
+    note: (dir as { live?: boolean }).live === false ? "Demo members only — set CONGRESS_API_KEY for your real reps." : undefined,
+  };
+}
+
 /** Shared param parsing so every route clamps identically. */
 export const clampLimit = (raw: string | null, def: number, max: number) =>
   Math.min(Math.max(parseInt(raw ?? String(def), 10) || def, 1), max);

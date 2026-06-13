@@ -6,7 +6,7 @@ import { jsonImmutable, jsonError } from '../../../../src/http.ts';
 
 export const onRequestGet: PagesFunction<{ CONGRESS_API_KEY?: string }> = async (context) => {
   const { request, env } = context;
-  const limit = clampLimit(new URL(request.url).searchParams.get('limit'), 250, 250);
+  const limit = clampLimit(new URL(request.url).searchParams.get('limit'), 540, 540);
   try {
     return jsonImmutable(await getMembers(limit, env.CONGRESS_API_KEY), { request });
   } catch (err) {

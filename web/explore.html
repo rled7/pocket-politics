@@ -17,7 +17,7 @@
       <span class="chip on" data-chamber="">All</span>
       <span class="chip" data-chamber="House of Representatives">House</span>
       <span class="chip" data-chamber="Senate">Senate</span>
-      <label class="grp"><input type="checkbox" id="byState"> 🗺️ Group by state</label>
+      <label class="grp"><input type="checkbox" id="byState" checked> 🗺️ Group by state</label>
     </div>
     <div class="count" id="count">Loading members…</div>
     <div class="list" id="list"></div>
@@ -55,6 +55,7 @@
         if (!q) return true;
         return [m.name, m.state, m.party].some(f => String(f ?? "").toLowerCase().includes(q));
       });
+      rows.sort((a, b) => String(a.name).localeCompare(String(b.name))); // always alphabetical
       document.getElementById("count").textContent =
         `${rows.length} ${rows.length === 1 ? "member" : "members"}${q || chamber ? " match" : ""}`;
       const list = document.getElementById("list");

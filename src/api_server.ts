@@ -11,7 +11,7 @@ import http from "node:http";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join, extname, normalize } from "node:path";
-import { getMembers, getBills, getProfile, getBillVotes, clampLimit, isBioguide, DEFAULT_BIOGUIDE } from "./handlers.ts";
+import { getMembers, getBills, getProfile, getBillVotes, getReps, clampLimit, isBioguide, DEFAULT_BIOGUIDE } from "./handlers.ts";
 import { getMoney } from "./money.ts";
 import { jsonCached, jsonImmutable, jsonPointer, jsonError } from "./http.ts";
 import { dataVersion } from "./version.ts";
@@ -47,7 +47,7 @@ const MIME: Record<string, string> = {
 
 // Serve the static web client (so this one server = the whole app locally, like Pages does).
 async function serveStatic(pathname: string, res: http.ServerResponse): Promise<void> {
-  const rel = pathname === "/" ? "/explore.html" : pathname; // land on the directory
+  const rel = pathname === "/" ? "/home.html" : pathname; // land on the personalized home
   const full = normalize(join(WEB, rel));
   if (!full.startsWith(WEB)) { res.statusCode = 403; res.end("forbidden"); return; }
   try {
@@ -67,7 +67,7 @@ async function route(url: URL, request: Request): Promise<Response> {
   // mutable
   if (segs[0] === "api" && segs[1] === "latest") return jsonPointer({ dataVersion: dataVersion() });
   if (segs[0] === "api" && segs[1] === "members") {
-    return jsonCached(await getMembers(clampLimit(q.get("limit"), 250, 250), KEY), { request });
+    return jsonCached(await getMembers(clampLimit(q.get("limit"), 540, 540), KEY), { request });
   }
   if (segs[0] === "api" && segs[1] === "bills") {
     return jsonCached(await getBills(clampLimit(q.get("limit"), 20, 50), KEY), { request });
@@ -86,9 +86,14 @@ async function route(url: URL, request: Request): Promise<Response> {
     if (!isBioguide(b)) return jsonError("Invalid bioguide id (expected e.g. O000172)", 400);
     return jsonCached(await getMoney(b, FEC_KEY), { request });
   }
+  if (segs[0] === "api" && segs[1] === "reps") {
+    const addr = (q.get("address") ?? "").trim();
+    if (!addr) return jsonError("address required", 400);
+    return jsonCached(await getReps(addr, KEY), { request });
+  }
   // immutable, version-addressed: /api/v/{ver}/...
   if (segs[0] === "api" && segs[1] === "v") {
-    if (segs[3] === "members") return jsonImmutable(await getMembers(250, KEY), { request });
+    if (segs[3] === "members") return jsonImmutable(await getMembers(540, KEY), { request });
     if (segs[3] === "bills") return jsonImmutable(await getBills(50, KEY), { request });
     if (segs[3] === "profile" && segs[4]) {
       const b = segs[4].toUpperCase();

@@ -67,6 +67,16 @@ h2 { font-family: "Fraunces", serif; font-weight: 600; font-size: 22px; margin: 
 a.back { display: inline-block; margin-top: 8px; font-size: 14px; color: var(--forest); text-decoration: none; font-weight: 600; }
 a.back:hover { color: var(--brass-2); }
 
+/* Top nav */
+.nav { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+.nav a { font-size: 14px; font-weight: 600; color: var(--ink-soft); text-decoration: none; padding: 7px 13px; border-radius: 999px; }
+.nav a:hover { color: var(--ink); background: #f1ede0; }
+.nav a.on { color: #fbf9f2; background: var(--forest); }
+
+/* Hero */
+.hero h1 { font-size: 40px; margin-top: 18px; }
+@media (max-width: 560px) { .hero h1 { font-size: 31px; } }
+
 /* Section label with a brass rule */
 .sec-title {
   font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--brass-2);
