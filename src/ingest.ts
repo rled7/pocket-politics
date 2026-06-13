@@ -21,11 +21,13 @@ import { writeFile, mkdir, rm } from "node:fs/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { dirname, join } from "node:path";
 import { getProfile, getMembers, getBills } from "./handlers.ts";
+import { selectToPregenerate, type ScorableMember } from "./optimize.ts";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
-/** Top-N member profiles to pre-generate (capped to stay well under gov API rate limits). */
-const TOP_N = 8;
+/** Pre-generation budget: how many profiles we can afford to bake (API/storage). The
+ *  optimizer (src/optimize.ts) picks the BEST set within this budget, not an arbitrary slice. */
+const PREGEN_BUDGET = Number(process.env.PREGEN_BUDGET ?? 8);
 
 export interface SnapshotFile {
   path: string; // relative to the output root, e.g. "api/v/abc/members"
@@ -68,14 +70,17 @@ async function main(): Promise<void> {
 
   const [members, bills] = await Promise.all([getMembers(250, key), getBills(50, key)]);
 
-  // Pre-generate profiles for the first TOP_N members in the directory.
-  const ids = ((members as { members: { bioguideId: string }[] }).members ?? [])
-    .map((m) => m.bioguideId)
-    .filter(Boolean)
-    .slice(0, TOP_N);
+  // OPTIMIZATION: instead of an arbitrary "first N", pick the set of profiles that maximizes
+  // expected cache hits within PREGEN_BUDGET (0/1 knapsack — see src/optimize.ts). With real
+  // view counts this becomes demand-driven; for now it uses a transparent popularity proxy.
+  const directory = ((members as { members: ScorableMember[] }).members ?? []).filter((m) => m.bioguideId);
+  const selection = selectToPregenerate(directory, PREGEN_BUDGET /*, { views } when we have logs */);
+  console.log(`  optimizer: baking ${selection.chosen.length}/${directory.length} profiles ` +
+    `(budget ${PREGEN_BUDGET}, expected-value ${selection.totalValue})`);
+
   const profiles: { bioguide: string; data: unknown }[] = [];
-  for (const bioguide of ids) {
-    profiles.push({ bioguide, data: await getProfile(bioguide, key) });
+  for (const m of selection.chosen) {
+    profiles.push({ bioguide: m.bioguideId, data: await getProfile(m.bioguideId, key) });
   }
 
   const version = versionFor({ members, bills, profiles });

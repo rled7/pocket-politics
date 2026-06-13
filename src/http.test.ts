@@ -8,6 +8,7 @@ import { dataVersion } from "./version.ts";
 import { getProfile, getMembers, getBills, clampLimit, isBioguide } from "./handlers.ts";
 import { buildProfile } from "./profile.ts";
 import { planSnapshot } from "./ingest.ts";
+import { knapsack, selectToPregenerate, popularityValue } from "./optimize.ts";
 import type { ApiMember, ApiSponsored } from "./congress.ts";
 
 let pass = 0;
@@ -113,6 +114,36 @@ check("planSnapshot writes one profile file per member",
   snap.filter((f) => f.path.startsWith("api/v/abc123/profile/")).length === 2);
 check("planSnapshot profile path uses the bioguide",
   snap.some((f) => f.path === "api/v/abc123/profile/O000172"));
+
+// optimize — knapsack is EXACT DP, not naive greedy.
+// Classic trap: greedy-by-value grabs A(60) and stops; the optimum is B+C(=100).
+const ks = knapsack([
+  { item: "A", value: 60, cost: 10 },
+  { item: "B", value: 50, cost: 5 },
+  { item: "C", value: 50, cost: 5 },
+], 10);
+check("knapsack finds the true optimum 100 (B+C), beating greedy A=60", ks.totalValue === 100);
+check("knapsack chose exactly B and C", [...ks.chosen].sort().join("") === "BC");
+check("knapsack never exceeds the budget", ks.totalCost <= 10);
+check("knapsack zero budget → selects nothing", knapsack([{ item: "A", value: 5, cost: 1 }], 0).chosen.length === 0);
+
+// selectToPregenerate — picks the highest-value members within the budget
+const sm = [
+  { bioguideId: "H1", chamber: "House of Representatives" },
+  { bioguideId: "S1", chamber: "Senate" },
+  { bioguideId: "H2", chamber: "House of Representatives" },
+  { bioguideId: "S2", chamber: "Senate" },
+];
+const sel = selectToPregenerate(sm, 2);
+check("selectToPregenerate respects the budget", sel.chosen.length === 2);
+check("selectToPregenerate prefers higher-value members (proxy: Senate)", sel.chosen.every((m) => m.chamber === "Senate"));
+check("selectToPregenerate honors real view data over the proxy",
+  selectToPregenerate(sm, 1, { views: { H1: 1000 } }).chosen[0].bioguideId === "H1");
+
+// popularityValue — real demand beats proxy; proxy ranks Senate over House
+check("popularityValue uses real views when present", popularityValue({ bioguideId: "X" }, { X: 99 }) === 100);
+check("popularityValue proxy: Senate > House",
+  popularityValue({ bioguideId: "S", chamber: "Senate" }) > popularityValue({ bioguideId: "H", chamber: "House of Representatives" }));
 
 // summary
 console.log(`\n  ${pass} passed, ${fails.length} failed`);
