@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocket Politics — How Law & the Courts Work</title>
+  <link rel="stylesheet" href="./style.css" />
+  <style>
+    .layers { display: grid; gap: 10px; margin-top: 12px; }
+    .tier { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media (max-width: 560px) { .tier { grid-template-columns: 1fr; } }
+    .node { text-align: left; background: var(--paper-2); border: 1px solid var(--line); border-radius: 12px;
+      padding: 12px 14px; cursor: pointer; font: inherit; color: var(--ink); box-shadow: var(--shadow); transition: border-color .12s; }
+    .node:hover, .node.sel { border-color: var(--forest); }
+    .node b { display: block; font-family: "Fraunces", serif; }
+    .node small { color: var(--ink-soft); }
+    .node.top { background: var(--forest); color: #fbf9f2; }
+    .node.top small { color: #d9e7df; }
+    .tracks { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 12px; }
+    @media (max-width: 560px) { .tracks { grid-template-columns: 1fr; } }
+    .track { display: grid; gap: 8px; }
+    .track h3 { margin: 0 0 2px; font-size: 15px; }
+    .arrow { text-align: center; color: var(--ink-soft); font-size: 13px; }
+    #panel { position: sticky; bottom: 12px; margin-top: 16px; background: var(--paper-2);
+      border: 1px solid var(--forest); border-radius: 14px; padding: 14px 16px; box-shadow: var(--shadow); }
+    #panel b { font-family: "Fraunces", serif; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="./home.html" class="brand">Pocket Politics</a>
+    <nav class="nav">
+      <a href="./home.html">My Government</a>
+      <a href="./explore.html">Browse Congress</a>
+      <a href="./bills.html">Bills</a>
+      <a href="./presidents.html">Presidents</a>
+      <a href="./scotus.html">Justices</a>
+      <a href="./howto.html">Take Action</a>
+    </nav>
+    <h1>How law &amp; the courts fit together</h1>
+    <div class="meta">Tap any box to see what it means — how laws stack up and overlap, and how a case moves from one court to another.</div>
+
+    <div class="sec-title">How U.S. law is layered</div>
+    <div class="meta" style="margin-top:4px">When two laws conflict, the higher layer wins (the Constitution's “Supremacy Clause”). Federal beats state beats local — but only where the federal government has power to act.</div>
+    <div class="layers" id="layers"></div>
+
+    <div class="sec-title" style="margin-top:24px">The two court systems — and how a case moves</div>
+    <div class="meta" style="margin-top:4px">The U.S. runs <strong>two parallel court systems</strong> — federal and state. Most cases stay in one, climbing by appeal. Only federal questions can reach the U.S. Supreme Court from a state.</div>
+    <div class="node top" style="margin-top:12px" data-id="scotus"><b>U.S. Supreme Court</b><small>The final word — takes a tiny, chosen few cases from the top of either system (a “writ of certiorari”).</small></div>
+    <div class="arrow">▲ both systems can reach it ▲</div>
+    <div class="tracks" id="tracks"></div>
+
+    <div class="sec-title" style="margin-top:24px">Changing courts &amp; venue — the four moves</div>
+    <div class="layers" id="moves"></div>
+
+    <div id="panel"><b>Pick any box above</b><div class="meta" style="margin-top:4px">Its plain-English explanation shows up here.</div></div>
+    <div class="src">A plain-language civics reference (stable knowledge — no API key). For the law itself, see the <a href="https://www.law.cornell.edu/" target="_blank" rel="noopener noreferrer">Cornell Legal Information Institute ↗</a>.</div>
+  </div>
+  <script>
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    const INFO = {
+      constitution: ["U.S. Constitution", "The supreme law of the land. Every other law — federal, state, or local — must yield to it. It also defines what the federal government is allowed to do at all."],
+      fedstat: ["Federal statutes", "Laws passed by Congress and signed by the President (the bills you see in this app). They apply nationwide, but only on subjects the Constitution gives the federal government."],
+      fedreg: ["Federal regulations", "Detailed rules written by federal agencies (EPA, IRS, FDA…) to carry out statutes. They have the force of law — you can comment on proposed ones at regulations.gov."],
+      stateconst: ["State constitutions", "Each state's own supreme law. It can grant MORE rights than the U.S. Constitution, but never less."],
+      statestat: ["State statutes", "Laws passed by a state legislature (most day-to-day law — crime, family, property, traffic — is state law)."],
+      local: ["Local ordinances", "Rules made by counties, cities, and towns (zoning, parking, noise, business licenses). They must obey state and federal law above them."],
+      scotus: ["U.S. Supreme Court", "Nine justices, the final authority. It chooses only ~60–70 cases a year, almost always involving the Constitution or federal law. It can hear appeals from the top of EITHER system."],
+      fdist: ["U.S. District Court (trial)", "The federal trial court — where federal cases start, evidence is heard, and a judge or jury decides. There are 94 districts."],
+      fapp: ["U.S. Court of Appeals (circuit)", "13 circuits. They don't retry facts — they review the trial for legal errors. A panel of judges decides."],
+      strial: ["State trial court", "Where most cases begin (named Superior, District, Circuit… depending on the state). Facts are heard and decided here."],
+      sapp: ["State appellate court", "Reviews state trial decisions for legal error. Smaller states may go straight to their Supreme Court."],
+      ssup: ["State Supreme Court", "The final word on STATE law. Its ruling can only be appealed further if a FEDERAL question is involved — and only to the U.S. Supreme Court."],
+      appeal: ["Appeal (move UP)", "Ask a higher court to review a lower court's decision for legal mistakes. You don't get a new trial — you argue the law was applied wrong."],
+      removal: ["Removal (state → federal)", "A defendant can move a case from state court to federal court if it qualifies — e.g. it raises a federal question, or the parties are from different states (“diversity”)."],
+      venue: ["Venue transfer (same system, new place)", "Move a case to a different court in the SAME system — usually for fairness or convenience (e.g. too much local publicity, or witnesses are elsewhere)."],
+      cert: ["Certiorari (to the U.S. Supreme Court)", "The Supreme Court's discretionary “yes, we'll hear it.” Lose at a state Supreme Court or a federal circuit on a federal issue, and you can petition — but it grants very few."],
+    };
+    const panel = document.getElementById("panel");
+    function select(id, el) {
+      const i = INFO[id]; if (!i) return;
+      document.querySelectorAll(".node.sel").forEach(n => n.classList.remove("sel"));
+      if (el) el.classList.add("sel");
+      panel.innerHTML = `<b>${esc(i[0])}</b><div class="meta" style="margin-top:4px;color:var(--ink)">${esc(i[1])}</div>`;
+    }
+    function node(id, cls) { const i = INFO[id]; return `<button class="node ${cls || ""}" data-id="${id}"><b>${esc(i[0])}</b><small>${esc(i[1].split(".")[0])}.</small></button>`; }
+
+    document.getElementById("layers").innerHTML =
+      `<div class="tier" style="grid-template-columns:1fr">${node("constitution", "top")}</div>` +
+      `<div class="tier">${node("fedstat")}${node("stateconst")}</div>` +
+      `<div class="tier">${node("fedreg")}${node("statestat")}</div>` +
+      `<div class="tier" style="grid-template-columns:1fr 1fr"><div></div>${node("local")}</div>`;
+
+    document.getElementById("tracks").innerHTML =
+      `<div class="track"><h3>⚖️ Federal system</h3>${node("fapp")}<div class="arrow">▲ appeal ▲</div>${node("fdist")}</div>` +
+      `<div class="track"><h3>🏛️ State system</h3>${node("ssup")}<div class="arrow">▲ appeal ▲</div>${node("sapp")}<div class="arrow">▲ appeal ▲</div>${node("strial")}</div>`;
+
+    document.getElementById("moves").innerHTML =
+      `<div class="tier">${node("appeal")}${node("removal")}</div>` +
+      `<div class="tier">${node("venue")}${node("cert")}</div>`;
+
+    document.querySelectorAll(".node").forEach(n => n.addEventListener("click", () => select(n.getAttribute("data-id"), n)));
+    document.querySelector('.node.top[data-id="scotus"]').addEventListener("click", function () { select("scotus", this); });
+  </script>
+</body>
+</html>
