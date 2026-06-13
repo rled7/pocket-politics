@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocket Politics — Take Action</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand">Pocket Politics</div>
+    <nav class="nav">
+      <a href="./home.html">My Government</a>
+      <a href="./explore.html">Browse Congress</a>
+      <a href="./bills.html">Bills</a>
+      <a href="./howto.html" class="on">Take Action</a>
+    </nav>
+    <span class="eyebrow">The how-to</span>
+    <h1>Don't just watch government — take part in it.</h1>
+    <p class="lead">Everything you can actually do, with the official place to do it. (Soon: personalized to your address.)</p>
+
+    <div id="howto"></div>
+    <div class="src">Sources: vote.gov · USA.gov · USAJOBS · regulations.gov · FEC · your state election office.</div>
+  </div>
+  <script>
+    const SECTIONS = [
+      { t: "Participate — today", items: [
+        ["Register to vote / check your registration", "Confirm you're registered and fix it if not.", "https://vote.gov/"],
+        ["Find your representatives", "Every level, by your address.", "./home.html"],
+        ["Contact your reps (that actually works)", "Office lines, district offices, and what to say.", "./explore.html"],
+        ["Comment on a bill", "Weigh in publicly on legislation.", "./bills.html"],
+        ["Comment on federal rules", "Official public comment on proposed regulations.", "https://www.regulations.gov/"],
+        ["Find your polling place & deadlines", "What's on your ballot and when.", "https://vote.gov/"],
+      ]},
+      { t: "Run for office", items: [
+        ["See what's open", "Federal, state, county, city, school boards, special districts.", "./explore.html"],
+        ["File to run", "Your state/county election office: windows, fees, signatures.", "https://www.usa.gov/elections"],
+        ["Register a campaign committee", "Federal candidates register with the FEC.", "https://www.fec.gov/help-candidates-and-committees/registering-candidate/"],
+      ]},
+      { t: "Get appointed or hired", items: [
+        ["Boards & commissions", "Planning, zoning, library, parks, ethics — usually open seats.", "https://www.usa.gov/state-government"],
+        ["Government jobs", "Federal roles via USAJOBS, plus state & local civil service.", "https://www.usajobs.gov/"],
+        ["Internships & fellowships", "Congressional, state-legislature, and civic fellowships.", "https://www.usa.gov/government-jobs"],
+      ]},
+      { t: "Build & organize", items: [
+        ["Start a ballot initiative", "Petition thresholds and filing with your election office.", "https://www.usa.gov/elections"],
+        ["Start a nonprofit or civic org", "501(c)(3)/(c)(4) basics, state incorporation, EIN.", "https://www.usa.gov/start-nonprofit"],
+        ["Form a PAC", "When/why, and how to register (FEC / state).", "https://www.fec.gov/help-candidates-and-committees/registering-pac/"],
+        ["Organize locally", "Neighborhood associations, community boards, issue groups.", "https://www.usa.gov/local-governments"],
+      ]},
+    ];
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    document.getElementById("howto").innerHTML = SECTIONS.map(s => `
+      <div class="sec-title">${esc(s.t)}</div>
+      <div class="list">${s.items.map(([title, desc, url]) => {
+        const ext = /^https?:/.test(url);
+        return `<a class="row" href="${esc(url)}"${ext ? ' target="_blank" rel="noopener noreferrer"' : ""}>
+          <div><div class="nm">${esc(title)}${ext ? " ↗" : ""}</div><div class="sub">${esc(desc)}</div></div></a>`;
+      }).join("")}</div>`).join("");
+  </script>
+</body>
+</html>

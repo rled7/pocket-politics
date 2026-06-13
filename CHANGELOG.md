@@ -3,6 +3,22 @@
 All notable changes to Pocket Politics. Format follows [Keep a Changelog](https://keepachangelog.com);
 this project uses date-stamped milestones while pre-1.0.
 
+## [0.8.0] — 2026-06-13 — "Take Action" (How-To v1)
+### Added
+- **`web/howto.html` — "Take Action"** page: an evergreen, location-agnostic guide to actually
+  participating in government, grouped into four sections — *Participate today* (register/vote,
+  find & contact reps, comment on bills & federal rules), *Run for office* (see what's open, file
+  to run, register a campaign committee), *Get appointed or hired* (boards & commissions, USAJOBS,
+  internships/fellowships), and *Build & organize* (ballot initiatives, nonprofits, PACs, local
+  organizing). Each item links to the official place to do it (vote.gov, USA.gov, USAJOBS,
+  regulations.gov, FEC, state election offices). Internal links route back into the app;
+  external links open safely (`rel="noopener noreferrer"`).
+- **Consistent top nav** across the site: the "Take Action" tab is now on `home`, `explore`, and
+  `bills`; `explore.html` gained the shared `<nav>` it was previously missing.
+### Notes
+- This is How-To **v1** (evergreen + official links). Address-personalization ("how to run for
+  *your* school board" → your district's filing office/deadlines) is the next iteration.
+
 ## [0.7.0] — 2026-06-13 — Votes, comments, money, state organization, perf
 ### Added
 - **Voting records** — `GET /api/votes?congress=&type=&number=`: each roll call on a bill with
