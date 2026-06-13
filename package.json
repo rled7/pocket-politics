@@ -7,7 +7,9 @@
   "scripts": {
     "demo": "tsx src/demo.ts",
     "demo:live": "USE_LIVE=1 tsx src/demo.ts",
-    "serve": "tsx src/serve.ts"
+    "serve": "tsx src/serve.ts",
+    "test": "tsx src/http.test.ts",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
