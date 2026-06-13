@@ -10,7 +10,9 @@
     "serve": "tsx src/serve.ts",
     "test": "tsx src/http.test.ts",
     "ingest": "tsx src/ingest.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "api": "tsx src/api_server.ts",
+    "bench": "bash bench/run_all.sh"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

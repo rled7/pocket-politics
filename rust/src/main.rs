@@ -8,10 +8,10 @@
 //!
 //!   cargo run --release            # serves on 0.0.0.0:8787 (override with PORT)
 
-use std::io::{Read, Write};
+use std::io::{BufRead, BufReader, Write};
 use std::net::{TcpListener, TcpStream};
 use std::thread;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use serde_json::{json, Map, Value};
 
@@ -205,20 +205,45 @@ fn route(path: &str, query: &str) -> (&'static str, &'static str, String) {
     }
 }
 
-fn handle_client(mut stream: TcpStream) {
-    let mut buf = [0u8; 8192];
-    let n = match stream.read(&mut buf) { Ok(n) if n > 0 => n, _ => return };
-    let req = String::from_utf8_lossy(&buf[..n]);
-    let first = req.lines().next().unwrap_or("");
-    let target = first.split_whitespace().nth(1).unwrap_or("/");
-    let (path, query) = target.split_once('?').unwrap_or((target, ""));
+/// One connection, HTTP/1.1 keep-alive: serve requests in a loop on the same socket until the
+/// client closes or times out. (GET only, no body — read the request line + headers to the
+/// blank line.) Keep-alive matters: without it every request pays a TCP handshake + thread
+/// spawn, which measures the server loop, not the language.
+fn handle_client(stream: TcpStream) {
+    let _ = stream.set_read_timeout(Some(Duration::from_secs(30)));
+    let write_stream = match stream.try_clone() { Ok(s) => s, Err(_) => return };
+    let mut reader = BufReader::new(stream);
+    let mut writer = write_stream;
 
-    let (status, cache, body) = route(path, query);
-    let resp = format!(
-        "HTTP/1.1 {}\r\nContent-Type: application/json\r\nCache-Control: {}\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
-        status, cache, body.len(), body
-    );
-    let _ = stream.write_all(resp.as_bytes());
+    loop {
+        let mut line = String::new();
+        match reader.read_line(&mut line) {
+            Ok(0) => break,            // client closed
+            Ok(_) => {}
+            Err(_) => break,
+        }
+        if line.trim().is_empty() { continue; }
+        let target = line.split_whitespace().nth(1).unwrap_or("/").to_string();
+
+        // Drain the rest of the request headers up to the blank line.
+        loop {
+            let mut h = String::new();
+            match reader.read_line(&mut h) {
+                Ok(0) => return,
+                Ok(_) => {}
+                Err(_) => return,
+            }
+            if h == "\r\n" || h == "\n" { break; }
+        }
+
+        let (path, query) = target.split_once('?').unwrap_or((target.as_str(), ""));
+        let (status, cache, body) = route(path, query);
+        let resp = format!(
+            "HTTP/1.1 {}\r\nContent-Type: application/json\r\nCache-Control: {}\r\nContent-Length: {}\r\nConnection: keep-alive\r\n\r\n{}",
+            status, cache, body.len(), body
+        );
+        if writer.write_all(resp.as_bytes()).is_err() { break; }
+    }
 }
 
 fn main() {
