@@ -116,6 +116,9 @@
       const states = [...new Set(MEMBERS.map(m => m.state).filter(Boolean))].sort();
       document.getElementById("stateSel").insertAdjacentHTML("beforeend",
         states.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join(""));
+      // Deep link from the home map: ?state=New+York preselects that state.
+      const wantState = new URLSearchParams(location.search).get("state");
+      if (wantState && states.includes(wantState)) document.getElementById("stateSel").value = wantState;
       document.getElementById("src").textContent =
         (data.live === false ? "Demo data — set CONGRESS_API_KEY for all 535 members. " : "") + "Source: Congress.gov";
       render();
