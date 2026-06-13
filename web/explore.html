@@ -29,6 +29,14 @@
     .D { background:#2563eb; } .R { background:#dc2626; } .I { background:#7c3aed; } .U { background:#9ca3af; }
     .empty { padding:28px 16px; color:var(--muted); text-align:center; }
     .src { color:var(--muted); font-size:12px; margin-top:14px; }
+    /* Ad slot: a single, LIGHT, clearly-labeled revenue placeholder in a NEUTRAL zone (never
+       beside a politician's record — that would read as pay-to-influence and break trust). The
+       $0.99 "remove ads" model just hides this. Swap the body for a privacy-respecting/contextual
+       network or a direct civic-org sponsor; load async so it never reintroduces lag. */
+    .ad { margin-top:18px; border:1px dashed var(--line); border-radius:12px; padding:12px 14px; background:#fff; display:flex; align-items:center; gap:10px; }
+    .ad-label { font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); border:1px solid var(--line); border-radius:6px; padding:2px 6px; flex:none; }
+    .ad-body { font-size:13px; color:var(--muted); }
+    .ad-body a { color:var(--accent); text-decoration:none; }
   </style>
 </head>
 <body>
@@ -45,6 +53,13 @@
     </div>
     <div class="count" id="count">Loading members…</div>
     <div class="list" id="list"></div>
+
+    <!-- Light revenue slot for free users (hidden by the $0.99 remove-ads upgrade). -->
+    <div class="ad" id="ad-slot" hidden>
+      <span class="ad-label">Sponsored</span>
+      <div class="ad-body">Ad slot — keep Pocket Politics free. <a href="#remove-ads">Remove ads for $0.99</a></div>
+    </div>
+
     <div class="src" id="src"></div>
   </div>
 
@@ -97,6 +112,9 @@
       document.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c === chip));
       render();
     });
+
+    // Show the ad slot for free users only. The remove-ads upgrade sets this flag (stub).
+    if (localStorage.getItem("pp_remove_ads") !== "1") document.getElementById("ad-slot").hidden = false;
 
     loadMembers().then(data => {
       if (!data || !(data.members || []).length) {
