@@ -19,36 +19,77 @@
     <div class="meta">What's moving through Congress — click any bill to see who voted and weigh in.</div>
     <input id="q" class="search" type="search" placeholder="Search bills by title…" autocomplete="off" />
     <div class="count" id="count">Loading bills…</div>
-    <div class="list" id="list"></div>
+    <div class="feed" id="list"></div>
     <div class="src" id="src"></div>
   </div>
   <script>
     const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    const billId = b => `${b.congress}-${b.type}-${b.number}`.toLowerCase();
+
+    // Anonymous client id — one reaction per device per bill, changeable. Reactions are low-
+    // friction (unlike comments, which require name + district + a valid email).
+    const CID = (() => {
+      let id = localStorage.getItem("pp_client_id");
+      if (!id) { id = crypto.randomUUID ? crypto.randomUUID() : Date.now() + "-" + Math.random().toString(36).slice(2); localStorage.setItem("pp_client_id", id); }
+      return id;
+    })();
+
     let BILLS = [];
+    const RX = {}; // billId -> { like, dislike, neutral, mine }
 
     async function load() {
       try { const r = await fetch("/api/bills?limit=50"); if (r.ok) return await r.json(); } catch (_) {}
       try { return await (await fetch("./bills.json")).json(); } catch (_) { return null; }
+    }
+    function rxBar(id) {
+      const r = RX[id] || { like: 0, dislike: 0, neutral: 0, mine: null };
+      const btn = (k, label, emoji) => `<button class="rx${r.mine === k ? " on" : ""}" data-rx="${k}" data-bill="${esc(id)}">${emoji} ${label} <span class="rxc">${esc(r[k] || 0)}</span></button>`;
+      return `<div class="rxbar">${btn("like", "Like", "👍")}${btn("dislike", "Dislike", "👎")}${btn("neutral", "Neutral", "😐")}</div>`;
     }
     function render() {
       const q = document.getElementById("q").value.trim().toLowerCase();
       const rows = BILLS.filter(b => !q || String(b.title ?? "").toLowerCase().includes(q));
       document.getElementById("count").textContent = `${rows.length} bill${rows.length === 1 ? "" : "s"}${q ? " match" : ""}`;
       const list = document.getElementById("list");
-      list.innerHTML = rows.length ? rows.map(b => `
-        <a class="row" href="./bill.html?congress=${esc(b.congress)}&type=${esc(b.type)}&number=${esc(b.number)}">
-          <div>
-            <div class="nm">${esc(b.title)}</div>
-            <div class="sub">${esc(b.type)} ${esc(b.number)} (${esc(b.congress)}th)${b.latestAction ? " · " + esc(b.latestAction.actionDate) : ""} · see who voted →</div>
-          </div>
-        </a>`).join("") : `<div class="empty">No bills match “${esc(q)}”.</div>`;
+      list.innerHTML = rows.length ? rows.map(b => {
+        const id = billId(b);
+        return `<div class="post">
+          <a class="row" href="./bill.html?congress=${esc(b.congress)}&type=${esc(b.type)}&number=${esc(b.number)}">
+            <div>
+              <div class="nm">${esc(b.title)}</div>
+              <div class="sub">${esc(b.type)} ${esc(b.number)} (${esc(b.congress)}th)${b.latestAction ? " · " + esc(b.latestAction.actionDate) : ""} · see who voted →</div>
+            </div>
+          </a>
+          ${rxBar(id)}
+        </div>`;
+      }).join("") : `<div class="empty">No bills match “${esc(q)}”.</div>`;
     }
+    async function loadReactions() {
+      const ids = BILLS.map(billId);
+      if (!ids.length) return;
+      try {
+        const r = await fetch(`/api/reactions?client=${encodeURIComponent(CID)}&bills=${ids.map(encodeURIComponent).join(",")}`);
+        if (r.ok) { Object.assign(RX, (await r.json()).reactions || {}); render(); }
+      } catch (_) {}
+    }
+    // React on click (event delegation; the list is re-rendered in place).
+    document.getElementById("list").addEventListener("click", async (e) => {
+      const btn = e.target.closest(".rx");
+      if (!btn) return;
+      e.preventDefault();
+      const id = btn.getAttribute("data-bill"), reaction = btn.getAttribute("data-rx");
+      try {
+        const r = await fetch("/api/reactions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ bill: id, client: CID, reaction }) });
+        if (r.ok) { RX[id] = await r.json(); render(); }
+      } catch (_) {}
+    });
     document.getElementById("q").addEventListener("input", render);
     load().then(d => {
       if (!d || !(d.bills || []).length) { document.getElementById("count").textContent = "Could not load bills."; return; }
       BILLS = d.bills;
       document.getElementById("src").textContent = (d.live === false ? "Demo data — set CONGRESS_API_KEY for live bills. " : "") + "Source: Congress.gov";
       render();
+      loadReactions();
     });
   </script>
 </body>

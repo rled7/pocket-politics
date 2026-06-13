@@ -17,6 +17,7 @@ import { jsonCached, jsonImmutable, jsonPointer, jsonError } from "./http.ts";
 import { dataVersion } from "./version.ts";
 import { MemoryStore } from "./store.ts";
 import { getComments, addComment, validBillId } from "./comments.ts";
+import { getReactions, setReaction, isReaction, validClientId } from "./reactions.ts";
 import { SwrCache, mapLimit, type LoadResult } from "./swr_cache.ts";
 
 const KEY = process.env.CONGRESS_API_KEY || undefined;
@@ -147,6 +148,31 @@ const server = http.createServer(async (req, res) => {
       const bill = url.searchParams.get("bill") ?? "";
       if (!validBillId(bill)) return sendJson(res, 400, { error: "invalid bill id" });
       return sendJson(res, 200, { comments: await getComments(store, bill) });
+    }
+
+    // Bill reactions (like / dislike / neutral) — read + write, never cached.
+    if (url.pathname === "/api/reactions") {
+      if (req.method === "POST") {
+        const payload = JSON.parse((await readBody(req)) || "{}");
+        const bill = String(payload.bill ?? "");
+        const client = String(payload.client ?? "");
+        const reaction = String(payload.reaction ?? "");
+        if (!validBillId(bill)) return sendJson(res, 400, { error: "invalid bill id" });
+        if (!validClientId(client)) return sendJson(res, 400, { error: "invalid client id" });
+        if (!isReaction(reaction)) return sendJson(res, 400, { error: "reaction must be like, dislike, or neutral" });
+        return sendJson(res, 200, await setReaction(store, bill, client, reaction));
+      }
+      const client = url.searchParams.get("client") ?? undefined;
+      const bills = url.searchParams.get("bills"); // batch: load a whole feed in one request
+      if (bills) {
+        const ids = bills.split(",").filter(validBillId).slice(0, 100);
+        const reactions: Record<string, unknown> = {};
+        for (const id of ids) reactions[id] = await getReactions(store, id, client);
+        return sendJson(res, 200, { reactions });
+      }
+      const bill = url.searchParams.get("bill") ?? "";
+      if (!validBillId(bill)) return sendJson(res, 400, { error: "invalid bill id" });
+      return sendJson(res, 200, await getReactions(store, bill, client));
     }
 
     const ckey = url.pathname + url.search;

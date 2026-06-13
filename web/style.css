@@ -147,6 +147,17 @@ a.back:hover { color: var(--brass-2); }
 .empty { padding: 30px 18px; color: var(--ink-soft); text-align: center; }
 .src { color: var(--ink-soft); font-size: 12px; margin-top: 16px; }
 
+/* Bills feed — each bill is a "post" with reactions */
+.feed { margin-top: 10px; display: grid; gap: 12px; }
+.post { background: var(--paper-2); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden; }
+.post .row { border: 0; }
+.rxbar { display: flex; gap: 8px; padding: 10px 14px 12px; flex-wrap: wrap; border-top: 1px solid var(--line); }
+.rx { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--ink-soft);
+  background: var(--paper); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+.rx:hover { color: var(--ink); }
+.rx.on { color: #fbf9f2; background: var(--forest); border-color: var(--forest); }
+.rxc { font-variant-numeric: tabular-nums; }
+
 /* Facts / pills */
 .facts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 .fact { font-size: 13px; background: #f1ede0; color: var(--forest); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; }
