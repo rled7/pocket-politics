@@ -29,6 +29,8 @@
     .facts { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
     .fact { font-size:13px; background:#f1f5ff; color:#1e3a8a; border:1px solid #dbe4ff; border-radius:999px; padding:5px 11px; }
     .fact b { font-weight:700; }
+    a.fact { text-decoration:none; }
+    a.fact:hover { background:#dbe4ff; }
     .contact { margin-top:12px; font-size:14px; color:var(--ink); }
     .contact div { margin-top:4px; }
     .contact a { color:var(--accent); text-decoration:none; }
@@ -40,6 +42,8 @@
     <div class="brand">Pocket Politics</div>
     <a href="./explore.html" style="display:inline-block;margin-top:6px;font-size:14px;color:var(--accent);text-decoration:none">← All members</a>
     <div class="card" id="card">Loading profile…</div>
+    <div class="sec-title" style="margin-top:22px">Web presence</div>
+    <div class="card" id="web">Loading links…</div>
     <div class="sec-title" style="margin-top:22px">Bills currently in Congress</div>
     <div class="card" id="bills">Loading bills…</div>
   </div>
@@ -91,7 +95,44 @@
         </div>
         <div style="margin-top:8px">${items || "<p>No records.</p>"}</div>
         <div class="src">Source: ${esc((p.sources||[]).join("; "))} · generated ${new Date(p.generatedAt).toLocaleString()}</div>`;
+      // Web presence research: official site (from the profile) + social media, sourced from
+      // the public @unitedstates dataset (keyed by bioguide). Graceful — if it fails, the
+      // official site still shows.
+      renderWebPresence(p);
     }).catch(e => { document.getElementById("card").textContent = "Could not load profile (" + e + ")"; });
+
+    const SOCIAL_DS = "https://unitedstates.github.io/congress-legislators/legislators-social-media.json";
+    async function loadSocials(bioguide) {
+      try {
+        window.__socials = window.__socials || fetch(SOCIAL_DS).then(r => r.json());
+        const all = await window.__socials;
+        const rec = all.find(x => x.id && x.id.bioguide === bioguide);
+        return rec ? rec.social : null;
+      } catch (_) { return null; }
+    }
+    function socialLinks(s) {
+      if (!s) return [];
+      const L = [];
+      if (s.twitter)   L.push(["𝕏 Twitter", "https://twitter.com/" + s.twitter]);
+      if (s.facebook)  L.push(["Facebook", "https://facebook.com/" + s.facebook]);
+      if (s.instagram) L.push(["Instagram", "https://instagram.com/" + s.instagram]);
+      if (s.youtube)   L.push(["YouTube", "https://youtube.com/@" + s.youtube]);
+      else if (s.youtube_id) L.push(["YouTube", "https://youtube.com/channel/" + s.youtube_id]);
+      return L;
+    }
+    async function renderWebPresence(p) {
+      const el = document.getElementById("web");
+      const site = (p.contact || {}).website;
+      const socials = socialLinks(await loadSocials(p.bioguideId));
+      const chips = [];
+      if (site) chips.push(`<a class="fact" href="${esc(site)}" target="_blank" rel="noopener noreferrer">🏛️ Official site</a>`);
+      for (const [label, url] of socials)
+        chips.push(`<a class="fact" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(label)}</a>`);
+      el.innerHTML = chips.length
+        ? `<div class="facts">${chips.join("")}</div>
+           <div class="src">Official site: Congress.gov · Social: @unitedstates/congress-legislators (public)</div>`
+        : `<div class="meta">No web presence found for this member.</div>`;
+    }
 
     // Bills currently in Congress (separate endpoint; same API).
     (async () => {
