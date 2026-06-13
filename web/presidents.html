@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocket Politics — Presidents</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand">Pocket Politics</div>
+    <nav class="nav">
+      <a href="./home.html">My Government</a>
+      <a href="./explore.html">Browse Congress</a>
+      <a href="./bills.html">Bills</a>
+      <a href="./presidents.html" class="on">Presidents</a>
+      <a href="./howto.html">Take Action</a>
+    </nav>
+    <h1>Presidents of the United States</h1>
+    <div class="meta">The current president, and everyone who held the office before — all 47 presidencies.</div>
+
+    <div class="sec-title">In office now</div>
+    <div id="current" class="card">Loading…</div>
+
+    <div class="sec-title">Every president</div>
+    <input id="q" class="search" type="search" placeholder="Search by name or party…" autocomplete="off" />
+    <div class="count" id="count"></div>
+    <div class="list" id="list"></div>
+    <div class="src">Source: public record (no API key needed — this list is curated, finite, and stable).</div>
+  </div>
+  <script>
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    const pc = p => /^D/i.test(p) ? "D" : /^R/i.test(p) ? "R" : "U";
+    const term = p => `${esc(p.start)}–${p.end == null ? "present" : esc(p.end)}`;
+    let PREZ = [];
+
+    function rowHtml(p) {
+      return `<div class="row" style="cursor:default">
+        <div>
+          <div class="nm"><span class="dot ${pc(p.party)}"></span>#${esc(p.n)} · ${esc(p.name)}</div>
+          <div class="sub">${esc(p.party)} · ${term(p)}${p.note ? " · " + esc(p.note) : ""}</div>
+        </div>
+      </div>`;
+    }
+    function render() {
+      const q = document.getElementById("q").value.trim().toLowerCase();
+      const rows = PREZ.filter(p => !q || `${p.name} ${p.party}`.toLowerCase().includes(q)).slice().reverse();
+      document.getElementById("count").textContent = `${rows.length} presidenc${rows.length === 1 ? "y" : "ies"}${q ? " match" : ""}`;
+      document.getElementById("list").innerHTML = rows.length ? rows.map(rowHtml).join("")
+        : `<div class="empty">No match for “${esc(q)}”.</div>`;
+    }
+    document.getElementById("q").addEventListener("input", render);
+
+    fetch("./presidents.json").then(r => r.json()).then(data => {
+      PREZ = data;
+      const cur = data.find(p => p.end == null) || data[data.length - 1];
+      document.getElementById("current").innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span class="dot ${pc(cur.party)}" style="width:12px;height:12px"></span>
+          <div><div style="font-weight:700;font-size:20px">${esc(cur.name)}</div>
+            <div class="meta" style="margin-top:2px">${esc(cur.party)} · ${esc(cur.n)}th president · since ${esc(cur.start)}</div></div>
+        </div>`;
+      render();
+    }).catch(() => { document.getElementById("current").textContent = "Could not load presidents."; });
+  </script>
+</body>
+</html>
