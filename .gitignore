@@ -5,3 +5,4 @@ web/profile.json
 .dev.vars.*
 *.log
 .DS_Store
+dist/
