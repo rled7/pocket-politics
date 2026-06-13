@@ -75,6 +75,39 @@ export function jsonCached(data: unknown, opts: JsonCachedOpts = {}): Response {
 }
 
 /**
+ * Immutable response for a version-addressed payload (`/api/v/{dataVersion}/...`). Because
+ * the URL pins a specific data version, the bytes never change → cache for a year, never
+ * revalidate. This is the hot path that makes lag disappear (CACHING_ARCHITECTURE.md §4).
+ */
+export function jsonImmutable(data: unknown, opts: { request?: Request } = {}): Response {
+  const body = JSON.stringify(data);
+  const etag = etagFor(body);
+  const cc = "public, max-age=31536000, immutable";
+
+  const inm = opts.request?.headers.get("If-None-Match");
+  if (inm && inm === etag) {
+    return new Response(null, { status: 304, headers: { "Cache-Control": cc, ETag: etag } });
+  }
+  return new Response(body, {
+    status: 200,
+    headers: { "Content-Type": "application/json", "Cache-Control": cc, ETag: etag },
+  });
+}
+
+/**
+ * The mutable version pointer (`/api/latest`). Tiny + short-lived, with async SWR so even
+ * its own refresh never blocks a reader. This is the ONLY thing clients revalidate.
+ */
+export function jsonPointer(data: unknown): Response {
+  return new Response(JSON.stringify(data), {
+    headers: {
+      "Content-Type": "application/json",
+      "Cache-Control": "public, max-age=30, s-maxage=30, stale-while-revalidate=300",
+    },
+  });
+}
+
+/**
  * Error response — deliberately NOT cached (`no-store`). Upstream-outage resilience is
  * handled by `stale-if-error` on the *success* path; we never want to cache an error body.
  */

@@ -146,6 +146,39 @@ Bills currently moving through Congress, most recent first.
 
 ---
 
+---
+
+## `GET /api/latest` — version pointer
+
+The tiny mutable pointer that drives immutable caching (CACHING_ARCHITECTURE.md §4).
+
+```json
+{ "dataVersion": "a1b2c3d4" }
+```
+
+- `Cache-Control: public, max-age=30, s-maxage=30, stale-while-revalidate=300` (short-lived;
+  the ONLY thing clients revalidate).
+- `dataVersion` is a URL-safe hex string. Clients use it to build immutable data URLs below.
+
+## `GET /api/v/{version}/{resource}` — immutable, version-addressed
+
+Same payloads as the mutable endpoints, but pinned to a `{version}` so they cache forever.
+
+| Route | Mirrors |
+|---|---|
+| `GET /api/v/{version}/profile/{bioguide}` | `/api/profile?bioguide=…` |
+| `GET /api/v/{version}/members` | `/api/members` |
+| `GET /api/v/{version}/bills` | `/api/bills` |
+
+- `Cache-Control: public, max-age=31536000, immutable` — never revalidated.
+- Body is byte-identical to the matching mutable endpoint (modulo the envelope being the
+  same `live`/`note` fields). `{version}` pins a data snapshot; in fixture mode data is
+  constant so any version serves the current fixture, and once the ingest job lands the
+  version selects the matching snapshot.
+- `{bioguide}` is validated `^[A-Z]\d{6}$` (→ `400` otherwise), same as the mutable route.
+
+---
+
 ## Conformance & bake-off harness (planned)
 
 `bench/run_all.sh` (AlgoForge pattern) will, for each backend:
