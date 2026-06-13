@@ -11,7 +11,7 @@ import http from "node:http";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join, extname, normalize } from "node:path";
-import { getMembers, getBills, getBill, getProfile, getBillVotes, getReps, clampLimit, isBioguide, DEFAULT_BIOGUIDE } from "./handlers.ts";
+import { getMembers, getBills, getBillsWithSponsors, getBill, getProfile, getBillVotes, getReps, clampLimit, isBioguide, DEFAULT_BIOGUIDE } from "./handlers.ts";
 import { getMoney } from "./money.ts";
 import { jsonCached, jsonImmutable, jsonPointer, jsonError } from "./http.ts";
 import { dataVersion } from "./version.ts";
@@ -89,7 +89,9 @@ async function route(url: URL, request: Request): Promise<Response> {
     return jsonCached(await getMembers(clampLimit(q.get("limit"), 540, 540), KEY), { request });
   }
   if (segs[0] === "api" && segs[1] === "bills") {
-    return jsonCached(await getBills(clampLimit(q.get("limit"), 20, 50), KEY), { request });
+    const lim = clampLimit(q.get("limit"), 20, 50);
+    if (q.get("sponsors")) return jsonCached(await getBillsWithSponsors(lim, KEY), { request });
+    return jsonCached(await getBills(lim, KEY), { request });
   }
   if (segs[0] === "api" && segs[1] === "profile") {
     const b = (q.get("bioguide") || DEFAULT_BIOGUIDE).toUpperCase();
@@ -235,7 +237,7 @@ server.listen(PORT, () => console.log(`pp api-server (TypeScript) listening on :
 // 3) A refresh loop re-pulls cached keys before they go stale, so data stays fresh (~daily-changing
 //    congressional data; a few-minute freshness window is invisible). Disable with PREWARM=0.
 const PREWARM = process.env.PREWARM !== "0";
-const COMMON_KEYS = ["/api/members?limit=540", "/api/bills?limit=50", "/api/latest"];
+const COMMON_KEYS = ["/api/members?limit=540", "/api/bills?limit=50", "/api/bills?limit=50&sponsors=1", "/api/latest"];
 
 async function warm(): Promise<void> {
   if (!PREWARM) return;

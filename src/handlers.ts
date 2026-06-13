@@ -15,6 +15,7 @@ import {
 } from "./congress.ts";
 import { buildProfile } from "./profile.ts";
 import type { ApiMember, ApiSponsored } from "./congress.ts";
+import { mapLimit } from "./swr_cache.ts";
 import memberFixture from "../fixtures/member.json";
 import sponsoredFixture from "../fixtures/sponsored.json";
 import membersFixture from "../fixtures/members.json";
@@ -54,6 +55,27 @@ export async function getBills(limit: number, key?: string) {
   }
   const bills = await fetchBills(key, limit);
   return { bills, count: bills.length, live: true };
+}
+
+/**
+ * Bills enriched with each bill's SPONSOR — powers the bills feed's "group by state" view and
+ * the per-post "sponsored by" line. The plain `getBills` (the frozen bake-off contract) stays
+ * untouched; this is a TS-feature-tier endpoint. The sponsor fetches are bounded-concurrency and
+ * cached by the SWR layer (warmed at boot), so the live page never pays the cost per request.
+ */
+export async function getBillsWithSponsors(limit: number, key?: string) {
+  const base = await getBills(limit, key) as { bills: any[]; count: number; live?: boolean; note?: string };
+  if (!key || !base.bills?.length) return base;
+  const bills = base.bills.map((b) => ({ ...b }));
+  await mapLimit(bills, 6, async (b) => {
+    try {
+      const d = await fetchBillDetail(b.congress, b.type, b.number, key);
+      b.sponsor = d.sponsor
+        ? { bioguideId: d.sponsor.bioguideId, fullName: d.sponsor.fullName, party: d.sponsor.party, state: d.sponsor.state }
+        : null;
+    } catch { b.sponsor = null; }
+  });
+  return { ...base, bills };
 }
 
 /**
