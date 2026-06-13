@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  typescript:
+    name: TypeScript — typecheck + tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - run: npm run typecheck
+      - run: npm test
+
+  rust:
+    name: Rust — build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cd rust && cargo build --release
+
+  bakeoff:
+    name: Bake-off — Rust conforms to the TypeScript reference
+    runs-on: ubuntu-latest
+    needs: [typescript, rust]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - run: cd rust && cargo build --release
+      - name: Start Rust backend + run conformance gate
+        run: |
+          PORT=8787 ./rust/target/release/pp-server &
+          sleep 3
+          BASE=http://localhost:8787 npx tsx bench/conformance.ts
