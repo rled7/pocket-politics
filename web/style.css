@@ -54,6 +54,7 @@ a { color: var(--forest); }
   letter-spacing: .01em;
   color: var(--forest);
   display: flex; justify-content: center; align-items: center; gap: 8px;
+  text-decoration: none; cursor: pointer;
 }
 .brand::before {
   content: "★"; color: var(--brass); font-size: 13px;
