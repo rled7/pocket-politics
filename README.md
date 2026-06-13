@@ -49,20 +49,24 @@ ship it everywhere.
 
 ## Two backends — the bake-off
 
-The same [`API_CONTRACT.md`](./API_CONTRACT.md) is implemented twice and compared:
+The **core** [`API_CONTRACT.md`](./API_CONTRACT.md) (`/api/members`, `/api/bills`,
+`/api/profile`, `/api/latest` + immutable `/api/v/…`) is implemented twice and compared:
 
 | | TypeScript | Rust |
 |---|---|---|
 | Server | `src/api_server.ts` (Cloudflare Functions in prod) | `rust/` (`pp-server`, std HTTP + serde_json) |
 | Run | `npm run api` (:8788) | `cd rust && cargo run --release` (:8787) |
+| Scope | **feature-complete production backend** (+ votes, comments, money) | **core-contract reference** (proves the perf comparison) |
 
 ```bash
-npm run bench        # conformance gate (JSON must match) + load test, TS vs Rust
+npm run bench        # conformance gate (core JSON must match) + load test, TS vs Rust
 ```
 
 Finding (see [`bench/README.md`](./bench/README.md)): on this cache-frontable read workload
-the language gap is modest — the **caching** dominates, so choose the backend by developer
-experience. The shared web frontend points at either via a base-URL switch.
+the language gap is modest — the **caching** dominates. The bake-off's purpose (compare
+language perf on the read path) is met by the core contract; the newer feature endpoints
+(`/api/votes`, `/api/comments`, `/api/money`) are **TypeScript-only**, which is the production
+backend. The web frontend points at the TS backend; Rust is the comparison reference.
 
 See [`CHANGELOG.md`](./CHANGELOG.md) for history and [`PROJECT_TRACKER.md`](./PROJECT_TRACKER.md)
 for the **full plan** — every level (federal → state → city), the data-source reality for

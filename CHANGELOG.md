@@ -25,6 +25,11 @@ this project uses date-stamped milestones while pre-1.0.
   Congress.gov, subsequent ones within TTL serve from memory (`X-Cache: HIT/MISS`). The real fix
   for slow Congress fetches = ingest-don't-proxy + cache.
 
+### Scope note (honesty)
+- The new feature endpoints (`/api/votes`, `/api/comments`, `/api/money`) are **TypeScript-only**.
+  The **Rust** backend remains the **core-contract reference** that proved the perf comparison;
+  TS is the feature-complete production backend. The conformance gate covers the core contract.
+
 ### Ops / docs
 - `wrangler.toml` + `DEPLOY.md` (turnkey Cloudflare steps); `.github/workflows/ci.yml`
   (typecheck + tests + Rust build + conformance gate); README/tracker refreshed.
