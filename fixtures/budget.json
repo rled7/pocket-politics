@@ -1,0 +1,29 @@
+{
+  "congress": 119,
+  "appropriations": [
+    {
+      "type": "HR",
+      "number": "9310",
+      "title": "Department of Homeland Security Appropriations Act, 2027",
+      "latestAction": "Placed on the Union Calendar, Calendar No. 605.",
+      "actionDate": "2026-06-12",
+      "url": "https://www.congress.gov/bill/119th-congress/house-bill/9310"
+    },
+    {
+      "type": "HR",
+      "number": "9260",
+      "title": "Departments of Labor, Health and Human Services, and Education, and Related Agencies Appropriations Act, 2027",
+      "latestAction": "Placed on the Union Calendar, Calendar No. 604.",
+      "actionDate": "2026-06-11",
+      "url": "https://www.congress.gov/bill/119th-congress/house-bill/9260"
+    },
+    {
+      "type": "HR",
+      "number": "3013",
+      "title": "To amend title 38, United States Code, to increase the authorization of appropriations for comprehensive service programs for homeless veterans.",
+      "latestAction": "Referred to the Subcommittee on Economic Opportunity.",
+      "actionDate": "2025-05-12",
+      "url": "https://www.congress.gov/bill/119th-congress/house-bill/3013"
+    }
+  ]
+}

@@ -4,6 +4,20 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.19.0] — build 61 — 2026-06-14 — "Ideas" section (redesigned) + grayscale fix
+### Changed / Fixed
+- **Replaced the global black-&-white toggle** (a misread of the feature, and it had no off-switch)
+  with the intended **"Ideas" section** (`ideas.html`): a proposal is shown as **just the idea** —
+  no name, no party, no color — so people judge it on the merits. React 👍/👎/😐 first; only then can
+  you **"reveal who proposed it."** The goal: debate the idea, not the side it came from.
+- `bw-mode.js` is now a one-time **migration** that clears the stuck global-grayscale flag, so anyone
+  who got trapped returns to normal color on next load.
+### Direction captured (user pitch — politician revenue side)
+- The business model now centers on **ID-verified registered voters**: tasks #15 (verified-voter
+  accounts), #38 (two-sided pricing — citizens + politicians undercutting Meta), #45 (politician →
+  district-targeted constituent messaging), #46 (identity-verification engine: gov ID → voter file →
+  district). Pitch: "100% ID-verified registered voters inside your district boundaries."
+
 ## [0.18.0] — build 60 — 2026-06-14 — Congressional calendar (front and center)
 ### Added
 - **Congressional calendar** (`web/calendar.html`, `GET /api/calendar`) — upcoming committee

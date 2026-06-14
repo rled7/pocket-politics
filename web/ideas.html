@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocket Politics — Ideas</title>
+  <link rel="stylesheet" href="./style.css" />
+  <style>
+    /* Ideas mode: neutral, colorless — the idea, not the side. Grayscale scoped to this page only. */
+    .ideas { filter: grayscale(100%); }
+    .idea { background: var(--paper-2); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; margin-top: 14px; box-shadow: var(--shadow); }
+    .idea .label { font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: var(--ink-soft); }
+    .idea .text { font-family: "Fraunces", serif; font-size: 19px; line-height: 1.3; margin: 6px 0 4px; }
+    .idea .ctx { font-size: 13px; color: var(--ink-soft); }
+    .rxbar { display: flex; gap: 8px; padding: 12px 0 0; flex-wrap: wrap; }
+    .rx { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--ink-soft);
+      background: var(--paper); border: 1px solid var(--line); border-radius: 999px; padding: 7px 14px; cursor: pointer; }
+    .rx.on { color: #fff; background: #333; border-color: #333; }
+    .reveal { margin-top: 10px; font-size: 13px; }
+    .reveal button { background: none; border: 0; color: var(--ink-soft); text-decoration: underline; cursor: pointer; font: inherit; padding: 0; }
+    .who { margin-top: 8px; font-size: 13px; color: var(--ink); display: none; }
+    .who.show { display: block; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="./home.html" class="brand">Pocket Politics</a>
+    <nav class="nav">
+      <a href="./home.html">My Government</a>
+      <a href="./bills.html">Bills</a>
+      <a href="./ideas.html" class="on">Ideas</a>
+      <a href="./calendar.html">Calendar</a>
+      <a href="./howto.html">Take Action</a>
+    </nav>
+    <h1>Ideas</h1>
+    <div class="meta">Here, a proposal is just an <b>idea</b> — no name, no party, no colors. Decide what you think
+      of the idea on its own merits. Only after you weigh in can you reveal who proposed it. The goal: debate
+      the idea, not the side it came from.</div>
+    <div class="ideas" id="list"><div class="idea"><div class="ctx">Loading ideas…</div></div></div>
+    <div class="src" id="src"></div>
+  </div>
+  <script>
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    const cid = (() => { let c = localStorage.getItem("pp_cid"); if (!c) { c = "c-" + Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem("pp_cid", c); } return c; })();
+    const billId = b => `${b.congress}-${String(b.type).toLowerCase()}-${b.number}`;
+    const party = p => /^Democrat/i.test(p) ? "Democrat" : /^Republican/i.test(p) ? "Republican" : /^Independent/i.test(p) ? "Independent" : (p || "—");
+
+    async function react(id, reaction, el) {
+      try {
+        const r = await (await fetch("/api/reactions", { method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ bill: id, client: cid, reaction }) })).json();
+        paintCounts(el, r);
+      } catch (_) {}
+    }
+    function paintCounts(card, r) {
+      const t = r.tally || r || {};
+      card.querySelectorAll(".rx").forEach(btn => {
+        const k = btn.dataset.k;
+        btn.querySelector(".c").textContent = t[k] != null ? t[k] : "0";
+        btn.classList.toggle("on", (r.mine || r.you) === k);
+      });
+    }
+
+    (async () => {
+      let d;
+      try { d = await (await fetch("/api/bills?sponsors=1&limit=25")).json(); }
+      catch (_) { d = null; }
+      const list = document.getElementById("list");
+      if (!d || !(d.bills || []).length) { list.innerHTML = `<div class="idea"><div class="ctx">Could not load ideas.</div></div>`; return; }
+      const ids = d.bills.map(billId);
+      let counts = {};
+      try { counts = (await (await fetch(`/api/reactions?bills=${encodeURIComponent(ids.join(","))}&client=${encodeURIComponent(cid)}`)).json()).reactions || {}; } catch (_) {}
+
+      list.innerHTML = d.bills.map(b => {
+        const id = billId(b);
+        const sponsor = b.sponsor ? `${esc(b.sponsor.name || b.sponsor.fullName || "")}${b.sponsor.party ? " (" + esc(party(b.sponsor.party)) + ")" : ""}${b.sponsor.state ? " · " + esc(b.sponsor.state) : ""}` : "Sponsor not listed";
+        return `<div class="idea" data-id="${esc(id)}">
+          <div class="label">Proposal</div>
+          <div class="text">${esc(b.title || "(untitled proposal)")}</div>
+          ${b.latestAction ? `<div class="ctx">Status: ${esc(b.latestAction.text || "")}</div>` : ""}
+          <div class="rxbar">
+            <button class="rx" data-k="like">👍 Agree <span class="c">0</span></button>
+            <button class="rx" data-k="dislike">👎 Disagree <span class="c">0</span></button>
+            <button class="rx" data-k="neutral">😐 Neutral <span class="c">0</span></button>
+          </div>
+          <div class="reveal"><button type="button">Reveal who proposed this →</button></div>
+          <div class="who">💡 Proposed by <b>${sponsor}</b>. Now you know — did it change your view of the idea?</div>
+        </div>`;
+      }).join("");
+
+      // wire reactions + reveal, and paint any existing counts
+      document.querySelectorAll(".idea").forEach(card => {
+        const id = card.dataset.id;
+        if (counts[id]) paintCounts(card, counts[id]);
+        card.querySelectorAll(".rx").forEach(btn => btn.addEventListener("click", () => react(id, btn.dataset.k, card)));
+        const rb = card.querySelector(".reveal button"), who = card.querySelector(".who");
+        rb.addEventListener("click", () => { who.classList.add("show"); rb.parentElement.style.display = "none"; });
+      });
+      document.getElementById("src").innerHTML = `${d.live === false ? "Demo data. " : ""}Ideas drawn from bills in Congress · Source: Congress.gov`;
+    })();
+  </script>
+  <script src="./build-tag.js" defer></script>
+  <script src="./bw-mode.js" defer></script>
+</body>
+</html>
