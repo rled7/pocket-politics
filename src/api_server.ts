@@ -22,6 +22,7 @@ import { getLobbying } from "./lobbying.ts";
 import { buildInfo } from "./build.ts";
 import { getNyBills, getNyLaws, getNyTranscripts } from "./nystate.ts";
 import { getStateData } from "./openstates.ts";
+import { getCalendar, OFFICIAL_CALENDARS } from "./calendar.ts";
 import { SwrCache, mapLimit, type LoadResult } from "./swr_cache.ts";
 import { KEYS, integrations, keySummary } from "./config.ts";
 
@@ -123,6 +124,10 @@ async function route(url: URL, request: Request): Promise<Response> {
   }
   if (segs[0] === "api" && segs[1] === "ny" && segs[2] === "transcripts") {
     return jsonCached(await getNyTranscripts(clampLimit(q.get("limit"), 12, 30), KEYS.nyOpenLeg), { request });
+  }
+  if (segs[0] === "api" && segs[1] === "calendar") {
+    const cal = await getCalendar(KEYS.congress);
+    return jsonCached({ ...cal, official: OFFICIAL_CALENDARS }, { request, sMaxAge: 3600 });
   }
   if (segs[0] === "api" && segs[1] === "state") {
     const st = (q.get("state") ?? "").slice(0, 40).trim();
@@ -302,7 +307,7 @@ function startRefreshLoop(): void {
       // Don't proactively re-pull rate-limited upstreams (OpenStates = 500/day) — they refresh
       // on-access via SWR instead, bounded by real traffic. Re-pulling all states on a timer
       // would blow the daily quota.
-      if (k.startsWith("/api/state")) continue;
+      if (k.startsWith("/api/state") || k.startsWith("/api/calendar")) continue;
       apiCache.revalidate(k, () => runRoute(k));
     }
   }, 240_000).unref(); // every 4 min; unref so it never holds the process open

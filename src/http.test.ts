@@ -251,6 +251,14 @@ check("getStateData fixture: legislators have name + chamber, bills have identif
   sd.legislators.length > 0 && sd.legislators.every(l => !!l.name && "chamber" in l)
   && sd.bills.length > 0 && sd.bills.every(b => !!b.identifier));
 
+// Congressional calendar — fixture mode
+const { getCalendar, OFFICIAL_CALENDARS } = await import("./calendar.ts");
+const cal = await getCalendar();
+check("getCalendar fixture: live false + demo note", cal.live === false && /demo/i.test(cal.note ?? ""));
+check("getCalendar fixture: meetings have title/date/committee", cal.meetings.length > 0 && cal.meetings.every(m => "title" in m && "date" in m));
+check("OFFICIAL_CALENDARS lists authoritative House/Senate schedules",
+  OFFICIAL_CALENDARS.length >= 3 && OFFICIAL_CALENDARS.every(o => /^https:\/\//.test(o.url)));
+
 // summary
 console.log(`\n  ${pass} passed, ${fails.length} failed`);
 if (fails.length) { console.error("  FAILED: " + fails.join(", ")); process.exit(1); }

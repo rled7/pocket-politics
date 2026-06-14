@@ -13,8 +13,8 @@
       <a href="./home.html" class="on">My Government</a>
       <a href="./explore.html">Browse Congress</a>
       <a href="./bills.html">Bills</a>
-      <a href="./presidents.html">Presidents</a>
-      <a href="./scotus.html">Justices</a>
+      <a href="./calendar.html">Calendar</a>
+      <a href="./states.html">Your state</a>
       <a href="./howto.html">Take Action</a>
     </nav>
 
@@ -33,6 +33,14 @@
     </div>
 
     <div id="reps"></div>
+
+    <a href="./calendar.html" class="card" id="calbanner" style="display:flex;gap:14px;align-items:center;text-decoration:none;color:inherit">
+      <div style="font-size:26px">📅</div>
+      <div style="flex:1">
+        <div class="nm">Congressional calendar</div>
+        <div class="sub" id="calnext">See what's scheduled in Congress →</div>
+      </div>
+    </a>
 
     <div class="sec-title">Or pick your state</div>
     <div class="meta" style="margin-top:6px">Click a state to see its members of Congress.</div>
@@ -136,6 +144,18 @@
       noteEl.querySelector("#chg").addEventListener("click", (e) => { e.preventDefault(); clearHome(); });
       if (h.t === "a") byAddress(h.v, false);
       else if (h.t === "c") byCoords(h.lat, h.lon, false);
+    })();
+
+    // Preview the next scheduled committee meeting in the calendar banner.
+    (async () => {
+      try {
+        const d = await (await fetch("/api/calendar")).json();
+        const m = (d.meetings || [])[0];
+        if (!m) return;
+        const when = m.date ? new Date(m.date).toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" }) : "";
+        const el = document.getElementById("calnext");
+        if (el) el.textContent = `Next: ${m.committee || m.title || "committee meeting"}${when ? " · " + when : ""} →`;
+      } catch (_) { /* leave the default label */ }
     })();
   </script>
   <script src="./build-tag.js" defer></script>

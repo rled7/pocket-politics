@@ -4,6 +4,20 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.18.0] — build 60 — 2026-06-14 — Congressional calendar (front and center)
+### Added
+- **Congressional calendar** (`web/calendar.html`, `GET /api/calendar`) — upcoming committee
+  hearings & markups, soonest first, with committee, chamber, time, and room. Plus authoritative
+  official-schedule links (House floor, Senate floor, Congress.gov committee meetings, days in
+  session). Front-and-center: a calendar banner on Home (previewing the next meeting) + a top-nav
+  link. Verified live (12 upcoming meetings).
+- `src/calendar.ts`: fetches the committee-meeting list + bounded detail fetches, filters to
+  **today-forward** dates (the list itself includes recently-edited PAST meetings), sorts soonest
+  first. Sends an explicit User-Agent (api.data.gov blocks default agents). Fixture fallback.
+### Rate-limit safeguard
+- The calendar is N+1 (list + ~30 detail fetches), so it uses a long TTL (sMaxAge=3600) and is
+  excluded from the background refresh loop. Tests 89/89.
+
 ## [0.17.1] — build 59 — 2026-06-13 — Fix: lobbying source link always shows
 ### Fixed
 - The profile's "Who's lobbying on their issues" panel only rendered the **Official Senate LDA search

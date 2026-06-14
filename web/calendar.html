@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocket Politics — Congressional Calendar</title>
+  <link rel="stylesheet" href="./style.css" />
+  <style>
+    .daygroup { margin-top: 16px; }
+    .dayhead { font-family: "Fraunces", serif; font-size: 16px; color: var(--ink); background: #f6f2e6;
+      border: 1px solid var(--line); border-radius: 10px; padding: 8px 14px; }
+    .mtg { padding: 13px 4px; border-bottom: 1px solid var(--line); }
+    .mtg:last-child { border-bottom: 0; }
+    .mtg .tt { font-weight: 600; }
+    .mtg .mate { font-size: 13px; color: var(--ink-soft); margin-top: 3px; }
+    .chip { font-size: 10px; text-transform: uppercase; letter-spacing: .06em; border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; color: var(--brass-2); }
+    .chip.house { color: var(--p-i); } .chip.senate { color: var(--p-d); }
+    .official a { display: inline-block; margin: 4px 8px 4px 0; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="./home.html" class="brand">Pocket Politics</a>
+    <nav class="nav">
+      <a href="./home.html">My Government</a>
+      <a href="./bills.html">Bills</a>
+      <a href="./calendar.html" class="on">Calendar</a>
+      <a href="./states.html">Your state</a>
+      <a href="./howto.html">Take Action</a>
+    </nav>
+    <h1>Congressional calendar</h1>
+    <div class="meta">What's scheduled in Congress — upcoming committee hearings and markups, soonest first.
+      For the live floor schedule, use the official calendars below.</div>
+
+    <div class="sec-title">Official schedules</div>
+    <div class="card official" id="official"></div>
+
+    <div class="sec-title">Upcoming committee meetings</div>
+    <div id="list"><div class="card"><div class="meta" style="margin-top:0">Loading the calendar…</div></div></div>
+    <div class="src" id="src"></div>
+  </div>
+  <script>
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    const dayKey = iso => { try { return new Date(iso).toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" }); } catch { return iso; } };
+    const time = iso => { try { return new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }); } catch { return ""; } };
+    const chamberClass = c => /house/i.test(c) ? "house" : /senate/i.test(c) ? "senate" : "";
+
+    (async () => {
+      let d;
+      try { d = await (await fetch("/api/calendar")).json(); }
+      catch (_) { try { d = await (await fetch("./fixtures/calendar.json")).json(); } catch { d = null; } }
+      document.getElementById("official").innerHTML = ((d && d.official) || [
+        { name: "House floor", url: "https://docs.house.gov/floor/" },
+        { name: "Senate floor schedule", url: "https://www.senate.gov/legislative/schedule.htm" },
+        { name: "All committee meetings", url: "https://www.congress.gov/committees/meetings" }
+      ]).map(o => `<a class="fact" href="${esc(o.url)}" target="_blank" rel="noopener noreferrer">📅 ${esc(o.name)} ↗</a>`).join(" ");
+
+      const list = document.getElementById("list");
+      if (!d || !(d.meetings || []).length) { list.innerHTML = `<div class="empty">No upcoming committee meetings loaded. See the official schedules above.</div>`; return; }
+      const groups = {};
+      d.meetings.forEach(m => { const k = dayKey(m.date); (groups[k] = groups[k] || []).push(m); });
+      list.innerHTML = Object.entries(groups).map(([day, mtgs]) => `
+        <div class="daygroup"><div class="dayhead">${esc(day)}</div>
+        <div class="card">${mtgs.map(m => `
+          <div class="mtg">
+            <div class="tt">${esc(m.title || m.committee || "Committee meeting")}</div>
+            <div class="mate"><span class="chip ${chamberClass(m.chamber)}">${esc(m.chamber || "")}</span>
+              ${m.committee ? " " + esc(m.committee) : ""}${m.date ? " · " + esc(time(m.date)) : ""}${m.status ? " · " + esc(m.status) : ""}
+              ${m.building ? " · " + esc(m.building) + (m.room ? " " + esc(m.room) : "") : ""}</div>
+          </div>`).join("")}</div></div>`).join("");
+      document.getElementById("src").innerHTML = `${d.live === false ? "Demo data — live calendar on with the Congress key. " : ""}Source: ${esc(d.source || "Congress.gov")} ↗`;
+    })();
+  </script>
+  <script src="./build-tag.js" defer></script>
+  <script src="./bw-mode.js" defer></script>
+</body>
+</html>

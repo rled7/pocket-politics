@@ -1,0 +1,125 @@
+{
+  "source": "Congress.gov \u2014 committee meetings",
+  "meetings": [
+    {
+      "title": "Effectiveness of the Intelligence Community's Inspector General (CLOSED)",
+      "date": "2026-06-24T18:00:00Z",
+      "status": "Scheduled",
+      "chamber": "House",
+      "type": "Hearing",
+      "committee": "House Intelligence (Permanent Select)",
+      "building": "Capitol",
+      "room": null
+    },
+    {
+      "title": "Hearings to examine the nominations of Juan Segura, of Virginia, to be a Member of the Board of Directors of the Inter-American Foundation, and Brendan Hanrahan, of New York, to be an Assistant Secretary (European and Eurasian Affairs), Rudolph Bauer, of South Carolina, to be Ambassador to Belize, Kari Lake, of Arizona, to be Ambassador to Jamaica, and Michael Vance, of Virginia, to be an Assistant Secretary (Intelligence and Research), all of the Department of State.",
+      "date": "2026-06-18T14:30:00Z",
+      "status": "Scheduled",
+      "chamber": "Senate",
+      "type": "Open Hearing",
+      "committee": "Senate Foreign Relations",
+      "building": "Dirksen Senate Office Building",
+      "room": "419"
+    },
+    {
+      "title": "Business meeting to consider S.4668, to protect the name, image, and likeness rights of, and provide protections for, student athletes and to promote fair competition among intercollegiate athletics.",
+      "date": "2026-06-18T14:00:00Z",
+      "status": "Scheduled",
+      "chamber": "Senate",
+      "type": "Open Business Meeting",
+      "committee": "Senate Commerce, Science, and Transportation",
+      "building": "Russell Senate Office Building",
+      "room": "253"
+    },
+    {
+      "title": "Closed business meeting to consider pending business items.",
+      "date": "2026-06-18T13:30:00Z",
+      "status": "Scheduled",
+      "chamber": "Senate",
+      "type": "Closed Business Meeting",
+      "committee": "Senate Intelligence (Select)",
+      "building": "Hart Senate Office Building",
+      "room": "219"
+    },
+    {
+      "title": "Hearings to examine\u00a0Walter Clayton, of New York, to be Director of National Intelligence.",
+      "date": "2026-06-17T18:00:00Z",
+      "status": "Scheduled",
+      "chamber": "Senate",
+      "type": "Open Hearing",
+      "committee": "Senate Intelligence (Select)",
+      "building": "Dirksen Senate Office Building",
+      "room": "G50"
+    },
+    {
+      "title": "Business meeting to consider S.4726, to promote efforts to bring about stability and security in Sudan, S.3984, to authorize a 2-year extension of the United States Commission on International Religious Freedom, S.4570, to incentivize, streamline, and sustain United States foreign government partner procurement of United States-origin cyber and digital technologies, S.4259, to promote the development, production, and deployment of secure and resilient Unmanned Aerial Systems (UAS) to enhance United States national security and support the defense and resilience of Taiwan in the Indo-Pacific Region, S.3018, to permit visiting dignitaries and service members from Taiwan to display the flag of the Republic of China, S.2578, to support United States investment opportunities, to strengthen bilateral collaboration in addressing criminal elements operating in the Brazilian Amazon, S.2252, to require United States foreign assistance commodities to be made available for their intended purposes before they expire, S.3050, to amend the Foreign Agents Registration Act of 1938, as amended, to modify requirements under that Act relating to exemptions, S.4610, to promote the development and use of geothermal resources in the Pacific, S.3172, to repeal certain Acts that impose sanctions upon Syria, S.3676, to require a sports diplomacy strategy to strategically leverage the major sporting events being hosted in the United States during the next decade to enhance United States soft power, diplomatic relationships, and global leadership, S.4708, to improve the security of the Arctic, S.4009, to provide for the imposition of sanctions with respect to forced organ harvesting within the People's Republic of China, S.1542, to support the human rights of Uyghurs and members of other minority groups residing primarily in the Xinjiang Uyghur Autonomous Region, to safeguard their distinct identity, S.3900, to promote human rights, internet freedom and accountability in Iran, S.4709, to amend the Arms Export Control Act to modify a limitation relating to exports and transfers of defense articles and services under the AUKUS partnership, S.4392, to promote United States and allied energy and mineral security, S.4600, to require a South China Sea diplomatic engagement strategy, S.4577, to reassess the United States-Tanzania bilateral relationship, S.4443, to increase cooperation with countries in the Eastern Mediterranean region in order to strengthen energy security and defense capabilities, S.4723, to establish a program to provide assistance to strengthen the capacity of law enforcement agencies in Latin America and the Caribbean to prosecute Chinese organized criminal groups and Chinese government-linked organizations engaged in criminal activity, S.4680, to authorize the Secretary of State to extend limited consular appointments to eight years, with an additional two-year extension for needs of the Foreign Service, S.4665, to require the Secretary of State to submit a strategy to Congress for countering Iranian and Hezbollah influence operations in Latin America, S.3733, to amend the Passport Act of June 4, 1920, to authorize certain public libraries to collect and retain a fee for the execution of a passport application.",
+      "date": "2026-06-17T14:00:00Z",
+      "status": "Scheduled",
+      "chamber": "Senate",
+      "type": "Open Business Meeting",
+      "committee": "Senate Foreign Relations",
+      "building": "Capitol (Senate side)",
+      "room": "116"
+    },
+    {
+      "title": "Hearings to examine the state of the U.S. Territories.",
+      "date": "2026-06-17T14:00:00Z",
+      "status": "Scheduled",
+      "chamber": "Senate",
+      "type": "Open Hearing",
+      "committee": "Senate Energy and Natural Resources",
+      "building": "Dirksen Senate Office Building",
+      "room": "366"
+    },
+    {
+      "title": "Business meeting to consider S.1547, to amend title 54, United States Code, to reauthorize the National Parks and Public Land Legacy Restoration Fund.",
+      "date": "2026-06-17T13:30:00Z",
+      "status": "Scheduled",
+      "chamber": "Senate",
+      "type": "Open Business Meeting",
+      "committee": "Senate Energy and Natural Resources",
+      "building": "Dirksen Senate Office Building",
+      "room": "366"
+    },
+    {
+      "title": "To receive a closed briefing on certain intelligence matters.",
+      "date": "2026-06-16T19:00:00Z",
+      "status": "Scheduled",
+      "chamber": "Senate",
+      "type": "Closed Business Meeting",
+      "committee": "Senate Intelligence (Select)",
+      "building": "Hart Senate Office Building",
+      "room": "219"
+    },
+    {
+      "title": "Legislative field hearing on a Discussion Draft of the \u201cGreat American Outdoors Act 250.\u201d\r\n(10:00AM local time)",
+      "date": "2026-06-12T15:00:00Z",
+      "status": "Scheduled",
+      "chamber": "House",
+      "type": "Hearing",
+      "committee": null,
+      "building": null,
+      "room": null
+    },
+    {
+      "title": "Fiscal Year 2027 Labor, Health and Human Services, Education, and Related Agencies Bill and the Fiscal Year 2027 Homeland Security Bill",
+      "date": "2026-06-09T15:00:00Z",
+      "status": "Scheduled",
+      "chamber": "House",
+      "type": "Markup",
+      "committee": "House Appropriations",
+      "building": "Rayburn House Office Building",
+      "room": "2359"
+    },
+    {
+      "title": "Various Measures",
+      "date": "2026-06-09T14:00:00Z",
+      "status": "Scheduled",
+      "chamber": "House",
+      "type": "Markup",
+      "committee": null,
+      "building": "Rayburn House Office Building",
+      "room": "2172"
+    }
+  ]
+}
