@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocket Politics — Filibuster & Cloture</title>
+  <link rel="stylesheet" href="./style.css" />
+  <style>
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 14px; }
+    .stat { background: var(--paper-2); border: 1px solid var(--line); border-radius: 16px; padding: 16px; text-align: center; box-shadow: var(--shadow); }
+    .stat .big { font-size: 28px; font-weight: 700; font-family: "Fraunces", serif; }
+    .stat .lbl { font-size: 12px; color: var(--ink-soft); }
+    .cv { padding: 13px 4px; border-bottom: 1px solid var(--line); }
+    .cv:last-child { border-bottom: 0; }
+    .cv .tt { font-weight: 600; }
+    .cv .mate { font-size: 13px; color: var(--ink-soft); margin-top: 3px; }
+    .tag { font-size: 11px; font-weight: 700; border-radius: 6px; padding: 2px 8px; }
+    .tag.broke { background: #effaf7; color: var(--p-d); border: 1px solid #b8ddd6; }
+    .tag.held { background: #fdf5ea; color: var(--p-r); border: 1px solid #f0d5b0; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="./home.html" class="brand">Pocket Politics</a>
+    <nav class="nav">
+      <a href="./home.html">My Government</a>
+      <a href="./bills.html">Bills</a>
+      <a href="./calendar.html">Calendar</a>
+      <a href="./filibuster.html" class="on">Filibuster</a>
+      <a href="./glossary.html">Glossary</a>
+    </nav>
+    <h1>Filibuster &amp; cloture</h1>
+    <div class="meta">In the Senate, a <b>filibuster</b> blocks a final vote — and the only way past it is
+      <b>cloture</b>, which needs 60 votes. So cloture votes are the public record of what got filibustered:
+      <span class="tag broke">filibuster broken</span> when cloture is agreed to, <span class="tag held">filibuster held</span> when it fails.</div>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="sec-title">Recent cloture votes</div>
+    <div id="list"><div class="card"><div class="meta" style="margin-top:0">Loading cloture votes…</div></div></div>
+    <div class="src" id="src"></div>
+  </div>
+  <script>
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    (async () => {
+      let d;
+      try { d = await (await fetch("/api/cloture")).json(); }
+      catch (_) { try { d = await (await fetch("./fixtures/cloture.json")).json(); } catch { d = null; } }
+      if (!d) { document.getElementById("list").innerHTML = `<div class="empty">Could not load cloture votes.</div>`; return; }
+      document.getElementById("stats").innerHTML = `
+        <div class="stat"><div class="big">${esc(d.total)}</div><div class="lbl">cloture votes<br>(session ${esc(d.session)})</div></div>
+        <div class="stat"><div class="big">${esc(d.invoked)}</div><div class="lbl">filibusters broken<br>(cloture invoked)</div></div>
+        <div class="stat"><div class="big">${esc(d.blocked)}</div><div class="lbl">filibusters held<br>(cloture failed)</div></div>`;
+      const list = document.getElementById("list");
+      if (!(d.votes || []).length) { list.innerHTML = `<div class="empty">No cloture votes loaded.</div>`; }
+      else list.innerHTML = `<div class="card">` + d.votes.map(v => `
+        <div class="cv">
+          <div class="tt">${esc(v.title || v.issue || "Cloture motion")}</div>
+          <div class="mate">
+            <span class="tag ${v.invoked ? "broke" : "held"}">${v.invoked ? "filibuster broken" : "filibuster held"}</span>
+            · Vote #${esc(v.voteNumber)} · ${esc(v.date)} · <b>${esc(v.yeas)}–${esc(v.nays)}</b>${v.issue ? " · " + esc(v.issue) : ""}
+            · <a href="${esc(v.url)}" target="_blank" rel="noopener noreferrer">roll call ↗</a>
+          </div>
+        </div>`).join("") + `</div>`;
+      document.getElementById("src").innerHTML = `${d.live === false ? "Demo data — live cloture votes load from senate.gov. " : ""}Source: ${esc(d.source || "U.S. Senate")} · 60 votes are needed to invoke cloture`;
+    })();
+  </script>
+  <script src="./build-tag.js" defer></script>
+  <script src="./bw-mode.js" defer></script>
+</body>
+</html>

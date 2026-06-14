@@ -25,6 +25,7 @@ import { getStateData } from "./openstates.ts";
 import { getCalendar, OFFICIAL_CALENDARS } from "./calendar.ts";
 import { getBudgetWatch } from "./budget.ts";
 import { createCheckout, tiersPublic, paymentsConfigured } from "./payments.ts";
+import { getCloture } from "./cloture.ts";
 import { SwrCache, mapLimit, type LoadResult } from "./swr_cache.ts";
 import { KEYS, integrations, keySummary } from "./config.ts";
 
@@ -131,6 +132,9 @@ async function route(url: URL, request: Request): Promise<Response> {
   }
   if (segs[0] === "api" && segs[1] === "budget") {
     return jsonCached(await getBudgetWatch(KEYS.congress), { request, sMaxAge: 3600 });
+  }
+  if (segs[0] === "api" && segs[1] === "cloture") {
+    return jsonCached(await getCloture(), { request, sMaxAge: 1800 });
   }
   if (segs[0] === "api" && segs[1] === "calendar") {
     const cal = await getCalendar(KEYS.congress);

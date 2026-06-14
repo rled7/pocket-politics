@@ -283,6 +283,18 @@ check("createCheckout rejects an unknown plan", /unknown plan/i.test((await crea
 check("createCheckout flags a missing price id (no network call)",
   /STRIPE_PRICE_PLUS/.test((await createCheckout("plus", "http://x", "sk_test_x")).error ?? ""));
 
+// Filibuster / cloture — validate the captured fixture shape (no network)
+{
+  const { readFile } = await import("node:fs/promises");
+  const { fileURLToPath } = await import("node:url");
+  const { dirname, join } = await import("node:path");
+  const p = join(dirname(fileURLToPath(import.meta.url)), "..", "fixtures", "cloture.json");
+  const clo = JSON.parse(await readFile(p, "utf8"));
+  check("cloture fixture: votes carry result/invoked/tally",
+    clo.votes.length > 0 && clo.votes.every((v: any) => "invoked" in v && typeof v.yeas === "number" && !!v.result));
+  check("cloture fixture: total = invoked + blocked", clo.total === clo.invoked + clo.blocked);
+}
+
 // summary
 console.log(`\n  ${pass} passed, ${fails.length} failed`);
 if (fails.length) { console.error("  FAILED: " + fails.join(", ")); process.exit(1); }

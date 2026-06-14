@@ -4,6 +4,15 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.22.0] — build 64 — 2026-06-14 — Filibuster & cloture
+### Added
+- **Filibuster & cloture** (`web/filibuster.html`, `GET /api/cloture`) — the public record of what got
+  filibustered, from the Senate's official roll-call vote menu. Cloture "Agreed to" = filibuster broken;
+  "Rejected" = filibuster held. Shows session stats (total cloture votes, broken vs held) + recent
+  cloture votes with tally, subject, and a roll-call link. No API key needed (public senate.gov XML).
+  Verified live (47 cloture votes this session: 35 broken / 12 held). Linked from Home + site map.
+- `src/cloture.ts`: fetches + parses the Senate vote menu XML, fixture fallback. Tests 100/100. Closes #22.
+
 ## [0.21.0] — build 63 — 2026-06-14 — Stripe payments scaffold + FEC live
 ### Added
 - **Stripe payments** (`src/payments.ts`, `web/pricing.html`, `POST /api/checkout`, `GET /api/pricing`)
