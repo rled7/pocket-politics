@@ -4,6 +4,15 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.15.0] — build 56 — 2026-06-13 — Government assistance / HRA hub
+### Added
+- **Get help** (`web/assistance.html` + `assistance.json`) — all social-services in one place: 24
+  programs across cash/emergency, housing, food, health, energy, and family — each with what it is,
+  who qualifies, **what to bring**, and exactly where to apply, with official links. Includes the
+  **One-Shot Deal / emergency assistance** and NYC housing programs (CityFHEPS, NYCHA, Homebase) the
+  user called out, plus benefit screeners (Benefits.gov, ACCESS HRA, myBenefits, 211). Searchable.
+  Federal nationwide; NY/NYC detailed (first covered state). Linked from Home + site map.
+
 ## [0.14.0] — build 55 — 2026-06-13 — Plain-language glossary (legalese + plain English)
 ### Added
 - **Glossary** (`web/glossary.html` + `glossary.json`) — 24 legal/legislative terms, each defined

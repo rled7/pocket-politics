@@ -1,0 +1,74 @@
+{
+  "note": "Government assistance programs in one place. Federal programs apply nationwide; NY / NYC entries are detailed because New York is our first fully-covered state. Always confirm details on the official link — rules and amounts change.",
+  "screeners": [
+    { "name": "Benefits.gov", "level": "Federal", "what": "Official screener that checks you against 1,000+ federal & state benefit programs in a few minutes.", "url": "https://www.benefits.gov/" },
+    { "name": "ACCESS HRA (NYC)", "level": "NYC", "what": "NYC's one-stop screen & apply tool for SNAP, Cash Assistance, and more.", "url": "https://access.nyc.gov/" },
+    { "name": "myBenefits (NY State)", "level": "NY", "what": "New York State's screening & application portal for SNAP, HEAP, and tax credits.", "url": "https://mybenefits.ny.gov/" },
+    { "name": "Call 211", "level": "All", "what": "Free, confidential statewide help line — a real person points you to local food, rent, utility, and crisis help.", "url": "https://www.211.org/" }
+  ],
+  "documents": [
+    "Photo ID (driver license, IDNYC, or passport)",
+    "Social Security number(s) for everyone applying",
+    "Proof of income — recent pay stubs, award letters, or a statement of no income",
+    "Proof of where you live — lease, rent receipt, or a utility bill",
+    "Proof of expenses — rent/mortgage, utilities, childcare, medical bills",
+    "Immigration/residency documents, if applicable",
+    "Recent bank statements"
+  ],
+  "categories": [
+    {
+      "id": "cash", "label": "Cash assistance & emergencies", "icon": "💵",
+      "programs": [
+        { "name": "Cash Assistance (Family Assistance / Safety Net)", "level": "NY/NYC", "what": "Monthly cash help for families and individuals with little or no income.", "need": ["Low/no income", "NY residency", "ID + SSN", "Proof of income & expenses"], "apply": "Apply on ACCESS HRA, at an HRA Job Center, or via myBenefits.", "url": "https://www.nyc.gov/site/hra/help/cash-assistance.page" },
+        { "name": "One-Shot Deal (Emergency / One-Time Assistance)", "level": "NYC", "what": "A one-time emergency grant for a sudden crisis you can't cover — back rent to stop an eviction, a utility shutoff, moving costs, or replacing essentials after a fire/flood. You don't have to be on Cash Assistance to apply, and it can be a grant or a repayable loan depending on your situation.", "need": ["An emergency you can't pay for", "Proof of the emergency (eviction notice, shutoff notice, etc.)", "ID + proof of income/expenses"], "apply": "Apply on ACCESS HRA (\"Emergency Assistance / One-Time Assistance\") or at an HRA Job Center — bring the proof of your emergency.", "url": "https://www.nyc.gov/site/hra/help/emergency-assistance.page" },
+        { "name": "Earned Income Tax Credit (EITC)", "level": "Federal/NY", "what": "A refundable tax credit that puts money back in your pocket if you worked and earned a low-to-moderate income — worth thousands for families.", "need": ["Earned income", "Valid SSN", "File a tax return (even if you owe nothing)"], "apply": "Claim it when you file taxes; free filing help at IRS VITA sites or nyc.gov/taxprep.", "url": "https://www.irs.gov/credits-deductions/individuals/earned-income-tax-credit-eitc" },
+        { "name": "Supplemental Security Income (SSI)", "level": "Federal", "what": "Monthly cash for people who are 65+, blind, or disabled and have very limited income/resources.", "need": ["Age 65+ OR disability/blindness", "Limited income & resources", "Medical records for disability claims"], "apply": "Apply with the Social Security Administration online, by phone, or at a local office.", "url": "https://www.ssa.gov/ssi/" }
+      ]
+    },
+    {
+      "id": "housing", "label": "Housing & rent", "icon": "🏠",
+      "programs": [
+        { "name": "Section 8 Housing Choice Voucher", "level": "Federal/NYC", "what": "A voucher that pays part of your rent in private housing; you generally pay ~30% of income.", "need": ["Low income (HUD limits)", "Pass background screening", "ID + income docs"], "apply": "Through your local Public Housing Authority; in NYC via NYCHA or HPD when waitlists open.", "url": "https://www.nyc.gov/site/nycha/section-8/about-section-8.page" },
+        { "name": "NYCHA Public Housing", "level": "NYC", "what": "City-owned apartments with rent capped at ~30% of household income.", "need": ["Income within limits", "NYC residency", "Application + screening"], "apply": "Apply through NYCHA's self-service portal.", "url": "https://www.nyc.gov/site/nycha/section-8/applicants.page" },
+        { "name": "CityFHEPS rental assistance", "level": "NYC", "what": "A rent supplement that helps people who are homeless or facing eviction get and keep housing.", "need": ["Risk of/experiencing homelessness", "Income & residency criteria", "Referral often via shelter or Homebase"], "apply": "Through HRA, a shelter, or a Homebase office.", "url": "https://www.nyc.gov/site/hra/help/cityfheps.page" },
+        { "name": "Homebase (homelessness prevention)", "level": "NYC", "what": "Free help to avoid eviction and stay housed — rent arrears help, mediation, benefits, job support.", "need": ["At risk of entering shelter", "Bring any eviction/court papers"], "apply": "Walk into your neighborhood Homebase office or call 311.", "url": "https://www.nyc.gov/site/hra/help/homebase.page" },
+        { "name": "Housing Choice / HUD programs", "level": "Federal", "what": "Find every HUD rental, public-housing, and homeownership program and your local housing authority.", "need": ["Varies by program"], "apply": "Use HUD's program & local-PHA finder.", "url": "https://www.hud.gov/topics/rental_assistance" }
+      ]
+    },
+    {
+      "id": "food", "label": "Food & nutrition", "icon": "🍎",
+      "programs": [
+        { "name": "SNAP (food stamps)", "level": "Federal/NY", "what": "Monthly money on an EBT card to buy groceries.", "need": ["Income within SNAP limits", "ID + SSN", "Proof of income, rent, utilities"], "apply": "Apply on ACCESS HRA (NYC), myBenefits (NY), or your local SNAP office.", "url": "https://otda.ny.gov/programs/snap/" },
+        { "name": "WIC", "level": "Federal/NY", "what": "Food, formula, nutrition help, and breastfeeding support for pregnant people, new parents, and kids under 5.", "need": ["Pregnant/postpartum or child under 5", "Income or already on Medicaid/SNAP"], "apply": "Find your local WIC office through the NY Health Dept.", "url": "https://www.health.ny.gov/prevention/nutrition/wic/" },
+        { "name": "Free & reduced school meals", "level": "Federal", "what": "Free or low-cost breakfast and lunch at school; many NYC schools serve all students free.", "need": ["Enrolled student", "Household income (or universal free schools)"], "apply": "Through your child's school or district.", "url": "https://www.fns.usda.gov/cn/national-school-lunch-program" },
+        { "name": "Find a food pantry", "level": "All", "what": "Free groceries and meals near you, today, no long application.", "need": ["None — just show up"], "apply": "Search by ZIP, or dial 211.", "url": "https://www.foodpantries.org/" }
+      ]
+    },
+    {
+      "id": "health", "label": "Health coverage", "icon": "⚕️",
+      "programs": [
+        { "name": "Medicaid", "level": "Federal/NY", "what": "Free or low-cost health coverage for people with low income.", "need": ["Income within limits", "ID + SSN", "Income docs"], "apply": "Enroll through NY State of Health.", "url": "https://www.health.ny.gov/health_care/medicaid/" },
+        { "name": "Child Health Plus", "level": "NY", "what": "Low-cost or free health insurance for kids under 19 who don't qualify for Medicaid.", "need": ["Child under 19", "NY residency", "Income (sliding scale)"], "apply": "Enroll through NY State of Health.", "url": "https://www.health.ny.gov/health_care/child_health_plus/" },
+        { "name": "NY State of Health marketplace", "level": "NY", "what": "Compare and enroll in health plans; many people qualify for big subsidies.", "need": ["NY resident", "Income info for subsidies"], "apply": "Apply online, by phone, or with a free in-person Navigator.", "url": "https://nystateofhealth.ny.gov/" },
+        { "name": "Medicare", "level": "Federal", "what": "Federal health coverage for people 65+ and some younger people with disabilities.", "need": ["Age 65+ or qualifying disability"], "apply": "Enroll through Social Security / Medicare.gov.", "url": "https://www.medicare.gov/" }
+      ]
+    },
+    {
+      "id": "energy", "label": "Energy, phone & utilities", "icon": "🔌",
+      "programs": [
+        { "name": "HEAP (Home Energy Assistance)", "level": "Federal/NY", "what": "Helps pay heating bills in winter, plus emergency benefits if your heat is shut off or about to be.", "need": ["Income within limits", "Recent energy bill", "ID + proof of residence"], "apply": "Apply on myBenefits (NY) or through your local HEAP/DSS office.", "url": "https://otda.ny.gov/programs/heap/" },
+        { "name": "Lifeline (phone/internet)", "level": "Federal", "what": "A monthly discount on phone or internet service for low-income households.", "need": ["On a qualifying program (SNAP/Medicaid/SSI) or low income"], "apply": "Apply through the Lifeline National Verifier.", "url": "https://www.lifelinesupport.org/" },
+        { "name": "Utility arrears & shutoff help", "level": "NY", "what": "Programs and protections to clear past-due gas/electric bills and stop shutoffs.", "need": ["Past-due utility account", "Income docs"], "apply": "Contact your utility about an arrears/relief program, or call 211; a One-Shot Deal may also cover it.", "url": "https://www.211.org/" }
+      ]
+    },
+    {
+      "id": "family", "label": "Family, work & disability", "icon": "👪",
+      "programs": [
+        { "name": "Child Care Assistance / vouchers", "level": "NY/NYC", "what": "Help paying for childcare so you can work, look for work, or attend school.", "need": ["Working/in school/training", "Income within limits", "Child under 13 (or older if disabled)"], "apply": "Apply through your local Social Services district (ACS in NYC).", "url": "https://ocfs.ny.gov/programs/childcare/" },
+        { "name": "Head Start / Early Head Start", "level": "Federal", "what": "Free early education, health, and family support for kids 0–5 in low-income families.", "need": ["Child 0–5", "Income within limits"], "apply": "Find a local program through the Head Start locator.", "url": "https://www.acf.hhs.gov/ohs" },
+        { "name": "Unemployment Insurance", "level": "NY", "what": "Temporary weekly payments if you lost your job through no fault of your own.", "need": ["Recent work history/wages", "Lost job (not for cause)", "Able & available to work"], "apply": "File with the NY Department of Labor.", "url": "https://dol.ny.gov/unemployment-insurance" },
+        { "name": "Social Security Disability (SSDI)", "level": "Federal", "what": "Monthly payments if a disability keeps you from working and you've paid into Social Security.", "need": ["Qualifying disability", "Enough work credits", "Medical records"], "apply": "Apply with the Social Security Administration.", "url": "https://www.ssa.gov/benefits/disability/" }
+      ]
+    }
+  ]
+}
