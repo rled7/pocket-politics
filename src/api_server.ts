@@ -20,7 +20,7 @@ import { getComments, addComment, validBillId } from "./comments.ts";
 import { getReactions, setReaction, isReaction, validClientId } from "./reactions.ts";
 import { getLobbying } from "./lobbying.ts";
 import { buildInfo } from "./build.ts";
-import { getNyBills } from "./nystate.ts";
+import { getNyBills, getNyLaws, getNyTranscripts } from "./nystate.ts";
 import { SwrCache, mapLimit, type LoadResult } from "./swr_cache.ts";
 import { KEYS, integrations, keySummary } from "./config.ts";
 
@@ -116,6 +116,12 @@ async function route(url: URL, request: Request): Promise<Response> {
   }
   if (segs[0] === "api" && segs[1] === "ny" && segs[2] === "bills") {
     return jsonCached(await getNyBills(clampLimit(q.get("limit"), 20, 50), KEYS.nyOpenLeg), { request });
+  }
+  if (segs[0] === "api" && segs[1] === "ny" && segs[2] === "laws") {
+    return jsonCached(await getNyLaws(KEYS.nyOpenLeg), { request });
+  }
+  if (segs[0] === "api" && segs[1] === "ny" && segs[2] === "transcripts") {
+    return jsonCached(await getNyTranscripts(clampLimit(q.get("limit"), 12, 30), KEYS.nyOpenLeg), { request });
   }
   if (segs[0] === "api" && segs[1] === "lobbying") {
     const yr = parseInt(q.get("year") ?? "", 10);

@@ -235,6 +235,13 @@ const ny = await getNyBills(10);
 check("getNyBills fixture: live false + demo note", ny.live === false && /demo/i.test(ny.note ?? ""));
 check("getNyBills fixture: bills have printNo, sponsor, official url",
   ny.bills.length > 0 && ny.bills.every(b => !!b.printNo && "sponsor" in b && /nysenate\.gov/.test(b.url)));
+const { getNyLaws, getNyTranscripts } = await import("./nystate.ts");
+const nyl = await getNyLaws();
+check("getNyLaws fixture: laws have lawId, name, official url",
+  nyl.laws.length > 0 && nyl.laws.every(l => !!l.lawId && !!l.name && /nysenate\.gov\/legislation\/laws/.test(l.url)));
+const nyt = await getNyTranscripts();
+check("getNyTranscripts fixture: entries have dateTime + url",
+  nyt.transcripts.length > 0 && nyt.transcripts.every(t => !!t.dateTime && !!t.url));
 
 // summary
 console.log(`\n  ${pass} passed, ${fails.length} failed`);

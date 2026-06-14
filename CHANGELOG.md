@@ -4,6 +4,16 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.13.0] — build 54 — 2026-06-13 — NY laws + Senate floor transcripts
+### Added
+- **New York laws** (`GET /api/ny/laws`) — the full codified body of NY law (137 chapters), searchable,
+  each linking to the official nysenate.gov law text.
+- **NY Senate floor transcripts** (`GET /api/ny/transcripts`) — records of floor discussion (kept since
+  1993; 2,289 available), most recent first. Surfaces ACCESS now; plain-language AI summaries are the
+  follow-on (#32, needs an AI step).
+- Both added as sections on `web/ny.html`; `src/nystate.ts` extended with `getNyLaws` / `getNyTranscripts`
+  (shared fixture loader). Verified live (137 laws, 2,289 transcripts). Tests 84/84.
+
 ## [0.12.0] — build 53 — 2026-06-13 — "Converge on ideas" black & white mode
 ### Added
 - **Black & white mode** (`web/bw-mode.js`) — a persistent toggle (bottom-right ◑) that strips ALL

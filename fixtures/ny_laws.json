@@ -1,0 +1,827 @@
+{
+  "total": 137,
+  "laws": [
+    {
+      "lawId": "ABC",
+      "name": "Alcoholic Beverage Control",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/ABC"
+    },
+    {
+      "lawId": "ABP",
+      "name": "Abandoned Property",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/ABP"
+    },
+    {
+      "lawId": "ACA",
+      "name": "Arts and Cultural Affairs",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/ACA"
+    },
+    {
+      "lawId": "ACG",
+      "name": "Alternative County Government",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/ACG"
+    },
+    {
+      "lawId": "AGM",
+      "name": "Agriculture & Markets",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/AGM"
+    },
+    {
+      "lawId": "BAT",
+      "name": "Bridges and Tunnels New York/New Jersey 47/31",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/BAT"
+    },
+    {
+      "lawId": "BNK",
+      "name": "Banking",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/BNK"
+    },
+    {
+      "lawId": "BSC",
+      "name": "Business Corporation",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/BSC"
+    },
+    {
+      "lawId": "BSW",
+      "name": "Boxing, Sparring and Wrestling Ch. 912/20",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/BSW"
+    },
+    {
+      "lawId": "BVO",
+      "name": "Benevolent Orders",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/BVO"
+    },
+    {
+      "lawId": "CAL",
+      "name": "Canal",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/CAL"
+    },
+    {
+      "lawId": "CAN",
+      "name": "Cannabis",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/CAN"
+    },
+    {
+      "lawId": "CCA",
+      "name": "New York City Civil Court",
+      "type": "Court_Acts",
+      "url": "https://www.nysenate.gov/legislation/laws/CCA"
+    },
+    {
+      "lawId": "CCO",
+      "name": "Cooperative Corporations",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/CCO"
+    },
+    {
+      "lawId": "CCT",
+      "name": "Cigarettes, Cigars, Tobacco 235/52",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/CCT"
+    },
+    {
+      "lawId": "CMA",
+      "name": "Assembly Rules",
+      "type": "Rules",
+      "url": "https://www.nysenate.gov/legislation/laws/CMA"
+    },
+    {
+      "lawId": "CMS",
+      "name": "Senate Rules",
+      "type": "Rules",
+      "url": "https://www.nysenate.gov/legislation/laws/CMS"
+    },
+    {
+      "lawId": "CNS",
+      "name": "Constitution",
+      "type": "Misc",
+      "url": "https://www.nysenate.gov/legislation/laws/CNS"
+    },
+    {
+      "lawId": "CNT",
+      "name": "County",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/CNT"
+    },
+    {
+      "lawId": "COM",
+      "name": "Economic Development Law",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/COM"
+    },
+    {
+      "lawId": "COR",
+      "name": "Correction",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/COR"
+    },
+    {
+      "lawId": "CPL",
+      "name": "Criminal Procedure",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/CPL"
+    },
+    {
+      "lawId": "CRC",
+      "name": "New York City Criminal Court Act",
+      "type": "Court_Acts",
+      "url": "https://www.nysenate.gov/legislation/laws/CRC"
+    },
+    {
+      "lawId": "CTC",
+      "name": "Court of Claims",
+      "type": "Court_Acts",
+      "url": "https://www.nysenate.gov/legislation/laws/CTC"
+    },
+    {
+      "lawId": "CVP",
+      "name": "Civil Practice Law & Rules",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/CVP"
+    },
+    {
+      "lawId": "CVR",
+      "name": "Civil Rights",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/CVR"
+    },
+    {
+      "lawId": "CVS",
+      "name": "Civil Service",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/CVS"
+    },
+    {
+      "lawId": "DCD",
+      "name": "Debtor & Creditor",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/DCD"
+    },
+    {
+      "lawId": "DEA",
+      "name": "Defense Emergency Act 1951 784/51",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/DEA"
+    },
+    {
+      "lawId": "DOM",
+      "name": "Domestic Relations",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/DOM"
+    },
+    {
+      "lawId": "DPN",
+      "name": "Development of Port of New York 43/22",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/DPN"
+    },
+    {
+      "lawId": "EDN",
+      "name": "Education",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/EDN"
+    },
+    {
+      "lawId": "EDP",
+      "name": "Eminent Domain Procedure",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/EDP"
+    },
+    {
+      "lawId": "EHC",
+      "name": "Expanded Health Care Coverage Act 703/88",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/EHC"
+    },
+    {
+      "lawId": "ELD",
+      "name": "Elder",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/ELD"
+    },
+    {
+      "lawId": "ELN",
+      "name": "Election",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/ELN"
+    },
+    {
+      "lawId": "EML",
+      "name": "Employers' Liability",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/EML"
+    },
+    {
+      "lawId": "ENG",
+      "name": "Energy",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/ENG"
+    },
+    {
+      "lawId": "ENV",
+      "name": "Environmental Conservation",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/ENV"
+    },
+    {
+      "lawId": "EPT",
+      "name": "Estates, Powers & Trusts",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/EPT"
+    },
+    {
+      "lawId": "ERL",
+      "name": "Emergency Housing Rent Control Law 274/46 337/61",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/ERL"
+    },
+    {
+      "lawId": "ETP",
+      "name": "Emergency Tenant Protection Act 576/74",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/ETP"
+    },
+    {
+      "lawId": "EXC",
+      "name": "Executive",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/EXC"
+    },
+    {
+      "lawId": "FCT",
+      "name": "Family Court Act",
+      "type": "Court_Acts",
+      "url": "https://www.nysenate.gov/legislation/laws/FCT"
+    },
+    {
+      "lawId": "FDC",
+      "name": "Facilities Development Corporation Act 359/68",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/FDC"
+    },
+    {
+      "lawId": "FEA",
+      "name": "NYS Financial Emergency Act for the city of NY 868/75",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/FEA"
+    },
+    {
+      "lawId": "FIS",
+      "name": "Financial Services Law",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/FIS"
+    },
+    {
+      "lawId": "GAS",
+      "name": "General Associations",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/GAS"
+    },
+    {
+      "lawId": "GBS",
+      "name": "General Business",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/GBS"
+    },
+    {
+      "lawId": "GCM",
+      "name": "General City Model 772/66",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/GCM"
+    },
+    {
+      "lawId": "GCN",
+      "name": "General Construction",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/GCN"
+    },
+    {
+      "lawId": "GCT",
+      "name": "General City",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/GCT"
+    },
+    {
+      "lawId": "GMU",
+      "name": "General Municipal",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/GMU"
+    },
+    {
+      "lawId": "GOB",
+      "name": "General Obligations",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/GOB"
+    },
+    {
+      "lawId": "HAY",
+      "name": "Highway",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/HAY"
+    },
+    {
+      "lawId": "HHC",
+      "name": "New York City health and hospitals corporation act 1016/69",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/HHC"
+    },
+    {
+      "lawId": "IND",
+      "name": "Indian",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/IND"
+    },
+    {
+      "lawId": "ISC",
+      "name": "Insurance",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/ISC"
+    },
+    {
+      "lawId": "JUD",
+      "name": "Judiciary",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/JUD"
+    },
+    {
+      "lawId": "LAB",
+      "name": "Labor",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/LAB"
+    },
+    {
+      "lawId": "LEG",
+      "name": "Legislative",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/LEG"
+    },
+    {
+      "lawId": "LEH",
+      "name": "Local Emergency Housing Rent Control Act 21/62",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/LEH"
+    },
+    {
+      "lawId": "LFN",
+      "name": "Local Finance",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/LFN"
+    },
+    {
+      "lawId": "LIE",
+      "name": "Lien",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/LIE"
+    },
+    {
+      "lawId": "LLC",
+      "name": "Limited Liability Company Law",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/LLC"
+    },
+    {
+      "lawId": "LSA",
+      "name": "Lost and Strayed Animals 115/1894",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/LSA"
+    },
+    {
+      "lawId": "MCF",
+      "name": "Medical Care Facilities Finance Agency 392/73",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/MCF"
+    },
+    {
+      "lawId": "MDW",
+      "name": "Multiple Dwelling",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/MDW"
+    },
+    {
+      "lawId": "MHA",
+      "name": "Municipal Housing Authorities",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/MHA"
+    },
+    {
+      "lawId": "MHR",
+      "name": "Municipal Home Rule",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/MHR"
+    },
+    {
+      "lawId": "MHY",
+      "name": "Mental Hygiene",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/MHY"
+    },
+    {
+      "lawId": "MIL",
+      "name": "Military",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/MIL"
+    },
+    {
+      "lawId": "MRE",
+      "name": "Multiple Residence",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/MRE"
+    },
+    {
+      "lawId": "NAV",
+      "name": "Navigation",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/NAV"
+    },
+    {
+      "lawId": "NNY",
+      "name": "New, New York Bond Act 649/92",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/NNY"
+    },
+    {
+      "lawId": "NPC",
+      "name": "Not-for-Profit Corporation",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/NPC"
+    },
+    {
+      "lawId": "NYP",
+      "name": "NYS Project Finance Agency Act7/75",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/NYP"
+    },
+    {
+      "lawId": "NYW",
+      "name": "N. Y. wine/grape 80/85",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/NYW"
+    },
+    {
+      "lawId": "PAB",
+      "name": "Private Activity Bond 47/90",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/PAB"
+    },
+    {
+      "lawId": "PAR",
+      "name": "Parks, Recreation and Historic Preservation",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/PAR"
+    },
+    {
+      "lawId": "PBA",
+      "name": "Public Authorities",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/PBA"
+    },
+    {
+      "lawId": "PBB",
+      "name": "Public Buildings",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/PBB"
+    },
+    {
+      "lawId": "PBG",
+      "name": "Public Housing",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/PBG"
+    },
+    {
+      "lawId": "PBH",
+      "name": "Public Health",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/PBH"
+    },
+    {
+      "lawId": "PBL",
+      "name": "Public Lands",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/PBL"
+    },
+    {
+      "lawId": "PBO",
+      "name": "Public Officers",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/PBO"
+    },
+    {
+      "lawId": "PBS",
+      "name": "Public Service",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/PBS"
+    },
+    {
+      "lawId": "PCM",
+      "name": "Police Certain Municipalities 360/11",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/PCM"
+    },
+    {
+      "lawId": "PEN",
+      "name": "Penal",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/PEN"
+    },
+    {
+      "lawId": "PEP",
+      "name": "Personal Property",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/PEP"
+    },
+    {
+      "lawId": "PML",
+      "name": "Racing, Pari-Mutuel Wagering and Breeding Law",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/PML"
+    },
+    {
+      "lawId": "PNY",
+      "name": "Port of New York Authority 154/21",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/PNY"
+    },
+    {
+      "lawId": "POA",
+      "name": "Port of Albany 192/25",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/POA"
+    },
+    {
+      "lawId": "PPD",
+      "name": "New York State Printing and Public Documents",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/PPD"
+    },
+    {
+      "lawId": "PTR",
+      "name": "Partnership",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/PTR"
+    },
+    {
+      "lawId": "PVH",
+      "name": "Private Housing Finance",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/PVH"
+    },
+    {
+      "lawId": "RAT",
+      "name": "Rapid Transit",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/RAT"
+    },
+    {
+      "lawId": "RCO",
+      "name": "Religious Corporations",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/RCO"
+    },
+    {
+      "lawId": "REL",
+      "name": "Rural Electric Cooperative",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/REL"
+    },
+    {
+      "lawId": "RLA",
+      "name": "Regulation of Lobbying Act 1040/81",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/RLA"
+    },
+    {
+      "lawId": "RPA",
+      "name": "Real Property Actions & Proceedings",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/RPA"
+    },
+    {
+      "lawId": "RPP",
+      "name": "Real Property",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/RPP"
+    },
+    {
+      "lawId": "RPT",
+      "name": "Real Property Tax",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/RPT"
+    },
+    {
+      "lawId": "RRD",
+      "name": "Railroad",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/RRD"
+    },
+    {
+      "lawId": "RSS",
+      "name": "Retirement & Social Security",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/RSS"
+    },
+    {
+      "lawId": "SAP",
+      "name": "State Administrative Procedure Act",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/SAP"
+    },
+    {
+      "lawId": "SCC",
+      "name": "Second Class Cities",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/SCC"
+    },
+    {
+      "lawId": "SCP",
+      "name": "Surrogate's Court Procedure",
+      "type": "Court_Acts",
+      "url": "https://www.nysenate.gov/legislation/laws/SCP"
+    },
+    {
+      "lawId": "SCT",
+      "name": "Suffolk County Tax Act",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/SCT"
+    },
+    {
+      "lawId": "SLG",
+      "name": "Statute of Local Governments",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/SLG"
+    },
+    {
+      "lawId": "SNH",
+      "name": "Special Needs Housing Act 261/88",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/SNH"
+    },
+    {
+      "lawId": "SOS",
+      "name": "Social Services",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/SOS"
+    },
+    {
+      "lawId": "STF",
+      "name": "State Finance",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/STF"
+    },
+    {
+      "lawId": "STL",
+      "name": "State",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/STL"
+    },
+    {
+      "lawId": "STT",
+      "name": "State Technology",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/STT"
+    },
+    {
+      "lawId": "SWC",
+      "name": "Soil & Water Conservation Districts",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/SWC"
+    },
+    {
+      "lawId": "TAX",
+      "name": "Tax",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/TAX"
+    },
+    {
+      "lawId": "TCP",
+      "name": "Transportation Corporations",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/TCP"
+    },
+    {
+      "lawId": "TRA",
+      "name": "Transportation",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/TRA"
+    },
+    {
+      "lawId": "TRY",
+      "name": "City of Troy Issuance of Serial Bonds",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/TRY"
+    },
+    {
+      "lawId": "TSF",
+      "name": "Tobacco Settlement Financing Corporation Act",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/TSF"
+    },
+    {
+      "lawId": "TWN",
+      "name": "Town",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/TWN"
+    },
+    {
+      "lawId": "UCC",
+      "name": "Uniform Commercial Code",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/UCC"
+    },
+    {
+      "lawId": "UCT",
+      "name": "Uniform City Court Act",
+      "type": "Court_Acts",
+      "url": "https://www.nysenate.gov/legislation/laws/UCT"
+    },
+    {
+      "lawId": "UDA",
+      "name": "Urban Development Corporation Act 174/68",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/UDA"
+    },
+    {
+      "lawId": "UDC",
+      "name": "Uniform District Court Act",
+      "type": "Court_Acts",
+      "url": "https://www.nysenate.gov/legislation/laws/UDC"
+    },
+    {
+      "lawId": "UDG",
+      "name": "Urban development guarantee fund of New York 175/68",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/UDG"
+    },
+    {
+      "lawId": "UDR",
+      "name": "Urban development research corporation act 173/68",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/UDR"
+    },
+    {
+      "lawId": "UJC",
+      "name": "Uniform Justice Court Act",
+      "type": "Court_Acts",
+      "url": "https://www.nysenate.gov/legislation/laws/UJC"
+    },
+    {
+      "lawId": "VAT",
+      "name": "Vehicle & Traffic",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/VAT"
+    },
+    {
+      "lawId": "VAW",
+      "name": "Volunteer Ambulance Workers' Benefit",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/VAW"
+    },
+    {
+      "lawId": "VET",
+      "name": "Veterans' Services",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/VET"
+    },
+    {
+      "lawId": "VIL",
+      "name": "Village",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/VIL"
+    },
+    {
+      "lawId": "VOL",
+      "name": "Volunteer Firefighters' Benefit",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/VOL"
+    },
+    {
+      "lawId": "WKC",
+      "name": "Workers' Compensation",
+      "type": "Consolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/WKC"
+    },
+    {
+      "lawId": "YFA",
+      "name": "Yonkers financial emergency act 103/84",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/YFA"
+    },
+    {
+      "lawId": "YTS",
+      "name": "Yonkers income tax surcharge",
+      "type": "Unconsolidated",
+      "url": "https://www.nysenate.gov/legislation/laws/YTS"
+    }
+  ]
+}

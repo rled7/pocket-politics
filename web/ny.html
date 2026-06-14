@@ -24,6 +24,17 @@
     <div class="count" id="count"></div>
     <div class="feed" id="list"><div class="card"><div class="meta" style="margin-top:0">Loading New York bills…</div></div></div>
     <div class="src" id="src"></div>
+
+    <div class="sec-title">New York laws</div>
+    <div class="meta" style="margin-top:6px">The codified body of New York law. Tap one to read it on the official site.</div>
+    <input id="lawq" class="search" type="search" placeholder="Search laws — e.g. “vehicle”, “tax”, “education”…" autocomplete="off" />
+    <div class="list" id="laws"><div class="row"><div class="meta">Loading NY laws…</div></div></div>
+    <div class="src" id="lawsrc"></div>
+
+    <div class="sec-title">Senate floor transcripts</div>
+    <div class="meta" style="margin-top:6px">Records of NY Senate floor discussion (kept since 1993). Plain-language summaries are coming next.</div>
+    <div class="list" id="trans"><div class="row"><div class="meta">Loading transcripts…</div></div></div>
+    <div class="src" id="transrc"></div>
   </div>
   <script>
     const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
@@ -59,6 +70,43 @@
       render();
       document.getElementById("src").innerHTML =
         `${d.live === false ? "Demo data — live NY legislation enabled with the Open Legislation key. " : ""}${d.total ? "<b>" + Number(d.total).toLocaleString() + "</b> bills this session (" + esc(d.session) + "). " : ""}Source: ${esc(d.source || "NY Senate Open Legislation")} ↗`;
+    })();
+
+    // ── NY laws (catalog) ──
+    let LAWS = [];
+    function renderLaws() {
+      const q = document.getElementById("lawq").value.trim().toLowerCase();
+      const rows = LAWS.filter(l => !q || `${l.name} ${l.lawId}`.toLowerCase().includes(q));
+      document.getElementById("laws").innerHTML = rows.length ? rows.map(l => `
+        <a class="row" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">
+          <div class="av" style="display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--forest);background:var(--paper);font-size:11px">${esc(l.lawId)}</div>
+          <div><div class="nm">${esc(l.name)}</div><div class="sub">${esc(l.type || "Law")} ↗</div></div>
+        </a>`).join("") : `<div class="empty">No laws match “${esc(q)}”.</div>`;
+    }
+    (async () => {
+      let d;
+      try { d = await (await fetch("/api/ny/laws")).json(); }
+      catch (_) { try { d = await (await fetch("./fixtures/ny_laws.json")).json(); } catch { d = null; } }
+      if (!d || !(d.laws || []).length) { document.getElementById("laws").innerHTML = `<div class="row"><div class="meta">Could not load NY laws.</div></div>`; return; }
+      LAWS = d.laws; renderLaws();
+      document.getElementById("lawq").addEventListener("input", renderLaws);
+      document.getElementById("lawsrc").innerHTML = `${d.live === false ? "Demo data. " : ""}<b>${(d.laws||[]).length}</b> bodies of NY law · Source: NY Open Legislation ↗`;
+    })();
+
+    // ── NY Senate transcripts ──
+    (async () => {
+      let d;
+      try { d = await (await fetch("/api/ny/transcripts?limit=20")).json(); }
+      catch (_) { try { d = await (await fetch("./fixtures/ny_transcripts.json")).json(); } catch { d = null; } }
+      const el = document.getElementById("trans");
+      if (!d || !(d.transcripts || []).length) { el.innerHTML = `<div class="row"><div class="meta">Could not load transcripts.</div></div>`; return; }
+      const fmtDate = s => { try { return new Date(s).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }); } catch { return s; } };
+      el.innerHTML = d.transcripts.map(t => `
+        <a class="row" href="${esc(t.url)}" target="_blank" rel="noopener noreferrer">
+          <div class="av" style="display:flex;align-items:center;justify-content:center;font-size:16px">🎙️</div>
+          <div><div class="nm">${esc(fmtDate(t.dateTime))}</div><div class="sub">${esc(t.sessionType || "Session")} ↗</div></div>
+        </a>`).join("");
+      document.getElementById("transrc").innerHTML = `${d.live === false ? "Demo data. " : ""}${d.total ? "<b>" + Number(d.total).toLocaleString() + "</b> transcripts since 1993. " : ""}Source: NY Open Legislation ↗`;
     })();
   </script>
   <script src="./build-tag.js" defer></script>

@@ -81,14 +81,69 @@ export async function getNyBills(limit = 20, key?: string, session = nySession()
       return { ...base, note: `Live NY lookup unavailable (${e instanceof Error ? e.message : "error"}).` };
     }
   }
+  const fx = await loadFixture<{ session?: number; total?: number; bills: NyBill[] }>("ny_bills.json");
+  if (fx) return { ...base, session: fx.session ?? session, total: fx.total, bills: fx.bills, note: DEMO_NOTE };
+  return { ...base, note: "Demo data unavailable. Set NY_OPENLEG_API_KEY for live NY legislation." };
+}
+
+const DEMO_NOTE = "Demo data — set NY_OPENLEG_API_KEY for live NY legislation.";
+
+async function loadFixture<T>(file: string): Promise<T | null> {
   try {
     const { readFile } = await import("node:fs/promises");
     const { fileURLToPath } = await import("node:url");
     const { dirname, join } = await import("node:path");
-    const path = join(dirname(fileURLToPath(import.meta.url)), "..", "fixtures", "ny_bills.json");
-    const fx = JSON.parse(await readFile(path, "utf8")) as { session?: number; total?: number; bills: NyBill[] };
-    return { ...base, session: fx.session ?? session, total: fx.total, bills: fx.bills, note: "Demo data — set NY_OPENLEG_API_KEY for live NY legislation." };
-  } catch {
-    return { ...base, note: "Demo data unavailable. Set NY_OPENLEG_API_KEY for live NY legislation." };
+    const path = join(dirname(fileURLToPath(import.meta.url)), "..", "fixtures", file);
+    return JSON.parse(await readFile(path, "utf8")) as T;
+  } catch { return null; }
+}
+
+// ── NY Laws (codified) ────────────────────────────────────────────────────────────────────────
+export interface NyLaw { lawId: string; name: string; type?: string; url: string; }
+export interface NyLawsResult { source: string; live: boolean; note?: string; total?: number; laws: NyLaw[]; }
+
+function mapLaw(x: any): NyLaw {
+  return { lawId: x?.lawId, name: x?.name, type: (x?.lawType ?? "").toLowerCase().replace(/^\w/, (c: string) => c.toUpperCase()),
+    url: `https://www.nysenate.gov/legislation/laws/${x?.lawId}` };
+}
+
+/** The full catalog of NY consolidated/unconsolidated laws (≈137). */
+export async function getNyLaws(key?: string): Promise<NyLawsResult> {
+  const base: NyLawsResult = { source: SOURCE, live: false, laws: [] };
+  if (key) {
+    try {
+      const res = await fetch(`${API}/laws?key=${encodeURIComponent(key)}`);
+      if (!res.ok) throw new Error(`OpenLeg ${res.status}`);
+      const d: any = await res.json();
+      const laws = (d?.result?.items ?? []).map(mapLaw);
+      return { ...base, live: true, total: laws.length, laws };
+    } catch (e) { return { ...base, note: `Live NY laws unavailable (${e instanceof Error ? e.message : "error"}).` }; }
   }
+  const fx = await loadFixture<{ total?: number; laws: NyLaw[] }>("ny_laws.json");
+  if (fx) return { ...base, total: fx.total, laws: fx.laws, note: DEMO_NOTE };
+  return { ...base, note: "Demo data unavailable. Set NY_OPENLEG_API_KEY for live NY laws." };
+}
+
+// ── NY Senate floor transcripts ───────────────────────────────────────────────────────────────
+export interface NyTranscript { dateTime: string; sessionType?: string; url: string; }
+export interface NyTranscriptsResult { source: string; live: boolean; note?: string; total?: number; transcripts: NyTranscript[]; }
+
+/** Recent NY Senate session/hearing transcripts (records exist since 1993). Plain-language
+ *  summarization of each is a follow-on (#32) — it needs an AI step. This surfaces ACCESS now. */
+export async function getNyTranscripts(limit = 12, key?: string): Promise<NyTranscriptsResult> {
+  const base: NyTranscriptsResult = { source: SOURCE, live: false, transcripts: [] };
+  if (key) {
+    try {
+      const res = await fetch(`${API}/transcripts?limit=${Math.min(limit, 50)}&key=${encodeURIComponent(key)}`);
+      if (!res.ok) throw new Error(`OpenLeg ${res.status}`);
+      const d: any = await res.json();
+      const transcripts = (d?.result?.items ?? []).map((t: any) => ({
+        dateTime: t?.dateTime, sessionType: t?.sessionType, url: "https://www.nysenate.gov/transcripts",
+      }));
+      return { ...base, live: true, total: d?.total, transcripts };
+    } catch (e) { return { ...base, note: `Live NY transcripts unavailable (${e instanceof Error ? e.message : "error"}).` }; }
+  }
+  const fx = await loadFixture<{ total?: number; transcripts: NyTranscript[] }>("ny_transcripts.json");
+  if (fx) return { ...base, total: fx.total, transcripts: fx.transcripts, note: DEMO_NOTE };
+  return { ...base, note: "Demo data unavailable. Set NY_OPENLEG_API_KEY for live NY transcripts." };
 }
