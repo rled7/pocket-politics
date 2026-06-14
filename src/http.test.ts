@@ -206,6 +206,17 @@ check("getMoney fixture: totals have raised/spent/cashOnHand",
   typeof money.totals!.raised === "number" && typeof money.totals!.spent === "number" && typeof money.totals!.cashOnHand === "number");
 check("getMoney echoes the requested bioguide", money.bioguide === "O000172");
 
+// config — integrations registry (secrets-safe status, never exposes values)
+const { integrations, keySummary } = await import("./config.ts");
+const intg = integrations();
+const ids = intg.map(i => i.id);
+check("integrations lists congress, fec, lda, nyOpenLeg",
+  ["congress", "fec", "lda", "nyOpenLeg"].every(id => ids.includes(id)));
+check("integrations entries are secrets-safe (no value field)",
+  intg.every(i => !("value" in i) && typeof i.configured === "boolean" && !!i.signup));
+check("keySummary marks each id with ✓/✗ and never leaks a key",
+  /congress[✓✗]/.test(keySummary()) && !/=/.test(keySummary()));
+
 // summary
 console.log(`\n  ${pass} passed, ${fails.length} failed`);
 if (fails.length) { console.error("  FAILED: " + fails.join(", ")); process.exit(1); }

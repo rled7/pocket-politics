@@ -19,9 +19,10 @@ import { MemoryStore } from "./store.ts";
 import { getComments, addComment, validBillId } from "./comments.ts";
 import { getReactions, setReaction, isReaction, validClientId } from "./reactions.ts";
 import { SwrCache, mapLimit, type LoadResult } from "./swr_cache.ts";
+import { KEYS, integrations, keySummary } from "./config.ts";
 
-const KEY = process.env.CONGRESS_API_KEY || undefined;
-const FEC_KEY = process.env.FEC_API_KEY || undefined;
+const KEY = KEYS.congress;
+const FEC_KEY = KEYS.fec;
 const PORT = Number(process.env.PORT ?? 8788);
 const store = new MemoryStore(); // single shared store for the process (comments persist while up)
 
@@ -85,6 +86,8 @@ async function route(url: URL, request: Request): Promise<Response> {
 
   // mutable
   if (segs[0] === "api" && segs[1] === "latest") return jsonPointer({ dataVersion: dataVersion() });
+  // Which data integrations are configured (booleans only — never exposes key values).
+  if (segs[0] === "api" && segs[1] === "integrations") return jsonCached({ integrations: integrations() }, { request });
   if (segs[0] === "api" && segs[1] === "members") {
     return jsonCached(await getMembers(clampLimit(q.get("limit"), 540, 540), KEY), { request });
   }
@@ -230,7 +233,10 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, () => console.log(`pp api-server (TypeScript) listening on :${PORT}`));
+server.listen(PORT, () => {
+  console.log(`pp api-server (TypeScript) listening on :${PORT}`);
+  console.log(`  integrations: ${keySummary()}`); // secrets-safe: shows ✓/✗ per key, never the value
+});
 
 // ── Make it feel static: warm the cache so navigation is instant from the first click ─────────
 // 1) Warm the common entry points NOW (directory + bills) so the landing pages are instant.
