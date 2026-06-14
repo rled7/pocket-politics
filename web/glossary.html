@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocket Politics — Plain-Language Glossary</title>
+  <link rel="stylesheet" href="./style.css" />
+  <style>
+    .term { background: var(--paper-2); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; margin-top: 12px; box-shadow: var(--shadow); }
+    .term h3 { font-family: "Fraunces", serif; margin: 0 0 8px; font-size: 19px; }
+    .defs { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 560px) { .defs { grid-template-columns: 1fr; } }
+    .def h4 { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; margin: 0 0 4px; }
+    .def.plain h4 { color: var(--forest); }
+    .def.legal h4 { color: var(--brass-2); }
+    .def p { margin: 0; font-size: 14.5px; }
+    .term .src { margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="./home.html" class="brand">Pocket Politics</a>
+    <nav class="nav">
+      <a href="./home.html">My Government</a>
+      <a href="./bills.html">Bills</a>
+      <a href="./ny.html">New York</a>
+      <a href="./courts.html">Law &amp; courts</a>
+      <a href="./glossary.html" class="on">Glossary</a>
+    </nav>
+    <h1>Plain-language glossary</h1>
+    <div class="meta">Every term twice — once in <b>plain English</b>, once in <b>legalese</b> — plus a link to the
+      official definition. So when a word on any page trips you up, you can look it up here.</div>
+
+    <input id="q" class="search" type="search" placeholder="Look up a term — e.g. “cloture”, “tort”, “veto”…" autocomplete="off" />
+    <div class="count" id="count"></div>
+    <div id="list"></div>
+    <div class="src">Official definitions: <a href="https://www.law.cornell.edu/wex" target="_blank" rel="noopener noreferrer">Cornell Law School — Wex</a> (a free legal dictionary). Plain-English is our paraphrase; the source link is authoritative.</div>
+  </div>
+  <script>
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    let TERMS = [];
+    function row(t) {
+      const wex = t.wex ? `https://www.law.cornell.edu/wex/${encodeURIComponent(t.wex)}` : "https://www.law.cornell.edu/wex";
+      return `<div class="term">
+        <h3>${esc(t.term)}</h3>
+        <div class="defs">
+          <div class="def plain"><h4>Plain English</h4><p>${esc(t.plain)}</p></div>
+          <div class="def legal"><h4>Legalese</h4><p>${esc(t.legal)}</p></div>
+        </div>
+        <div class="src">📖 Official definition: <a href="${esc(wex)}" target="_blank" rel="noopener noreferrer">Cornell Wex — “${esc(t.term)}” ↗</a></div>
+      </div>`;
+    }
+    function render() {
+      const q = document.getElementById("q").value.trim().toLowerCase();
+      const rows = TERMS.filter(t => !q || `${t.term} ${t.plain} ${t.legal}`.toLowerCase().includes(q));
+      document.getElementById("count").textContent = `${rows.length} term${rows.length === 1 ? "" : "s"}${q ? " match" : ""}`;
+      document.getElementById("list").innerHTML = rows.length ? rows.map(row).join("") : `<div class="empty">No term matches “${esc(q)}”.</div>`;
+    }
+    document.getElementById("q").addEventListener("input", render);
+    fetch("./glossary.json").then(r => r.json()).then(d => {
+      TERMS = (d.terms || []).slice().sort((a, b) => a.term.localeCompare(b.term));
+      render();
+    }).catch(() => { document.getElementById("list").innerHTML = `<div class="empty">Could not load the glossary.</div>`; });
+  </script>
+  <script src="./build-tag.js" defer></script>
+  <script src="./bw-mode.js" defer></script>
+</body>
+</html>

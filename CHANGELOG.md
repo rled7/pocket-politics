@@ -4,6 +4,12 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.14.0] — build 55 — 2026-06-13 — Plain-language glossary (legalese + plain English)
+### Added
+- **Glossary** (`web/glossary.html` + `glossary.json`) — 24 legal/legislative terms, each defined
+  **twice** (plain English + legalese) with a link to the authoritative definition (Cornell Law's Wex).
+  Searchable. Linked from Home and the site map. Foundation for later on-page term auto-definition.
+
 ## [0.13.0] — build 54 — 2026-06-13 — NY laws + Senate floor transcripts
 ### Added
 - **New York laws** (`GET /api/ny/laws`) — the full codified body of NY law (137 chapters), searchable,
