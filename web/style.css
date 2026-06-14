@@ -218,3 +218,20 @@ textarea { resize: vertical; }
 
 /* Build/version badge (footer) */
 .buildtag { margin-top: 40px; text-align: center; font-size: 11px; letter-spacing: .04em; color: var(--ink-soft); opacity: .7; }
+
+/* "Converge on ideas" mode — strip ALL color (incl. party tones) so people weigh the idea, not the
+   side. A prototype toggle now; later it can auto-engage when an idea/proposal is in focus. */
+body { transition: filter .35s ease; }
+body.bw { filter: grayscale(100%); }
+.bwtoggle {
+  position: fixed; right: 16px; bottom: 16px; z-index: 50;
+  width: 44px; height: 44px; border-radius: 50%; cursor: pointer;
+  border: 1px solid var(--line); background: var(--paper-2); color: var(--ink);
+  font-size: 19px; line-height: 1; box-shadow: var(--shadow);
+}
+.bwtoggle:hover { border-color: var(--brass); }
+body.bw .bwtoggle { background: #111; color: #fff; }
+.bwtoggle-label { position: fixed; right: 16px; bottom: 64px; z-index: 50; font-size: 11px;
+  background: var(--ink); color: var(--paper-2); padding: 4px 9px; border-radius: 8px; box-shadow: var(--shadow);
+  max-width: 180px; opacity: 0; transform: translateY(4px); transition: opacity .2s, transform .2s; pointer-events: none; }
+.bwtoggle:hover + .bwtoggle-label { opacity: 1; transform: translateY(0); }

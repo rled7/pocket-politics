@@ -4,6 +4,14 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.12.0] — build 53 — 2026-06-13 — "Converge on ideas" black & white mode
+### Added
+- **Black & white mode** (`web/bw-mode.js`) — a persistent toggle (bottom-right ◑) that strips ALL
+  color from the app, including party tones, so people weigh the *idea* rather than the side. A
+  prototype now (user toggle, remembered in localStorage); designed to later auto-engage when a
+  proposal/idea is the focus. Present on all pages. Fits the design system, which already avoids
+  red/blue. Tests 82/82.
+
 ## [0.11.0] — build 52 — 2026-06-13 — New York State legislation (first state-level data)
 ### Added
 - **New York State legislation** (`web/ny.html`, `GET /api/ny/bills`) via the NY Senate Open
