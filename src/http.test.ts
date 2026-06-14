@@ -268,6 +268,21 @@ check("getBudgetWatch always includes the authoritative status table",
 check("getBudgetWatch appropriations entries have type/number/url",
   bud.appropriations.every(b => !!b.type && !!b.number && /congress\.gov/.test(b.url)));
 
+// Payments (Stripe) — pure helpers, no network
+const { buildCheckoutForm, paymentsConfigured, createCheckout, tiersPublic } = await import("./payments.ts");
+check("paymentsConfigured reflects the secret key", !paymentsConfigured(undefined) && paymentsConfigured("sk_test_x"));
+check("tiersPublic exposes tiers without the priceEnv secret-ish field",
+  tiersPublic().length >= 3 && tiersPublic().every(t => !("priceEnv" in t) && !!t.id && !!t.price));
+const form = buildCheckoutForm("price_123", "subscription", "https://x/ok", "https://x/no");
+const fp = new URLSearchParams(form);
+check("buildCheckoutForm encodes price/mode/urls correctly",
+  fp.get("line_items[0][price]") === "price_123" && fp.get("mode") === "subscription" && fp.get("success_url") === "https://x/ok");
+check("createCheckout without a key returns a clean not-configured error",
+  /not configured/i.test((await createCheckout("plus", "http://x", undefined)).error ?? ""));
+check("createCheckout rejects an unknown plan", /unknown plan/i.test((await createCheckout("bogus", "http://x", "sk_test_x")).error ?? ""));
+check("createCheckout flags a missing price id (no network call)",
+  /STRIPE_PRICE_PLUS/.test((await createCheckout("plus", "http://x", "sk_test_x")).error ?? ""));
+
 // summary
 console.log(`\n  ${pass} passed, ${fails.length} failed`);
 if (fails.length) { console.error("  FAILED: " + fails.join(", ")); process.exit(1); }

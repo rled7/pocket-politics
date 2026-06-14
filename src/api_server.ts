@@ -24,6 +24,7 @@ import { getNyBills, getNyLaws, getNyTranscripts } from "./nystate.ts";
 import { getStateData } from "./openstates.ts";
 import { getCalendar, OFFICIAL_CALENDARS } from "./calendar.ts";
 import { getBudgetWatch } from "./budget.ts";
+import { createCheckout, tiersPublic, paymentsConfigured } from "./payments.ts";
 import { SwrCache, mapLimit, type LoadResult } from "./swr_cache.ts";
 import { KEYS, integrations, keySummary } from "./config.ts";
 
@@ -96,6 +97,8 @@ async function route(url: URL, request: Request): Promise<Response> {
   if (segs[0] === "api" && segs[1] === "integrations") return jsonCached({ integrations: integrations() }, { request });
   // Build / release version (human-facing app version + build number + data version).
   if (segs[0] === "api" && segs[1] === "version") return jsonCached({ ...buildInfo(), dataVersion: dataVersion() }, { request });
+  // Pricing tiers (no secrets) + whether payments are configured.
+  if (segs[0] === "api" && segs[1] === "pricing") return jsonCached({ tiers: tiersPublic(), configured: paymentsConfigured(KEYS.stripeSecret) }, { request });
   if (segs[0] === "api" && segs[1] === "members") {
     return jsonCached(await getMembers(clampLimit(q.get("limit"), 540, 540), KEY), { request });
   }
@@ -194,6 +197,16 @@ const server = http.createServer(async (req, res) => {
       const bill = url.searchParams.get("bill") ?? "";
       if (!validBillId(bill)) return sendJson(res, 400, { error: "invalid bill id" });
       return sendJson(res, 200, { comments: await getComments(store, bill) });
+    }
+
+    // Stripe Checkout — create a hosted-checkout session and hand back the URL. Never cached.
+    if (url.pathname === "/api/checkout" && req.method === "POST") {
+      const payload = JSON.parse((await readBody(req)) || "{}");
+      const tier = String(payload.tier ?? "");
+      const proto = (req.headers["x-forwarded-proto"] as string) || "http";
+      const host = req.headers.host || `localhost:${PORT}`;
+      const result = await createCheckout(tier, `${proto}://${host}`, KEYS.stripeSecret);
+      return sendJson(res, result.error ? 400 : 200, result);
     }
 
     // Bill reactions (like / dislike / neutral) — read + write, never cached.

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocket Politics — Pricing</title>
+  <link rel="stylesheet" href="./style.css" />
+  <style>
+    .side { margin-top: 18px; }
+    .plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 10px; }
+    .plan { background: var(--paper-2); border: 1px solid var(--line); border-radius: 16px; padding: 18px; box-shadow: var(--shadow); display: flex; flex-direction: column; }
+    .plan h3 { margin: 0; font-family: "Fraunces", serif; }
+    .plan .amt { font-size: 26px; font-weight: 700; margin: 6px 0; }
+    .plan .bl { font-size: 14px; color: var(--ink-soft); flex: 1; }
+    .plan .btn { margin-top: 12px; text-align: center; }
+    .note { font-size: 12.5px; color: var(--ink-soft); margin-top: 10px; }
+    .pitch { background: #f1ede0; border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; font-size: 14.5px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="./home.html" class="brand">Pocket Politics</a>
+    <nav class="nav">
+      <a href="./home.html">My Government</a>
+      <a href="./bills.html">Bills</a>
+      <a href="./ideas.html">Ideas</a>
+      <a href="./pricing.html" class="on">Pricing</a>
+    </nav>
+    <h1>Pricing</h1>
+    <div class="meta">Three audiences, one platform. Reading and reacting is always free — you only pay for AI
+      processing, or (for organizations and campaigns) for verified, in-district reach.</div>
+    <div id="status" class="note"></div>
+
+    <div class="side">
+      <div class="sec-title">👤 For citizens</div>
+      <div class="meta" style="margin-top:6px">Free to read every bill, react, and follow your reps. Pay only when you want the AI to break a bill down for you.</div>
+      <div class="plans" id="citizen"></div>
+    </div>
+
+    <div class="side">
+      <div class="sec-title">🤝 For non-profits</div>
+      <div class="pitch">Connect with the constituents you serve. Reach verified residents in your area about programs,
+        services, and events — the people who actually qualify for your help.</div>
+      <div style="margin-top:10px"><a class="btn" href="mailto:hello@pocketpolitics.app?subject=Non-profit%20early%20access">Get early access →</a></div>
+      <div class="note">Verified-audience reach is gated on identity verification (in build) — that's what keeps it trustworthy.</div>
+    </div>
+
+    <div class="side">
+      <div class="sec-title">🏛️ For politicians &amp; campaigns</div>
+      <div class="pitch">Don't spend $10,000 on Meta where half your budget hits bots and people in the wrong zip code.
+        Move it to Pocket Politics, where <b>100% of your audience is an ID-verified, registered voter living inside
+        your exact district boundaries.</b></div>
+      <div style="margin-top:10px"><a class="btn" href="mailto:hello@pocketpolitics.app?subject=Campaign%20early%20access">Talk to us →</a></div>
+      <div class="note">Reach is segmentable by district and party, and every recipient is a verified registered voter.</div>
+    </div>
+  </div>
+  <script>
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    const params = new URLSearchParams(location.search);
+    const statusEl = document.getElementById("status");
+    if (params.get("paid")) statusEl.textContent = "✅ Thanks — your payment went through!";
+    else if (params.get("canceled")) statusEl.textContent = "Checkout canceled — no charge.";
+
+    async function checkout(tier, btn) {
+      btn.disabled = true; const old = btn.textContent; btn.textContent = "Redirecting…";
+      try {
+        const r = await (await fetch("/api/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ tier }) })).json();
+        if (r.url) { location.href = r.url; return; }
+        statusEl.textContent = r.error || "Couldn't start checkout.";
+      } catch (_) { statusEl.textContent = "Couldn't start checkout."; }
+      btn.disabled = false; btn.textContent = old;
+    }
+    fetch("/api/pricing").then(r => r.json()).then(d => {
+      if (!d.configured) statusEl.textContent = "💳 Payments aren't switched on yet — add the Stripe key to go live. (Plans shown below.)";
+      document.getElementById("citizen").innerHTML = (d.tiers || []).map(t => `
+        <div class="plan"><h3>${esc(t.name)}</h3><div class="amt">${esc(t.price)}</div>
+          <div class="bl">${esc(t.blurb)}</div>
+          <button class="btn" data-tier="${esc(t.id)}"${d.configured ? "" : " disabled"}>${d.configured ? "Choose " + esc(t.name) : "Coming soon"}</button>
+        </div>`).join("");
+      document.querySelectorAll("#citizen button[data-tier]").forEach(b => b.addEventListener("click", () => checkout(b.dataset.tier, b)));
+    }).catch(() => { statusEl.textContent = "Could not load plans."; });
+  </script>
+  <script src="./build-tag.js" defer></script>
+  <script src="./bw-mode.js" defer></script>
+</body>
+</html>

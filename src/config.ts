@@ -36,6 +36,9 @@ export const KEYS = {
   nyOpenLeg:  env("NY_OPENLEG_API_KEY"),
   nyOpenLeg2: env("NY_OPENLEG_API_KEY_2"),
   openStates: env("OPENSTATES_API_KEY"),  // all-50-states legislators + bills (tight free tier)
+  stripeSecret: env("STRIPE_SECRET_KEY"),       // payments (hosted Checkout) — server-side only
+  stripePublishable: env("STRIPE_PUBLISHABLE_KEY"),
+  stripeWebhookSecret: env("STRIPE_WEBHOOK_SECRET"),
 } as const;
 
 const REGISTRY: Integration[] = [
@@ -44,6 +47,7 @@ const REGISTRY: Integration[] = [
   { id: "lda",       label: "Senate Lobbying Disclosure",    signup: "https://lda.senate.gov/api/",                       value: KEYS.lda },
   { id: "nyOpenLeg", label: "NY Open Legislation",           signup: "https://legislation.nysenate.gov/#!/signup",        value: KEYS.nyOpenLeg },
   { id: "openStates", label: "OpenStates (all 50 states)",   signup: "https://open.pluralpolicy.com/accounts/signup/",    value: KEYS.openStates },
+  { id: "stripe",     label: "Stripe (payments)",            signup: "https://dashboard.stripe.com/apikeys",              value: KEYS.stripeSecret },
 ];
 
 /** Secrets-safe status: which integrations are configured. Never returns key values. */

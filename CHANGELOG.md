@@ -4,6 +4,17 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.21.0] — build 63 — 2026-06-14 — Stripe payments scaffold + FEC live
+### Added
+- **Stripe payments** (`src/payments.ts`, `web/pricing.html`, `POST /api/checkout`, `GET /api/pricing`)
+  — hosted Checkout (no card data touches our server). Three-sided pricing page: citizen tiers
+  (self-serve), non-profit + politician sides (verified-reach, early-access CTAs with the Meta-undercut
+  pitch). Activates when `STRIPE_SECRET_KEY` + Price IDs are set; until then the API cleanly reports
+  "not configured." Pure helpers unit-tested (no network).
+- **FEC campaign finance is now live** — the key is wired, so the profile's *Campaign finance* card
+  shows real raised/spent/cash-on-hand instead of demo data.
+- Tests 98/98, typecheck clean.
+
 ## [0.20.0] — build 62 — 2026-06-14 — Budget & shutdown watch
 ### Added
 - **Budget & shutdown watch** (`web/budget.html`, `GET /api/budget`) — the appropriations bills
