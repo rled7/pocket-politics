@@ -4,6 +4,13 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.16.0] — build 57 — 2026-06-13 — Defend yourself in civil court
+### Added
+- **Defend yourself** (`web/defend.html` + `defend.json`) — plain-language help for people sued without
+  a lawyer: 6 first-steps (don't ignore it → file your Answer on time → show up), plus 12 official
+  resources grouped into free legal aid, DIY forms & drafts (NY CourtHelp, federal court forms), and
+  the rules/courts. Clear "not legal advice" disclaimer. Searchable. Linked from Home + site map.
+
 ## [0.15.0] — build 56 — 2026-06-13 — Government assistance / HRA hub
 ### Added
 - **Get help** (`web/assistance.html` + `assistance.json`) — all social-services in one place: 24

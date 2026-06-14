@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocket Politics — Defend Yourself in Civil Court</title>
+  <link rel="stylesheet" href="./style.css" />
+  <style>
+    .disclaimer { background: #fdf5ea; border: 1px solid #f0d5b0; border-radius: 12px; padding: 12px 14px; margin-top: 14px; font-size: 13.5px; color: var(--brass-2); }
+    .step { display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+    .step:last-child { border-bottom: 0; }
+    .step .n { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--forest); color: #fbf9f2; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .step h3 { margin: 2px 0 3px; font-size: 16px; }
+    .step p { margin: 0; font-size: 14.5px; }
+    .res { padding: 12px 0; border-bottom: 1px solid var(--line); }
+    .res:last-child { border-bottom: 0; }
+    .res .top { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+    .res .rn { font-weight: 700; }
+    .lvlchip { font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--brass-2); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; }
+    .res .rw { font-size: 14px; margin-top: 3px; color: var(--ink-soft); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="./home.html" class="brand">Pocket Politics</a>
+    <nav class="nav">
+      <a href="./home.html">My Government</a>
+      <a href="./courts.html">Law &amp; courts</a>
+      <a href="./glossary.html">Glossary</a>
+      <a href="./assistance.html">Get help</a>
+      <a href="./defend.html" class="on">Defend yourself</a>
+    </nav>
+    <h1>Defend yourself in civil court</h1>
+    <div class="meta">Being sued is scary — but you have rights, deadlines, and free help. Here's what to do, step by step,
+      plus the official forms and legal-aid offices that can stand with you.</div>
+    <div class="disclaimer">⚠️ This is general information and official resources — <b>not legal advice</b>. For guidance on your
+      specific case, talk to a lawyer or a free legal-aid office (listed below).</div>
+
+    <div class="sec-title">If you've been sued — first steps</div>
+    <div class="card" id="steps"></div>
+
+    <input id="q" class="search" type="search" placeholder="Search help — e.g. “answer form”, “legal aid”, “small claims”…" autocomplete="off" />
+    <div id="res"></div>
+    <div class="src">Court self-help: U.S. Courts &amp; nycourts.gov · Free legal aid: LSC / LawHelp · Not affiliated with any court or agency.</div>
+  </div>
+  <script>
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    let DATA = null;
+    function resHtml(r) {
+      const ext = /^https?:/.test(r.url);
+      return `<div class="res"><div class="top"><span class="rn">${esc(r.name)}</span><span class="lvlchip">${esc(r.level)}</span></div>
+        <div class="rw">${esc(r.what)}</div>
+        <div class="apply" style="margin-top:5px"><a href="${esc(r.url)}"${ext ? ' target="_blank" rel="noopener noreferrer"' : ""}>${ext ? "Open ↗" : "Open →"}</a></div></div>`;
+    }
+    function render() {
+      const q = document.getElementById("q").value.trim().toLowerCase();
+      document.getElementById("res").innerHTML = (DATA.resources || []).map(g => {
+        const items = g.items.filter(r => !q || `${r.name} ${r.what}`.toLowerCase().includes(q));
+        if (!items.length) return "";
+        return `<div class="sec-title">${esc(g.icon || "")} ${esc(g.group)}</div><div class="card">${items.map(resHtml).join("")}</div>`;
+      }).join("") || `<div class="empty">No resources match “${esc(q)}”.</div>`;
+    }
+    document.getElementById("q").addEventListener("input", render);
+    fetch("./defend.json").then(r => r.json()).then(d => {
+      DATA = d;
+      document.getElementById("steps").innerHTML = (d.firstSteps || []).map((s, i) =>
+        `<div class="step"><div class="n">${i + 1}</div><div><h3>${esc(s.h)}</h3><p>${esc(s.p)}</p></div></div>`).join("");
+      render();
+    }).catch(() => { document.getElementById("steps").innerHTML = `<div class="empty">Could not load.</div>`; });
+  </script>
+  <script src="./build-tag.js" defer></script>
+  <script src="./bw-mode.js" defer></script>
+</body>
+</html>

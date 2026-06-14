@@ -1,0 +1,40 @@
+{
+  "note": "Plain-language help for people facing a civil lawsuit without a lawyer (pro se / self-represented). This is general information and official resources — NOT legal advice. For advice about your specific case, talk to a lawyer or a free legal-aid office.",
+  "firstSteps": [
+    { "h": "Don't ignore it", "p": "If you do nothing, the court can enter a default judgment against you — the other side wins automatically and can garnish wages or freeze accounts. Acting fast is your strongest move." },
+    { "h": "Read the Summons & Complaint", "p": "Find three things: WHO is suing you, WHAT they claim you did, and your DEADLINE to respond (often 20–30 days from when you were served). Circle that date." },
+    { "h": "File your Answer on time", "p": "An 'Answer' is your written response — you admit or deny each claim and raise any defenses. File it with the court clerk before the deadline, send a copy to the other side, and keep a stamped copy for yourself." },
+    { "h": "Gather your evidence", "p": "Collect anything that tells your side: contracts, receipts, bank records, texts, emails, photos, names of witnesses. Organize it by date." },
+    { "h": "Get free help — you don't have to do this alone", "p": "Court Help Centers, legal-aid offices, and DIY form tools (below) are free. Many courts have a self-help desk right in the building." },
+    { "h": "Show up to every court date", "p": "Always appear (or ask the court about appearing remotely). Bring your documents, dress neatly, be respectful, and tell your story with your evidence." }
+  ],
+  "resources": [
+    {
+      "group": "Free legal help", "icon": "🆓",
+      "items": [
+        { "name": "Find legal aid near you (LSC)", "level": "National", "what": "Locator for free civil legal-aid offices funded by the Legal Services Corporation.", "url": "https://www.lsc.gov/about-lsc/what-legal-aid/get-legal-help" },
+        { "name": "LawHelp.org", "level": "National", "what": "Free legal information and a directory of local legal-aid programs by state and topic.", "url": "https://www.lawhelp.org/" },
+        { "name": "LawHelpNY", "level": "NY", "what": "Free legal help, plain-language guides, and a legal-aid finder for New Yorkers.", "url": "https://www.lawhelpny.org/" },
+        { "name": "The Legal Aid Society (NYC)", "level": "NYC", "what": "Free legal representation and advice for low-income New Yorkers in civil cases.", "url": "https://legalaidnyc.org/" }
+      ]
+    },
+    {
+      "group": "Do-it-yourself forms & drafts", "icon": "📝",
+      "items": [
+        { "name": "NY CourtHelp — DIY Forms", "level": "NY", "what": "Free guided programs that build your court papers (including an Answer in a consumer-debt case) by asking plain questions.", "url": "https://www.nycourts.gov/courthelp/diy/index.shtml" },
+        { "name": "NY CourtHelp", "level": "NY", "what": "Step-by-step guides for common civil problems: being sued, small claims, housing, family.", "url": "https://www.nycourts.gov/courthelp/" },
+        { "name": "Federal court forms", "level": "Federal", "what": "Official national forms for federal court, including pro se complaint and motion templates.", "url": "https://www.uscourts.gov/forms-rules/forms" },
+        { "name": "Small claims (NYC)", "level": "NYC", "what": "How to sue or defend yourself for smaller amounts — simpler, lawyer-optional court.", "url": "https://www.nycourts.gov/courts/nyc/smallclaims/" }
+      ]
+    },
+    {
+      "group": "Know the rules & the courts", "icon": "⚖️",
+      "items": [
+        { "name": "Representing Yourself (U.S. Courts)", "level": "Federal", "what": "The federal judiciary's overview of going to court without a lawyer.", "url": "https://www.uscourts.gov/court-programs/representing-yourself" },
+        { "name": "Federal Rules of Civil Procedure", "level": "Federal", "what": "The actual rules that govern civil lawsuits in federal court (free, via Cornell).", "url": "https://www.law.cornell.edu/rules/frcp" },
+        { "name": "Pro Se (self-represented) resources — SDNY", "level": "Federal", "what": "Example of a district court's pro se manual, intake office, and filing help.", "url": "https://nysd.uscourts.gov/prose" },
+        { "name": "How courts connect (Pocket Politics)", "level": "Guide", "what": "Our visual map of which court hears what, and how a case moves up on appeal.", "url": "./courts.html" }
+      ]
+    }
+  ]
+}
