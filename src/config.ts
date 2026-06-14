@@ -31,9 +31,10 @@ export const KEYS = {
   congress:   env("CONGRESS_API_KEY"),   // federal: members, bills, votes, Congressional Record
   fec:        env("FEC_API_KEY"),         // campaign finance
   lda:        env("LDA_API_KEY"),         // Senate Lobbying Disclosure (lda.senate.gov)
-  nyOpenLeg:  env("NY_OPENLEG_API_KEY"),  // NY State Senate Open Legislation
-  // pasted alongside the "black & white" note; service not yet confirmed.
-  unconfirmedBW: env("UNCONFIRMED_KEY_BW"),
+  // NY State Senate Open Legislation — bills, NY laws, session transcripts (since 1993),
+  // committee agendas, floor calendars, Senate/Assembly membership. `nyOpenLeg2` is a spare key.
+  nyOpenLeg:  env("NY_OPENLEG_API_KEY"),
+  nyOpenLeg2: env("NY_OPENLEG_API_KEY_2"),
 } as const;
 
 const REGISTRY: Integration[] = [

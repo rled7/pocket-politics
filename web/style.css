@@ -215,3 +215,6 @@ a.fact { text-decoration: none; } a.fact:hover { background: #ece6d4; border-col
 /* Forms */
 input, textarea { font-family: inherit; color: var(--ink); }
 textarea { resize: vertical; }
+
+/* Build/version badge (footer) */
+.buildtag { margin-top: 40px; text-align: center; font-size: 11px; letter-spacing: .04em; color: var(--ink-soft); opacity: .7; }

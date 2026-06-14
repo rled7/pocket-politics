@@ -18,6 +18,8 @@ import { dataVersion } from "./version.ts";
 import { MemoryStore } from "./store.ts";
 import { getComments, addComment, validBillId } from "./comments.ts";
 import { getReactions, setReaction, isReaction, validClientId } from "./reactions.ts";
+import { getLobbying } from "./lobbying.ts";
+import { buildInfo } from "./build.ts";
 import { SwrCache, mapLimit, type LoadResult } from "./swr_cache.ts";
 import { KEYS, integrations, keySummary } from "./config.ts";
 
@@ -88,6 +90,8 @@ async function route(url: URL, request: Request): Promise<Response> {
   if (segs[0] === "api" && segs[1] === "latest") return jsonPointer({ dataVersion: dataVersion() });
   // Which data integrations are configured (booleans only — never exposes key values).
   if (segs[0] === "api" && segs[1] === "integrations") return jsonCached({ integrations: integrations() }, { request });
+  // Build / release version (human-facing app version + build number + data version).
+  if (segs[0] === "api" && segs[1] === "version") return jsonCached({ ...buildInfo(), dataVersion: dataVersion() }, { request });
   if (segs[0] === "api" && segs[1] === "members") {
     return jsonCached(await getMembers(clampLimit(q.get("limit"), 540, 540), KEY), { request });
   }
@@ -108,6 +112,11 @@ async function route(url: URL, request: Request): Promise<Response> {
   if (segs[0] === "api" && segs[1] === "bill") {
     const congress = parseInt(q.get("congress") ?? "118", 10) || 118;
     return jsonCached(await getBill(congress, q.get("type") ?? "hr", q.get("number") ?? "1", KEY), { request });
+  }
+  if (segs[0] === "api" && segs[1] === "lobbying") {
+    const yr = parseInt(q.get("year") ?? "", 10);
+    const year = Number.isFinite(yr) ? yr : new Date().getFullYear();
+    return jsonCached(await getLobbying((q.get("q") ?? "").slice(0, 120), KEYS.lda, year), { request });
   }
   if (segs[0] === "api" && segs[1] === "money") {
     const b = (q.get("bioguide") || DEFAULT_BIOGUIDE).toUpperCase();

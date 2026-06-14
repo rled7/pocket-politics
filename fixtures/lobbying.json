@@ -1,0 +1,57 @@
+{
+  "query": "Lower Energy Costs",
+  "year": 2024,
+  "count": 482,
+  "filings": [
+    {
+      "registrant": "NVG, LLC",
+      "client": "WORKING FAMILIES ORGANIZATION, INC.",
+      "clientState": "New York",
+      "issue": "Environment/Superfund",
+      "description": "Issues related to implementation of Inflation Reduction Act. H.R.1 - Lower Energy Costs Act. H.R.797/S.271 - Farm System Reform Act of 2023. H.R.1705/S.919 - A. Donald McEachin Environmental Justice For All Act. H.R.2764 - Green New Deal fo",
+      "amount": 10000.0,
+      "year": 2024,
+      "url": "https://lda.senate.gov/filings/public/filing/96a33d77-96dd-4cdc-b3ec-d31ba69ca0a3/print/"
+    },
+    {
+      "registrant": "NATIONAL ELECTRICAL CONTRACTORS ASSOCIATION, INC.",
+      "client": "NATIONAL ELECTRICAL CONTRACTORS ASSOCIATION, INC.",
+      "clientState": "District of Columbia",
+      "issue": "Labor Issues/Antitrust/Workplace",
+      "description": "Davis-Bacon Act Project Labor Agreements Pension Reform Multiemployer Pension Reform Act Right to Work Government Neutrality in Contracting Act Fair Playing Field Act Paid Sick Leave Paid Family Leave Apprenticeship National Apprenticeship ",
+      "amount": 325000.0,
+      "year": 2024,
+      "url": "https://lda.senate.gov/filings/public/filing/34a4bbeb-b18c-47a4-9e1b-64233b4ede24/print/"
+    },
+    {
+      "registrant": "NATIONAL ELECTRICAL CONTRACTORS ASSOCIATION, INC.",
+      "client": "NATIONAL ELECTRICAL CONTRACTORS ASSOCIATION, INC.",
+      "clientState": "District of Columbia",
+      "issue": "Labor Issues/Antitrust/Workplace",
+      "description": "Davis-Bacon Act Project Labor Agreements Pension Reform Multiemployer Pension Reform Act Right to Work Government Neutrality in Contracting Act Fair Playing Field Act Paid Sick Leave Paid Family Leave Apprenticeship National Apprenticeship ",
+      "amount": 325000.0,
+      "year": 2024,
+      "url": "https://lda.senate.gov/filings/public/filing/34a4bbeb-b18c-47a4-9e1b-64233b4ede24/print/"
+    },
+    {
+      "registrant": "JAMES EDWARDS",
+      "client": "CONSERVATIVES FOR PROPERTY RIGHTS",
+      "clientState": "South Carolina",
+      "issue": "Copyright/Patent/Trademark",
+      "description": "P Patent Trial and Appeal Board, including institution of proceedings, Fintiv/NHK and related procedures Patent-eligible subject matter Injunctive relief against patent infringers Standard Essential Royalty Act, to establish a patent licens",
+      "amount": 10000.0,
+      "year": 2024,
+      "url": "https://lda.senate.gov/filings/public/filing/ea880d27-ca95-45ab-bcf4-e388f8393563/print/"
+    },
+    {
+      "registrant": "NATIONAL ROOFING CONTRACTORS ASSOCIATION",
+      "client": "NATIONAL ROOFING CONTRACTORS ASSOCIATION",
+      "clientState": "District of Columbia",
+      "issue": "Environment/Superfund",
+      "description": "Oppose classification of PVC as a hazardous material",
+      "amount": 200000.0,
+      "year": 2024,
+      "url": "https://lda.senate.gov/filings/public/filing/b5b92251-6b86-4a41-bf0c-b3621e56aa4c/print/"
+    }
+  ]
+}

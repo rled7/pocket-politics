@@ -15,6 +15,8 @@
     <div class="card" id="web">Loading links…</div>
     <div class="sec-title" style="margin-top:22px">Campaign finance</div>
     <div class="card" id="money">Loading money…</div>
+    <div class="sec-title" style="margin-top:22px">Who's lobbying on their issues</div>
+    <div class="card" id="lobby">Loading lobbying…</div>
     <div class="sec-title" style="margin-top:22px">Bills currently in Congress</div>
     <div class="card" id="bills">Loading bills…</div>
   </div>
@@ -71,7 +73,48 @@
       // official site still shows.
       renderWebPresence(p);
       renderMoney(p.bioguideId);
+      // Seed lobbying search from the member's most recent policy area / bill, so the panel lands
+      // on something relevant to THIS member — then let the user search any issue or bill.
+      const seed = (p.record || []).map(r => r.policyArea).find(Boolean)
+        || (p.record || []).map(r => r.title).find(Boolean) || "";
+      renderLobbying(seed);
     }).catch(e => { document.getElementById("card").textContent = "Could not load profile (" + e + ")"; });
+
+    let lobbyYear = new Date().getFullYear();
+    async function renderLobbying(query) {
+      const el = document.getElementById("lobby");
+      const q = (query || "").trim();
+      const usd = n => (n || n === 0) ? "$" + Number(n).toLocaleString() : "—";
+      const searchUi = (val) => `
+        <form id="lobbyForm" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+          <input id="lobbyQ" class="search" style="flex:1;min-width:200px;margin-top:0" value="${esc(val)}"
+            placeholder="An issue or bill — e.g. “climate”, “H.R. 1”" />
+          <button class="btn" type="submit">Search lobbying</button>
+        </form>`;
+      el.innerHTML = searchUi(q) + `<div class="meta" style="margin-top:8px">Searching lobbying disclosures…</div>`;
+      wireLobbyForm();
+      if (!q) { el.innerHTML = searchUi(q) + `<div class="meta" style="margin-top:8px">Enter an issue or bill to see who's lobbying on it.</div>`; wireLobbyForm(); return; }
+      let d;
+      try { d = await (await fetch(`/api/lobbying?q=${encodeURIComponent(q)}&year=${lobbyYear}`)).json(); }
+      catch (_) { el.innerHTML = searchUi(q) + `<div class="meta" style="margin-top:8px">Lobbying lookup unavailable right now.</div>`; wireLobbyForm(); return; }
+      const rows = (d.filings || []).map(f => `
+        <div class="item">
+          <div class="title">${esc(f.client || "—")} <span class="bill">via ${esc(f.registrant || "—")}</span></div>
+          <div class="action">${esc(f.issue || "General")}${f.clientState ? " · " + esc(f.clientState) : ""} · <b>${usd(f.amount)}</b>${f.year ? " · " + esc(f.year) : ""}
+            ${f.url ? ` · <a href="${esc(f.url)}" target="_blank" rel="noopener noreferrer">filing ↗</a>` : ""}</div>
+          ${f.description ? `<div class="meta" style="margin-top:3px">${esc(f.description)}</div>` : ""}
+        </div>`).join("");
+      el.innerHTML = searchUi(q) + `
+        <div class="meta" style="margin:6px 0 2px">${d.count != null ? `<b>${Number(d.count).toLocaleString()}</b> filings disclose lobbying on “${esc(q)}” (${esc(lobbyYear)}). Showing ${(d.filings||[]).length}.` : ""}
+          ${d.live === false ? " · demo data" : ""}</div>
+        ${rows || `<div class="meta">No lobbying filings matched “${esc(q)}”.</div>`}
+        <div class="src">${esc(d.guidance || "")} <a href="${esc(d.searchUrl)}" target="_blank" rel="noopener noreferrer">Official LDA search ↗</a> · Source: ${esc(d.source || "Senate LDA")}</div>`;
+      wireLobbyForm();
+    }
+    function wireLobbyForm() {
+      const f = document.getElementById("lobbyForm");
+      if (f) f.addEventListener("submit", e => { e.preventDefault(); renderLobbying(document.getElementById("lobbyQ").value); });
+    }
 
     async function renderMoney(bioguide) {
       const el = document.getElementById("money");
@@ -136,5 +179,6 @@
         `<div class="src">${data.live === false ? "Demo data — set CONGRESS_API_KEY for live bills. " : ""}Source: Congress.gov</div>`;
     })();
   </script>
+  <script src="./build-tag.js" defer></script>
 </body>
 </html>

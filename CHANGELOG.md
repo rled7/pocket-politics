@@ -1,7 +1,30 @@
 # Changelog
 
 All notable changes to Pocket Politics. Format follows [Keep a Changelog](https://keepachangelog.com);
-this project uses date-stamped milestones while pre-1.0.
+this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
+(`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
+
+## [0.10.0] — build 51 — 2026-06-13 — Lobbying on the profile, integration registry, build versioning
+### Added
+- **Lobbying disclosure on the member profile** — "Who's lobbying on their issues" (Senate LDA API,
+  `GET /api/lobbying?q=&year=`). Searchable by issue or bill; shows **client → lobbying firm → issue →
+  amount** with a link to each official filing. Seeded from the member's own policy area. Verified live
+  (e.g. `climate` 2024 → 2,899 disclosed filings). Demo fixture (a real captured sample) when no key.
+- **API integration registry** (`src/config.ts`) — one typed home for every key (Congress, FEC, Senate
+  LDA, NY Open Legislation); secrets-safe `GET /api/integrations` (booleans only, never values) + a boot
+  log line `integrations: congress✓ fec✗ lda✓ nyOpenLeg✓`. Keys stay in the gitignored `.dev.vars`.
+- **Build versioning** — `src/build.ts`, `GET /api/version`, build tag in the footer + this entry.
+### Changed
+- Contact card text pinned to full-strength ink with underlined links (was hard to read).
+### Honesty contract
+- LDA lobbying is **issue-level, not keyed to an individual member** (`government_entities` is often
+  empty and never names a member), and is kept **separate from FEC campaign money** — the UI never
+  fuses them into one "influence" figure.
+### Notes
+- Keys registered this session: Senate LDA (lobbying) + NY Open Legislation (NY bills, laws, session
+  transcripts, committee agendas, floor calendars, membership) — NY features scaffolded for a later
+  release. New backlog (#28–#40) captured: assistance/HRA hub, events, multilingual, transcripts,
+  glossary, pricing tiers, B&W "converge on ideas" mode, and more.
 
 ## [0.9.0] — 2026-06-13 — Sub-ms navigation: stale-while-revalidate cache + prewarm
 ### Added

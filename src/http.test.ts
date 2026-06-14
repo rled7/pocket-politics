@@ -217,6 +217,17 @@ check("integrations entries are secrets-safe (no value field)",
 check("keySummary marks each id with ✓/✗ and never leaks a key",
   /congress[✓✗]/.test(keySummary()) && !/=/.test(keySummary()));
 
+// lobbying — fixture mode (no LDA key) returns the bundled real sample, clearly marked
+const { getLobbying, LDA_SEARCH_URL } = await import("./lobbying.ts");
+const lob = await getLobbying("Lower Energy Costs");
+check("getLobbying fixture: live false + demo note", lob.live === false && /demo/i.test(lob.note ?? ""));
+check("getLobbying fixture: has filings with registrant→client→issue",
+  lob.filings.length > 0 && lob.filings.every(f => "registrant" in f && "client" in f && "issue" in f));
+check("getLobbying always exposes the official LDA search url", lob.searchUrl === LDA_SEARCH_URL);
+check("getLobbying never fuses lobbying with money (guidance says separate)", /separate/i.test(lob.guidance));
+const lobEmpty = await getLobbying("");
+check("getLobbying with no query returns no filings + a prompt", lobEmpty.filings.length === 0 && !!lobEmpty.note);
+
 // summary
 console.log(`\n  ${pass} passed, ${fails.length} failed`);
 if (fails.length) { console.error("  FAILED: " + fails.join(", ")); process.exit(1); }
