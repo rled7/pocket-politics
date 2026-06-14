@@ -259,6 +259,15 @@ check("getCalendar fixture: meetings have title/date/committee", cal.meetings.le
 check("OFFICIAL_CALENDARS lists authoritative House/Senate schedules",
   OFFICIAL_CALENDARS.length >= 3 && OFFICIAL_CALENDARS.every(o => /^https:\/\//.test(o.url)));
 
+// Budget watch — fixture mode + official trackers
+const { getBudgetWatch, OFFICIAL_BUDGET } = await import("./budget.ts");
+const bud = await getBudgetWatch();
+check("getBudgetWatch fixture: live false + demo note", bud.live === false && /demo/i.test(bud.note ?? ""));
+check("getBudgetWatch always includes the authoritative status table",
+  OFFICIAL_BUDGET.some(o => /Appropriations Status Table/i.test(o.name)) && bud.official.length >= 3);
+check("getBudgetWatch appropriations entries have type/number/url",
+  bud.appropriations.every(b => !!b.type && !!b.number && /congress\.gov/.test(b.url)));
+
 // summary
 console.log(`\n  ${pass} passed, ${fails.length} failed`);
 if (fails.length) { console.error("  FAILED: " + fails.join(", ")); process.exit(1); }

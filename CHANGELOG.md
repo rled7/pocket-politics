@@ -4,6 +4,19 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.20.0] — build 62 — 2026-06-14 — Budget & shutdown watch
+### Added
+- **Budget & shutdown watch** (`web/budget.html`, `GET /api/budget`) — the appropriations bills
+  actually moving in Congress + the authoritative **Appropriations Status Table** and committee
+  trackers + a plain "how a shutdown happens" explainer. No fake countdown (funding deadlines aren't a
+  clean data field); the official status table is flagged as the source of truth. Verified live (3
+  appropriations bills). Linked from Home + site map. Closes #20.
+- `src/budget.ts`: scans the recent bill feed for appropriations (excludes "disapproval" false-matches),
+  fixture fallback.
+### Direction
+- Pricing (#38) is now a **3-sided model**: citizens (tiers) · non-profits (connect with constituents) ·
+  politicians (verified-district reach). Tests 92/92.
+
 ## [0.19.0] — build 61 — 2026-06-14 — "Ideas" section (redesigned) + grayscale fix
 ### Changed / Fixed
 - **Replaced the global black-&-white toggle** (a misread of the feature, and it had no off-switch)

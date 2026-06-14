@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocket Politics — Budget & Shutdown Watch</title>
+  <link rel="stylesheet" href="./style.css" />
+  <style>
+    .steps { counter-reset: s; margin-top: 10px; }
+    .stepline { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+    .stepline:last-child { border-bottom: 0; }
+    .stepline .n { flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--brass); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; }
+    .stepline p { margin: 0; font-size: 14.5px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="./home.html" class="brand">Pocket Politics</a>
+    <nav class="nav">
+      <a href="./home.html">My Government</a>
+      <a href="./bills.html">Bills</a>
+      <a href="./calendar.html">Calendar</a>
+      <a href="./budget.html" class="on">Budget</a>
+      <a href="./howto.html">Take Action</a>
+    </nav>
+    <h1>Budget &amp; shutdown watch</h1>
+    <div class="meta">Where federal funding stands. We don't show a fake countdown — funding deadlines aren't a
+      clean data field — so this gives you the appropriations bills actually moving, plus the official status
+      trackers that are the source of truth.</div>
+
+    <div class="sec-title">Official status (source of truth)</div>
+    <div class="card" id="official"></div>
+
+    <div class="sec-title">Appropriations bills in Congress</div>
+    <div id="bills"><div class="card"><div class="meta" style="margin-top:0">Loading appropriations bills…</div></div></div>
+    <div class="src" id="src"></div>
+
+    <div class="sec-title">How a shutdown happens</div>
+    <div class="card">
+      <div class="steps">
+        <div class="stepline"><div class="n">1</div><p>Congress must pass <b>12 appropriations bills</b> each year to fund the government, and the President must sign them.</p></div>
+        <div class="stepline"><div class="n">2</div><p>If they can't agree in time, they can pass a <b>continuing resolution (CR)</b> — a stopgap that keeps funding at current levels for a while.</p></div>
+        <div class="stepline"><div class="n">3</div><p>If neither a full bill nor a CR is in place when funding runs out, agencies lose spending authority — a <b>government shutdown</b>.</p></div>
+        <div class="stepline"><div class="n">4</div><p>During a shutdown, "non-essential" operations pause and many federal workers are furloughed until funding is restored.</p></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    (async () => {
+      let d;
+      try { d = await (await fetch("/api/budget")).json(); }
+      catch (_) { try { d = await (await fetch("./fixtures/budget.json")).json(); } catch { d = null; } }
+      const off = (d && d.official) || [
+        { name: "Appropriations Status Table (Congress.gov)", url: "https://www.congress.gov/resources/display/content/Appropriations+Status+Table" },
+        { name: "House Appropriations Committee", url: "https://appropriations.house.gov/" },
+        { name: "Senate Appropriations Committee", url: "https://www.appropriations.senate.gov/" }
+      ];
+      document.getElementById("official").innerHTML = `<div class="facts">` +
+        off.map(o => `<a class="fact" href="${esc(o.url)}" target="_blank" rel="noopener noreferrer">🏛️ ${esc(o.name)} ↗</a>`).join("") + `</div>`;
+
+      const el = document.getElementById("bills");
+      const ap = (d && d.appropriations) || [];
+      if (!ap.length) { el.innerHTML = `<div class="empty">No appropriations bills found in the recent feed. Check the official status table above.</div>`; }
+      else el.innerHTML = `<div class="card">` + ap.map(b => `
+        <a class="item" style="display:block;text-decoration:none;color:inherit" href="${esc(b.url)}" target="_blank" rel="noopener noreferrer">
+          <span class="date">${esc(b.actionDate || "")}</span><span class="bill">${esc(b.type)} ${esc(b.number)} ↗</span>
+          <div class="title">${esc(b.title)}</div>
+          ${b.latestAction ? `<div class="action">${esc(b.latestAction)}</div>` : ""}
+        </a>`).join("") + `</div>`;
+      document.getElementById("src").innerHTML = `${d && d.live === false ? "Demo data — live appropriations on with the Congress key. " : ""}Appropriations bills are matched from the recent bill feed (it can miss some) — the official status table above is authoritative. Source: Congress.gov`;
+    })();
+  </script>
+  <script src="./build-tag.js" defer></script>
+  <script src="./bw-mode.js" defer></script>
+</body>
+</html>
