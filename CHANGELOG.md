@@ -4,6 +4,13 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.23.0] — build 65 — 2026-06-14 — NY Senate floor calendars + committee agendas
+### Added
+- **NY Senate floor calendars** (`GET /api/ny/calendars`) and **committee agendas**
+  (`GET /api/ny/agendas`) via Open Legislation — added as sections on `web/ny.html`. Calendars show
+  the days bills are scheduled for the floor; agendas show committee meetings with bills considered.
+  Verified live (68 calendars, 21 agendas). Completes the NY Open Legislation coverage (#33). Tests 102/102.
+
 ## [0.22.0] — build 64 — 2026-06-14 — Filibuster & cloture
 ### Added
 - **Filibuster & cloture** (`web/filibuster.html`, `GET /api/cloture`) — the public record of what got

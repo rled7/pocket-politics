@@ -147,3 +147,41 @@ export async function getNyTranscripts(limit = 12, key?: string): Promise<NyTran
   if (fx) return { ...base, total: fx.total, transcripts: fx.transcripts, note: DEMO_NOTE };
   return { ...base, note: "Demo data unavailable. Set NY_OPENLEG_API_KEY for live NY transcripts." };
 }
+
+// ── NY Senate floor calendars + committee agendas ───────────────────────────────────────────────
+export interface NyCalendar { calendarNumber: number; calDate: string | null; year?: number; url: string; }
+export interface NyAgenda { number: number; year?: number; weekOf: string | null; billsConsidered?: number; committees?: number; url: string; }
+
+/** NY Senate floor calendars (days bills are scheduled for the floor). */
+export async function getNyCalendars(key?: string, session = nySession()): Promise<{ source: string; live: boolean; note?: string; total?: number; calendars: NyCalendar[] }> {
+  const base = { source: SOURCE, live: false as boolean, calendars: [] as NyCalendar[] };
+  if (key) {
+    try {
+      const res = await fetch(`${API}/calendars/${session}?limit=10&key=${encodeURIComponent(key)}`);
+      if (!res.ok) throw new Error(`OpenLeg ${res.status}`);
+      const d: any = await res.json();
+      const calendars = (d?.result?.items ?? []).map((c: any) => ({ calendarNumber: c?.calendarNumber, calDate: c?.calDate ?? null, year: c?.year, url: "https://www.nysenate.gov/calendar" }));
+      return { ...base, live: true, total: d?.total, calendars };
+    } catch (e) { return { ...base, note: `Live NY calendars unavailable (${e instanceof Error ? e.message : "error"}).` }; }
+  }
+  const fx = await loadFixture<{ total?: number; calendars: NyCalendar[] }>("ny_calendars.json");
+  if (fx) return { ...base, total: fx.total, calendars: fx.calendars, note: DEMO_NOTE };
+  return { ...base, note: "Demo data unavailable. Set NY_OPENLEG_API_KEY for live NY calendars." };
+}
+
+/** NY Senate committee agendas (meetings where bills are considered + voted to the floor). */
+export async function getNyAgendas(key?: string, session = nySession()): Promise<{ source: string; live: boolean; note?: string; total?: number; agendas: NyAgenda[] }> {
+  const base = { source: SOURCE, live: false as boolean, agendas: [] as NyAgenda[] };
+  if (key) {
+    try {
+      const res = await fetch(`${API}/agendas/${session}?key=${encodeURIComponent(key)}`);
+      if (!res.ok) throw new Error(`OpenLeg ${res.status}`);
+      const d: any = await res.json();
+      const agendas = (d?.result?.items ?? []).map((a: any) => ({ number: a?.id?.number, year: a?.id?.year, weekOf: a?.weekOf ?? null, billsConsidered: a?.totalBillsConsidered, committees: a?.totalCommittees, url: "https://www.nysenate.gov/calendar" }));
+      return { ...base, live: true, total: d?.total, agendas };
+    } catch (e) { return { ...base, note: `Live NY agendas unavailable (${e instanceof Error ? e.message : "error"}).` }; }
+  }
+  const fx = await loadFixture<{ total?: number; agendas: NyAgenda[] }>("ny_agendas.json");
+  if (fx) return { ...base, total: fx.total, agendas: fx.agendas, note: DEMO_NOTE };
+  return { ...base, note: "Demo data unavailable. Set NY_OPENLEG_API_KEY for live NY agendas." };
+}

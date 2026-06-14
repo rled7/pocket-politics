@@ -20,7 +20,7 @@ import { getComments, addComment, validBillId } from "./comments.ts";
 import { getReactions, setReaction, isReaction, validClientId } from "./reactions.ts";
 import { getLobbying } from "./lobbying.ts";
 import { buildInfo } from "./build.ts";
-import { getNyBills, getNyLaws, getNyTranscripts } from "./nystate.ts";
+import { getNyBills, getNyLaws, getNyTranscripts, getNyCalendars, getNyAgendas } from "./nystate.ts";
 import { getStateData } from "./openstates.ts";
 import { getCalendar, OFFICIAL_CALENDARS } from "./calendar.ts";
 import { getBudgetWatch } from "./budget.ts";
@@ -129,6 +129,12 @@ async function route(url: URL, request: Request): Promise<Response> {
   }
   if (segs[0] === "api" && segs[1] === "ny" && segs[2] === "transcripts") {
     return jsonCached(await getNyTranscripts(clampLimit(q.get("limit"), 12, 30), KEYS.nyOpenLeg), { request });
+  }
+  if (segs[0] === "api" && segs[1] === "ny" && segs[2] === "calendars") {
+    return jsonCached(await getNyCalendars(KEYS.nyOpenLeg), { request });
+  }
+  if (segs[0] === "api" && segs[1] === "ny" && segs[2] === "agendas") {
+    return jsonCached(await getNyAgendas(KEYS.nyOpenLeg), { request });
   }
   if (segs[0] === "api" && segs[1] === "budget") {
     return jsonCached(await getBudgetWatch(KEYS.congress), { request, sMaxAge: 3600 });

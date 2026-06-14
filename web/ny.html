@@ -35,6 +35,15 @@
     <div class="meta" style="margin-top:6px">Records of NY Senate floor discussion (kept since 1993). Plain-language summaries are coming next.</div>
     <div class="list" id="trans"><div class="row"><div class="meta">Loading transcripts…</div></div></div>
     <div class="src" id="transrc"></div>
+
+    <div class="sec-title">Senate floor calendars</div>
+    <div class="meta" style="margin-top:6px">Days bills are scheduled for the NY Senate floor.</div>
+    <div class="list" id="cals"><div class="row"><div class="meta">Loading calendars…</div></div></div>
+
+    <div class="sec-title">Committee agendas</div>
+    <div class="meta" style="margin-top:6px">Committee meetings where bills are considered and voted toward the floor.</div>
+    <div class="list" id="agendas"><div class="row"><div class="meta">Loading agendas…</div></div></div>
+    <div class="src" id="calsrc"></div>
   </div>
   <script>
     const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
@@ -107,6 +116,36 @@
           <div><div class="nm">${esc(fmtDate(t.dateTime))}</div><div class="sub">${esc(t.sessionType || "Session")} ↗</div></div>
         </a>`).join("");
       document.getElementById("transrc").innerHTML = `${d.live === false ? "Demo data. " : ""}${d.total ? "<b>" + Number(d.total).toLocaleString() + "</b> transcripts since 1993. " : ""}Source: NY Open Legislation ↗`;
+    })();
+
+    const dayFmt = s => { try { return new Date(s).toLocaleDateString([], { weekday: "short", month: "short", day: "numeric", year: "numeric" }); } catch { return s; } };
+    // ── NY floor calendars ──
+    (async () => {
+      let d;
+      try { d = await (await fetch("/api/ny/calendars")).json(); }
+      catch (_) { try { d = await (await fetch("./fixtures/ny_calendars.json")).json(); } catch { d = null; } }
+      const el = document.getElementById("cals");
+      if (!d || !(d.calendars || []).length) { el.innerHTML = `<div class="row"><div class="meta">Could not load calendars.</div></div>`; return; }
+      el.innerHTML = d.calendars.map(c => `
+        <a class="row" href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">
+          <div class="av" style="display:flex;align-items:center;justify-content:center;font-size:15px">📅</div>
+          <div><div class="nm">${esc(dayFmt(c.calDate))}</div><div class="sub">Floor calendar #${esc(c.calendarNumber)} ↗</div></div>
+        </a>`).join("");
+      document.getElementById("calsrc").innerHTML = `${d.live === false ? "Demo data. " : ""}Source: NY Open Legislation ↗`;
+    })();
+    // ── NY committee agendas ──
+    (async () => {
+      let d;
+      try { d = await (await fetch("/api/ny/agendas")).json(); }
+      catch (_) { try { d = await (await fetch("./fixtures/ny_agendas.json")).json(); } catch { d = null; } }
+      const el = document.getElementById("agendas");
+      if (!d || !(d.agendas || []).length) { el.innerHTML = `<div class="row"><div class="meta">Could not load agendas.</div></div>`; return; }
+      el.innerHTML = d.agendas.map(a => `
+        <div class="row">
+          <div class="av" style="display:flex;align-items:center;justify-content:center;font-size:15px">🗂️</div>
+          <div><div class="nm">Week of ${esc(dayFmt(a.weekOf))}</div>
+          <div class="sub">${esc(a.billsConsidered || 0)} bills considered · ${esc(a.committees || 0)} committee${a.committees === 1 ? "" : "s"}</div></div>
+        </div>`).join("");
     })();
   </script>
   <script src="./build-tag.js" defer></script>

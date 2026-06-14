@@ -1,0 +1,53 @@
+{
+  "total": 68,
+  "calendars": [
+    {
+      "calendarNumber": 1,
+      "calDate": "2025-01-13",
+      "year": 2025,
+      "url": "https://www.nysenate.gov/calendar"
+    },
+    {
+      "calendarNumber": 2,
+      "calDate": "2025-01-14",
+      "year": 2025,
+      "url": "https://www.nysenate.gov/calendar"
+    },
+    {
+      "calendarNumber": 3,
+      "calDate": "2025-01-21",
+      "year": 2025,
+      "url": "https://www.nysenate.gov/calendar"
+    },
+    {
+      "calendarNumber": 4,
+      "calDate": "2025-01-22",
+      "year": 2025,
+      "url": "https://www.nysenate.gov/calendar"
+    },
+    {
+      "calendarNumber": 5,
+      "calDate": "2025-01-27",
+      "year": 2025,
+      "url": "https://www.nysenate.gov/calendar"
+    },
+    {
+      "calendarNumber": 6,
+      "calDate": "2025-01-28",
+      "year": 2025,
+      "url": "https://www.nysenate.gov/calendar"
+    },
+    {
+      "calendarNumber": 7,
+      "calDate": "2025-02-03",
+      "year": 2025,
+      "url": "https://www.nysenate.gov/calendar"
+    },
+    {
+      "calendarNumber": 8,
+      "calDate": "2025-02-04",
+      "year": 2025,
+      "url": "https://www.nysenate.gov/calendar"
+    }
+  ]
+}
