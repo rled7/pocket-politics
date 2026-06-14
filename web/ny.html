@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocket Politics — New York State Legislation</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <a href="./home.html" class="brand">Pocket Politics</a>
+    <nav class="nav">
+      <a href="./home.html">My Government</a>
+      <a href="./explore.html">Browse Congress</a>
+      <a href="./bills.html">Bills</a>
+      <a href="./ny.html" class="on">New York</a>
+      <a href="./howto.html">Take Action</a>
+    </nav>
+    <h1>New York State legislation</h1>
+    <div class="meta">Bills moving through the New York State Assembly &amp; Senate — most recently active first.
+      This is the first <b>state-level</b> coverage; more states come online as their data keys are added.</div>
+
+    <input id="q" class="search" type="search" placeholder="Search NY bills by title, sponsor, or print no…" autocomplete="off" />
+    <div class="count" id="count"></div>
+    <div class="feed" id="list"><div class="card"><div class="meta" style="margin-top:0">Loading New York bills…</div></div></div>
+    <div class="src" id="src"></div>
+  </div>
+  <script>
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    let BILLS = [];
+
+    function card(b) {
+      return `<div class="post">
+        <a class="row" style="border:0" href="${esc(b.url)}" target="_blank" rel="noopener noreferrer">
+          <div class="av" style="display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--forest);background:var(--paper);font-size:12px">${esc(b.printNo || "NY")}</div>
+          <div>
+            <div class="nm">${esc(b.title || "(untitled)")}</div>
+            <div class="sub">${esc(b.type || "Bill")}${b.sponsor ? " · " + esc(b.sponsor) : ""}${b.status ? " · " + esc(b.status) : ""}${b.actionDate ? " · " + esc(b.actionDate) : ""}</div>
+          </div>
+        </a>
+        ${b.summary ? `<div class="rxbar" style="border-top:1px solid var(--line)"><div class="meta" style="margin:0">${esc(b.summary)}</div></div>` : ""}
+      </div>`;
+    }
+    function render() {
+      const q = document.getElementById("q").value.trim().toLowerCase();
+      const rows = BILLS.filter(b => !q || `${b.title} ${b.sponsor} ${b.printNo} ${b.status}`.toLowerCase().includes(q));
+      document.getElementById("count").textContent = `${rows.length} bill${rows.length === 1 ? "" : "s"} shown${q ? " (filtered)" : ""}`;
+      document.getElementById("list").innerHTML = rows.length ? rows.map(card).join("")
+        : `<div class="empty">No NY bills match “${esc(q)}”.</div>`;
+    }
+    document.getElementById("q").addEventListener("input", render);
+
+    (async () => {
+      let d;
+      try { d = await (await fetch("/api/ny/bills?limit=50")).json(); }
+      catch (_) { try { d = await (await fetch("./fixtures/ny_bills.json")).json(); } catch { d = null; } }
+      if (!d || !(d.bills || []).length) { document.getElementById("list").innerHTML = `<div class="empty">Could not load New York bills.</div>`; return; }
+      BILLS = d.bills;
+      render();
+      document.getElementById("src").innerHTML =
+        `${d.live === false ? "Demo data — live NY legislation enabled with the Open Legislation key. " : ""}${d.total ? "<b>" + Number(d.total).toLocaleString() + "</b> bills this session (" + esc(d.session) + "). " : ""}Source: ${esc(d.source || "NY Senate Open Legislation")} ↗`;
+    })();
+  </script>
+  <script src="./build-tag.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+{
+  "session": 2025,
+  "total": 25307,
+  "bills": [
+    {
+      "printNo": "A10988",
+      "type": "Bill",
+      "title": "Directs utility corporations to petition the public service commission for approval of electric grid utilization metrics",
+      "sponsor": "Sarahana Shrestha",
+      "summary": "Directs utility corporations to petition the public service commission for approval of electric grid utilization metrics; directs the public service commission to determine which electric grid utilization metrics shall be approved and how such metrics shall be applied; directs the public service com",
+      "status": "In Assembly Committee",
+      "actionDate": "2026-06-12",
+      "year": 2025,
+      "url": "https://www.nysenate.gov/legislation/bills/2025/A10988"
+    },
+    {
+      "printNo": "A11610",
+      "type": "Bill",
+      "title": "Authorizes the city of Glen Cove to impose a hotel and motel tax",
+      "sponsor": "Charles Lavine",
+      "summary": "Authorizes a hotel and motel tax in the city of Glen Cove, in the county of Nassau, at a rate of four percent.",
+      "status": "In Assembly Committee",
+      "actionDate": "2026-06-12",
+      "year": 2025,
+      "url": "https://www.nysenate.gov/legislation/bills/2025/A11610"
+    },
+    {
+      "printNo": "S10655",
+      "type": "Bill",
+      "title": "Relates to the compensation, benefits and other terms and conditions of employment of certain state officers and employees; repealer",
+      "sponsor": "Robert Jackson",
+      "summary": "Relates to the compensation, benefits and other terms and conditions of employment of certain state officers and employees; implements the agreements between the state and the public employees federation.",
+      "status": "Delivered to Governor",
+      "actionDate": "2026-06-12",
+      "year": 2025,
+      "url": "https://www.nysenate.gov/legislation/bills/2025/S10655"
+    },
+    {
+      "printNo": "S9057",
+      "type": "Bill",
+      "title": "Adds the Harriet Tubman Underground Railroad scenic byway into the state scenic byways system",
+      "sponsor": "April Baskin",
+      "summary": "Adds the Harriet Tubman Underground Railroad scenic byway into the state scenic byways system.",
+      "status": "Delivered to Governor",
+      "actionDate": "2026-06-12",
+      "year": 2025,
+      "url": "https://www.nysenate.gov/legislation/bills/2025/S9057"
+    },
+    {
+      "printNo": "A10001",
+      "type": "Bill",
+      "title": "LEGISLATURE AND JUDICIARY BUDGET",
+      "sponsor": null,
+      "summary": "Makes appropriations for the support of government - Legislature and Judiciary Budget.",
+      "status": "Signed by Governor",
+      "actionDate": "2026-06-09",
+      "year": 2025,
+      "url": "https://www.nysenate.gov/legislation/bills/2025/A10001"
+    },
+    {
+      "printNo": "S9002",
+      "type": "Bill",
+      "title": "DEBT SERVICE FUND--GENERAL DEBT SERVICE FUND",
+      "sponsor": null,
+      "summary": "Makes appropriations for the support of government - State Debt Budget.",
+      "status": "Signed by Governor",
+      "actionDate": "2026-06-09",
+      "year": 2025,
+      "url": "https://www.nysenate.gov/legislation/bills/2025/S9002"
+    }
+  ]
+}

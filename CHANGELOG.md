@@ -4,6 +4,17 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.11.0] — build 52 — 2026-06-13 — New York State legislation (first state-level data)
+### Added
+- **New York State legislation** (`web/ny.html`, `GET /api/ny/bills`) via the NY Senate Open
+  Legislation API — the **first state-level** coverage. Lists NY Assembly & Senate bills
+  (most-recently-active first) with sponsor, status, summary, and a link to the official
+  nysenate.gov page; searchable. Verified live: 25,307 bills in the 2025 session.
+- `src/nystate.ts`: verified Open Legislation client (session math, fixture fallback) — the
+  template the rest of the per-state work (#6/#25/#35) follows. Open Legislation also serves NY
+  laws, session transcripts, committee agendas, floor calendars, and member rosters (next).
+- Linked from Home → Explore and the site map. Tests 82/82.
+
 ## [0.10.0] — build 51 — 2026-06-13 — Lobbying on the profile, integration registry, build versioning
 ### Added
 - **Lobbying disclosure on the member profile** — "Who's lobbying on their issues" (Senate LDA API,

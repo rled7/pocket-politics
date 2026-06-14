@@ -228,6 +228,14 @@ check("getLobbying never fuses lobbying with money (guidance says separate)", /s
 const lobEmpty = await getLobbying("");
 check("getLobbying with no query returns no filings + a prompt", lobEmpty.filings.length === 0 && !!lobEmpty.note);
 
+// NY state legislation — fixture mode + session math
+const { getNyBills, nySession } = await import("./nystate.ts");
+check("nySession maps even year to the odd session start", nySession(2026) === 2025 && nySession(2025) === 2025);
+const ny = await getNyBills(10);
+check("getNyBills fixture: live false + demo note", ny.live === false && /demo/i.test(ny.note ?? ""));
+check("getNyBills fixture: bills have printNo, sponsor, official url",
+  ny.bills.length > 0 && ny.bills.every(b => !!b.printNo && "sponsor" in b && /nysenate\.gov/.test(b.url)));
+
 // summary
 console.log(`\n  ${pass} passed, ${fails.length} failed`);
 if (fails.length) { console.error("  FAILED: " + fails.join(", ")); process.exit(1); }
