@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocket Politics — Your State Government</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <a href="./home.html" class="brand">Pocket Politics</a>
+    <nav class="nav">
+      <a href="./home.html">My Government</a>
+      <a href="./explore.html">Congress</a>
+      <a href="./states.html" class="on">Your state</a>
+      <a href="./ny.html">New York</a>
+      <a href="./assistance.html">Get help</a>
+    </nav>
+    <h1>Your state government</h1>
+    <div class="meta">Pick any state to see its <b>legislators</b> and the <b>bills</b> moving through its legislature —
+      all 50 states, live from OpenStates.</div>
+
+    <select id="picker" class="search" style="margin-top:14px"></select>
+    <div id="out"></div>
+    <div class="src" id="src"></div>
+  </div>
+  <script>
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    const STATES = ["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming"];
+    const pc = p => /^Democrat/i.test(p) ? "D" : /^Republican/i.test(p) ? "R" : /^Independent/i.test(p) ? "I" : "U";
+    const chamberName = c => c === "upper" ? "Senate" : c === "lower" ? "House / Assembly" : "Legislature";
+
+    const picker = document.getElementById("picker");
+    picker.innerHTML = `<option value="">— choose a state —</option>` + STATES.map(s => `<option>${s}</option>`).join("");
+
+    function legHtml(p) {
+      const av = p.image ? `<img class="av" src="${esc(p.image)}" alt="" onerror="this.style.visibility='hidden'">` : `<div class="av"></div>`;
+      const inner = `${av}<div><div class="nm">${esc(p.name)}</div>
+        <div class="sub"><span class="dot ${pc(p.party)}"></span>${esc(p.party || "")}${p.role ? " · " + esc(p.role) : ""}${p.district ? " · Dist " + esc(p.district) : ""}</div></div>`;
+      return p.url ? `<a class="row" href="${esc(p.url)}" target="_blank" rel="noopener noreferrer">${inner}</a>` : `<div class="row">${inner}</div>`;
+    }
+    function billHtml(b) {
+      return `<a class="item" style="display:block;text-decoration:none;color:inherit" href="${esc(b.url || "#")}" target="_blank" rel="noopener noreferrer">
+        <span class="date">${esc(b.latestDate || "")}</span><span class="bill">${esc(b.identifier || "")}${b.classification ? " · " + esc(b.classification) : ""} ↗</span>
+        <div class="title">${esc(b.title || "")}</div>
+        ${b.latestAction ? `<div class="action">${esc(b.latestAction)}</div>` : ""}</a>`;
+    }
+    async function load(state) {
+      const out = document.getElementById("out"), src = document.getElementById("src");
+      if (!state) { out.innerHTML = ""; src.innerHTML = ""; return; }
+      out.innerHTML = `<div class="card"><div class="meta" style="margin-top:0">Loading ${esc(state)}…</div></div>`;
+      let d;
+      try { d = await (await fetch("/api/state?state=" + encodeURIComponent(state))).json(); }
+      catch (_) { try { d = await (await fetch("./fixtures/state.json")).json(); } catch { d = null; } }
+      if (!d) { out.innerHTML = `<div class="empty">Could not load ${esc(state)}.</div>`; return; }
+      const byCh = { upper: [], lower: [], other: [] };
+      (d.legislators || []).forEach(p => (byCh[p.chamber] || byCh.other).push(p));
+      const legSection = ["upper", "lower", "other"].filter(c => byCh[c].length).map(c =>
+        `<div class="sec-title">${esc(chamberName(c))} <span class="state-h n" style="background:none;padding:0;border:0">${byCh[c].length}</span></div>
+         <div class="list">${byCh[c].map(legHtml).join("")}</div>`).join("");
+      const billSection = (d.bills || []).length
+        ? `<div class="sec-title">Recent bills</div><div class="card">${d.bills.map(billHtml).join("")}</div>` : "";
+      out.innerHTML = (legSection || `<div class="empty">No legislators found.</div>`) + billSection;
+      src.innerHTML = `${d.live === false ? "Demo data (" + esc(d.state) + ") — live, all-50-states data is on with the OpenStates key. " : ""}Source: ${esc(d.source || "OpenStates")} ↗ · showing up to 50 legislators &amp; 15 latest bills`;
+    }
+    picker.addEventListener("change", () => { const s = picker.value; load(s); history.replaceState(null, "", s ? "?state=" + encodeURIComponent(s) : "states.html"); });
+
+    const initial = new URLSearchParams(location.search).get("state");
+    if (initial && STATES.includes(initial)) { picker.value = initial; load(initial); }
+  </script>
+  <script src="./build-tag.js" defer></script>
+  <script src="./bw-mode.js" defer></script>
+</body>
+</html>

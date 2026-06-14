@@ -243,6 +243,14 @@ const nyt = await getNyTranscripts();
 check("getNyTranscripts fixture: entries have dateTime + url",
   nyt.transcripts.length > 0 && nyt.transcripts.every(t => !!t.dateTime && !!t.url));
 
+// OpenStates — all-50-states, fixture mode
+const { getStateData } = await import("./openstates.ts");
+const sd = await getStateData("North Dakota");
+check("getStateData fixture: live false + demo note", sd.live === false && /demo/i.test(sd.note ?? ""));
+check("getStateData fixture: legislators have name + chamber, bills have identifier",
+  sd.legislators.length > 0 && sd.legislators.every(l => !!l.name && "chamber" in l)
+  && sd.bills.length > 0 && sd.bills.every(b => !!b.identifier));
+
 // summary
 console.log(`\n  ${pass} passed, ${fails.length} failed`);
 if (fails.length) { console.error("  FAILED: " + fails.join(", ")); process.exit(1); }

@@ -1,0 +1,45 @@
+{
+  "state": "North Dakota",
+  "bills": [
+    {
+      "identifier": "HB 1622",
+      "title": "AN ACT to create and enact chapter 43-17.5 of the North Dakota Century Code, relating to the physician assistant licensure compact; to amend and reenact section 43-17-01, subsection 1 of section 43-17-02.1, and sections 43-17-02.2 and 43-17-46 of the North Dakota Century Code, relating to the requirements of physician assistants privileged to practice under the physician assistant licensure compact; and to provide an effective date.",
+      "classification": "bill",
+      "session": "69",
+      "latestAction": "Filed with Secretary Of State 01/23",
+      "latestDate": "2026-01-28",
+      "url": "https://openstates.org/nd/bills/69/HB1622/"
+    },
+    {
+      "identifier": "HB 1621",
+      "title": "AN ACT to amend and reenact subsection 1 of section 15.1-21-01 and section 15.1-21-02 of the North Dakota Century Code, relating to requiring the presidential physical fitness test in physical education courses in elementary, middle, and high schools and providing exceptions to the test; and to provide an effective date.",
+      "classification": "bill",
+      "session": "69",
+      "latestAction": "Filed with Secretary Of State 01/23",
+      "latestDate": "2026-01-28",
+      "url": "https://openstates.org/nd/bills/69/HB1621/"
+    }
+  ],
+  "legislators": [
+    {
+      "name": "Alisa Mitskog",
+      "party": "Democratic",
+      "role": "Representative",
+      "chamber": "lower",
+      "district": "25",
+      "image": "https://www.ndlegis.gov/sites/default/files/styles/member_list_photo/public/person/photo/amitskog2023_3.jpg?itok=vwMWQ-Ou",
+      "email": "amitskog@ndlegis.gov",
+      "url": "https://openstates.org/person/alisa-mitskog-4kTkkKaWhkLlchhJfyGwsx/"
+    },
+    {
+      "name": "Andrew Marschall",
+      "party": "Republican",
+      "role": "Representative",
+      "chamber": "lower",
+      "district": "16",
+      "image": "https://www.ndlegis.gov/sites/default/files/styles/member_list_photo/public/person/photo/amarschall2023.jpg?itok=hxGY-yV_",
+      "email": "amarschall@ndlegis.gov",
+      "url": "https://openstates.org/person/andrew-marschall-3Opfw1eL495VfDCIz9vsSW/"
+    }
+  ]
+}

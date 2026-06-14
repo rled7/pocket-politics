@@ -21,6 +21,7 @@ import { getReactions, setReaction, isReaction, validClientId } from "./reaction
 import { getLobbying } from "./lobbying.ts";
 import { buildInfo } from "./build.ts";
 import { getNyBills, getNyLaws, getNyTranscripts } from "./nystate.ts";
+import { getStateData } from "./openstates.ts";
 import { SwrCache, mapLimit, type LoadResult } from "./swr_cache.ts";
 import { KEYS, integrations, keySummary } from "./config.ts";
 
@@ -122,6 +123,12 @@ async function route(url: URL, request: Request): Promise<Response> {
   }
   if (segs[0] === "api" && segs[1] === "ny" && segs[2] === "transcripts") {
     return jsonCached(await getNyTranscripts(clampLimit(q.get("limit"), 12, 30), KEYS.nyOpenLeg), { request });
+  }
+  if (segs[0] === "api" && segs[1] === "state") {
+    const st = (q.get("state") ?? "").slice(0, 40).trim();
+    if (!st) return jsonError("state required (e.g. ?state=California)", 400);
+    // Long TTL: OpenStates is rate-limited (500/day) and state data changes slowly.
+    return jsonCached(await getStateData(st, KEYS.openStates), { request, sMaxAge: 1800 });
   }
   if (segs[0] === "api" && segs[1] === "lobbying") {
     const yr = parseInt(q.get("year") ?? "", 10);
@@ -291,7 +298,13 @@ async function warm(): Promise<void> {
 function startRefreshLoop(): void {
   if (!PREWARM) return;
   setInterval(() => {
-    for (const k of apiCache.keys()) apiCache.revalidate(k, () => runRoute(k));
+    for (const k of apiCache.keys()) {
+      // Don't proactively re-pull rate-limited upstreams (OpenStates = 500/day) — they refresh
+      // on-access via SWR instead, bounded by real traffic. Re-pulling all states on a timer
+      // would blow the daily quota.
+      if (k.startsWith("/api/state")) continue;
+      apiCache.revalidate(k, () => runRoute(k));
+    }
   }, 240_000).unref(); // every 4 min; unref so it never holds the process open
 }
 

@@ -4,6 +4,18 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.17.0] — build 58 — 2026-06-13 — All 50 states (OpenStates) — the big unlock
+### Added
+- **Your state government** (`web/states.html`, `GET /api/state?state=`) — pick any of the 50 states to
+  see its **legislators** (by chamber, with party/district) and the **bills** moving through its
+  legislature. Live via OpenStates v3. Verified (Vermont → 50 legislators, 15 bills). Linked from Home
+  + site map. Closes #6; advances #35 (state officials).
+- `src/openstates.ts`: rate-limit-aware client (free tier = 500/day, 1/sec) — on-demand only, two
+  SEQUENTIAL calls per state, fixture fallback.
+### Rate-limit safeguards
+- State responses use a long cache TTL (`sMaxAge=1800`) and are **excluded from the background refresh
+  loop**, so cached states are never re-pulled on a timer — protecting the 500/day quota.
+
 ## [0.16.0] — build 57 — 2026-06-13 — Defend yourself in civil court
 ### Added
 - **Defend yourself** (`web/defend.html` + `defend.json`) — plain-language help for people sued without

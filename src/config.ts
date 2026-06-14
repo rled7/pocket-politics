@@ -35,6 +35,7 @@ export const KEYS = {
   // committee agendas, floor calendars, Senate/Assembly membership. `nyOpenLeg2` is a spare key.
   nyOpenLeg:  env("NY_OPENLEG_API_KEY"),
   nyOpenLeg2: env("NY_OPENLEG_API_KEY_2"),
+  openStates: env("OPENSTATES_API_KEY"),  // all-50-states legislators + bills (tight free tier)
 } as const;
 
 const REGISTRY: Integration[] = [
@@ -42,6 +43,7 @@ const REGISTRY: Integration[] = [
   { id: "fec",       label: "FEC (campaign finance)",        signup: "https://api.open.fec.gov/developers/",              value: KEYS.fec },
   { id: "lda",       label: "Senate Lobbying Disclosure",    signup: "https://lda.senate.gov/api/",                       value: KEYS.lda },
   { id: "nyOpenLeg", label: "NY Open Legislation",           signup: "https://legislation.nysenate.gov/#!/signup",        value: KEYS.nyOpenLeg },
+  { id: "openStates", label: "OpenStates (all 50 states)",   signup: "https://open.pluralpolicy.com/accounts/signup/",    value: KEYS.openStates },
 ];
 
 /** Secrets-safe status: which integrations are configured. Never returns key values. */
