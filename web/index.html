@@ -91,12 +91,15 @@
             placeholder="An issue or bill — e.g. “climate”, “H.R. 1”" />
           <button class="btn" type="submit">Search lobbying</button>
         </form>`;
-      el.innerHTML = searchUi(q) + `<div class="meta" style="margin-top:8px">Searching lobbying disclosures…</div>`;
+      // The official source link must ALWAYS show — even before a search or on error.
+      const LDA_URL = "https://lda.senate.gov/filings/public/filing/search/";
+      const ldaFoot = (lead) => `<div class="src">${lead ? esc(lead) + " " : ""}<a href="${LDA_URL}" target="_blank" rel="noopener noreferrer">Official Senate LDA search ↗</a> · Source: Senate Lobbying Disclosure Act filings</div>`;
+      el.innerHTML = searchUi(q) + `<div class="meta" style="margin-top:8px">Searching lobbying disclosures…</div>` + ldaFoot();
       wireLobbyForm();
-      if (!q) { el.innerHTML = searchUi(q) + `<div class="meta" style="margin-top:8px">Enter an issue or bill to see who's lobbying on it.</div>`; wireLobbyForm(); return; }
+      if (!q) { el.innerHTML = searchUi(q) + `<div class="meta" style="margin-top:8px">Enter an issue or bill to see who's paying which firm to lobby on it.</div>` + ldaFoot("Lobbying is disclosed by issue, not by member."); wireLobbyForm(); return; }
       let d;
       try { d = await (await fetch(`/api/lobbying?q=${encodeURIComponent(q)}&year=${lobbyYear}`)).json(); }
-      catch (_) { el.innerHTML = searchUi(q) + `<div class="meta" style="margin-top:8px">Lobbying lookup unavailable right now.</div>`; wireLobbyForm(); return; }
+      catch (_) { el.innerHTML = searchUi(q) + `<div class="meta" style="margin-top:8px">Lobbying lookup unavailable right now.</div>` + ldaFoot(); wireLobbyForm(); return; }
       const rows = (d.filings || []).map(f => `
         <div class="item">
           <div class="title">${esc(f.client || "—")} <span class="bill">via ${esc(f.registrant || "—")}</span></div>

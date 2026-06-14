@@ -5,8 +5,8 @@
  *
  * Surfaced at /api/version and shown in the page footer so every screen says which build it is.
  */
-export const VERSION = "0.17.0";
-export const BUILD = 58;
+export const VERSION = "0.17.1";
+export const BUILD = 59;
 export const BUILD_TAG = `v${VERSION} · build ${BUILD}`;
 
 export function buildInfo(): { name: string; version: string; build: number; tag: string } {

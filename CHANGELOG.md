@@ -4,6 +4,16 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.17.1] — build 59 — 2026-06-13 — Fix: lobbying source link always shows
+### Fixed
+- The profile's "Who's lobbying on their issues" panel only rendered the **Official Senate LDA search
+  link** in the loaded state — so when a member had no seed issue, or the lookup errored, the source
+  link was missing. It now always shows (before a search, on empty results, and on error).
+### Noted
+- New task #44: make lobbying genuinely **member-specific via an AI step** (parse filings vs. the
+  member's own bills/issues, summarize "what they're trying to do") — the honest fix for LDA being
+  issue-level, not member-keyed. Needs an AI provider (cost decision) + per-member caching.
+
 ## [0.17.0] — build 58 — 2026-06-13 — All 50 states (OpenStates) — the big unlock
 ### Added
 - **Your state government** (`web/states.html`, `GET /api/state?state=`) — pick any of the 50 states to
