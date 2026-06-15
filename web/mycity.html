@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocket Politics — My City</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <a href="./home.html" class="brand">Pocket Politics</a>
+    <nav class="nav">
+      <a href="./home.html">My Government</a>
+      <a href="./mycity.html" class="on">My City</a>
+      <a href="./local.html">Find officials</a>
+      <a href="./events.html">Events</a>
+      <a href="./states.html">Your state</a>
+    </nav>
+    <h1>My City</h1>
+    <div class="meta">Your local heads-up — set automatically from your device location (or enter an address).
+      Everything here is scoped to where you actually live.</div>
+
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <button id="geo" class="btn">📍 Use my location</button>
+      <span class="meta" style="margin:0">or</span>
+      <form id="af" style="display:flex;gap:8px;flex:1;min-width:220px">
+        <input id="addr" class="search" style="margin:0;flex:1" placeholder="Enter your address or ZIP" autocomplete="street-address" />
+        <button class="btn" type="submit" style="background:transparent;color:var(--forest);border:1px solid var(--line)">Set</button>
+      </form>
+    </div>
+    <div id="note" class="meta" style="margin-top:8px"></div>
+
+    <div id="reps"></div>
+    <div id="links" style="display:none">
+      <div class="sec-title">Your local government</div>
+      <div class="list">
+        <a class="row" id="stateLink" href="./states.html"><div><div class="nm">🏛️ Your state legislature</div><div class="sub">Bills &amp; legislators</div></div></a>
+        <a class="row" href="./local.html"><div><div class="nm">🔎 County, city &amp; local officials</div><div class="sub">Find every official down to ALJs</div></div></a>
+        <a class="row" href="./events.html"><div><div class="nm">📣 Local civic events</div><div class="sub">Town halls, elections, public meetings</div></div></a>
+        <a class="row" href="./assistance.html"><div><div class="nm">🤝 Local assistance programs</div><div class="sub">Food, cash, rent, health, heat</div></div></a>
+      </div>
+    </div>
+    <div class="src">Location is used only in your browser to find your district — it's saved locally, and you can change it anytime.</div>
+  </div>
+  <script>
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    const pc = p => /^Democrat/i.test(p) ? "D" : /^Republican/i.test(p) ? "R" : /^Independent/i.test(p) ? "I" : "U";
+    const box = document.getElementById("reps"), note = document.getElementById("note"), links = document.getElementById("links");
+    const getHome = () => { try { return JSON.parse(localStorage.getItem("pp_home") || "null"); } catch { return null; } };
+    const setHome = h => localStorage.setItem("pp_home", JSON.stringify(h));
+
+    function repRow(m) {
+      const dist = (m.district !== undefined && m.district !== null && m.district !== "") ? ` · District ${esc(m.district)}` : "";
+      const av = m.photo ? `<img class="av" src="${esc(m.photo)}" alt="" onerror="this.style.visibility='hidden'">` : `<div class="av"></div>`;
+      return `<a class="row" href="./index.html?bioguide=${encodeURIComponent(m.bioguideId)}">${av}
+        <div><div class="nm">${esc(m.name)}</div><div class="sub"><span class="dot ${pc(m.party)}"></span>${esc(m.party)} · ${esc(m.chamber)}${dist}</div></div></a>`;
+    }
+    function show(d) {
+      if (!d || !d.found || !(d.representatives || []).length) { box.innerHTML = `<div class="card"><div class="meta" style="margin-top:0">${esc((d && d.note) || "Couldn't find your district — try a fuller address.")}</div></div>`; return; }
+      box.innerHTML = `<div class="sec-title">Your representatives — ${esc(d.state)}${d.district ? ", District " + esc(d.district) : ""}</div>
+        <div class="list">${d.representatives.map(repRow).join("")}</div>`;
+      if (d.state) document.getElementById("stateLink").href = "./states.html?state=" + encodeURIComponent(d.state);
+      links.style.display = "";
+    }
+    async function byCoords(lat, lon, remember) {
+      note.textContent = "Finding your area…";
+      try { const d = await (await fetch(`/api/reps?lat=${lat}&lon=${lon}`)).json(); show(d); note.textContent = d.found ? "📍 Set from your location" : ""; if (remember) setHome({ t: "c", lat, lon }); }
+      catch (_) { note.textContent = "Lookup unavailable right now."; }
+    }
+    async function byAddr(addr, remember) {
+      note.textContent = "Finding your area…";
+      try { const d = await (await fetch("/api/reps?address=" + encodeURIComponent(addr))).json(); show(d); note.textContent = d.found ? "📍 Set from your address" : ""; if (remember) setHome({ t: "a", v: addr }); }
+      catch (_) { note.textContent = "Lookup unavailable right now."; }
+    }
+    document.getElementById("geo").addEventListener("click", () => {
+      if (!navigator.geolocation) { note.textContent = "Location unavailable — enter an address."; return; }
+      note.textContent = "Asking your browser for your location…";
+      navigator.geolocation.getCurrentPosition(p => byCoords(p.coords.latitude.toFixed(5), p.coords.longitude.toFixed(5), true), () => { note.textContent = "Location denied — enter an address instead."; });
+    });
+    document.getElementById("af").addEventListener("submit", e => { e.preventDefault(); const a = document.getElementById("addr").value.trim(); if (a) byAddr(a, true); });
+
+    // Auto-load from a saved home, or prompt for location on first visit.
+    (function init() {
+      const h = getHome();
+      if (h && h.t === "c") byCoords(h.lat, h.lon, false);
+      else if (h && h.t === "a") byAddr(h.v, false);
+      else if (navigator.geolocation) { note.textContent = "Tap “Use my location” to set up your local view."; }
+    })();
+  </script>
+  <script src="./app-shell.js" defer></script>
+  <script src="./build-tag.js" defer></script>
+  <script src="./bw-mode.js" defer></script>
+</body>
+</html>

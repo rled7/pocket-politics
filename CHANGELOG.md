@@ -4,6 +4,13 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.29.0] — build 71 — 2026-06-15 — "My City" location-aware local dashboard
+### Added
+- **My City** (`web/mycity.html`) — a local heads-up set automatically from your device location (or an
+  address): your representatives + quick routes to your state legislature, local-officials finder, local
+  events, and assistance — all scoped to where you live. Location stays in the browser (saved locally,
+  changeable anytime). Built on the existing Census geocoder. Closes #23.
+
 ## [0.28.0] — build 70 — 2026-06-15 — Laws, regulations & ordinances finder
 ### Added
 - **Laws, regulations & ordinances** (`web/regulations.html` + `regulations.json`) — every layer of
