@@ -299,6 +299,12 @@ check("createCheckout flags a missing price id (no network call)",
   check("cloture fixture: total = invoked + blocked", clo.total === clo.invoked + clo.blocked);
 }
 
+// Security — state param allowlist (no upstream-URL injection)
+const { isValidState } = await import("./openstates.ts");
+check("isValidState accepts real states", isValidState("California") && isValidState("New York"));
+check("isValidState rejects junk / injection attempts",
+  !isValidState("../etc/passwd") && !isValidState("California&jurisdiction=x") && !isValidState("") && !isValidState("Atlantis"));
+
 // summary
 console.log(`\n  ${pass} passed, ${fails.length} failed`);
 if (fails.length) { console.error("  FAILED: " + fails.join(", ")); process.exit(1); }

@@ -4,6 +4,16 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.25.0] — build 67 — 2026-06-15 — Security hardening v1
+### Security
+- **Security headers on every response**: Content-Security-Policy (locks object/base/frame, restricts
+  script/style/img/connect origins), `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`,
+  `Referrer-Policy`, and a `Permissions-Policy` (geolocation self-only; camera/mic off).
+- **State param allowlist** (`isValidState`) — the `/api/state` jurisdiction is validated against the
+  50 state names, so it can never inject into the upstream OpenStates URL (SSRF/param-injection defense).
+- This is hardening **v1** (headers + input validation + audit of escaping/secret-safety). The full
+  red/blue-team pass (#16) stays scheduled for after the feature set locks, per plan. Tests 104/104.
+
 ## [0.24.0] — build 66 — 2026-06-15 — Facebook-style HUD layout (progressive)
 ### Added
 - **3-column HUD layout** (`web/app-shell.js` + `.appshell`/`.rail` styles) — on wide screens (≥1120px)

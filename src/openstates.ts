@@ -13,6 +13,17 @@
 const API = "https://v3.openstates.org";
 const SOURCE = "OpenStates (Plural)";
 
+/** Allowlist of valid jurisdictions — so a `state` param can never inject into the upstream URL. */
+export const US_STATES = new Set([
+  "Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia",
+  "Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts",
+  "Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey",
+  "New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island",
+  "South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia",
+  "Wisconsin","Wyoming",
+]);
+export const isValidState = (s: string): boolean => US_STATES.has(s);
+
 export interface StateBill {
   identifier: string; title: string; classification?: string | null;
   session?: string; latestAction?: string | null; latestDate?: string | null; url?: string;

@@ -21,7 +21,7 @@ import { getReactions, setReaction, isReaction, validClientId } from "./reaction
 import { getLobbying } from "./lobbying.ts";
 import { buildInfo } from "./build.ts";
 import { getNyBills, getNyLaws, getNyTranscripts, getNyCalendars, getNyAgendas } from "./nystate.ts";
-import { getStateData } from "./openstates.ts";
+import { getStateData, isValidState } from "./openstates.ts";
 import { getCalendar, OFFICIAL_CALENDARS } from "./calendar.ts";
 import { getBudgetWatch } from "./budget.ts";
 import { createCheckout, tiersPublic, paymentsConfigured } from "./payments.ts";
@@ -148,7 +148,7 @@ async function route(url: URL, request: Request): Promise<Response> {
   }
   if (segs[0] === "api" && segs[1] === "state") {
     const st = (q.get("state") ?? "").slice(0, 40).trim();
-    if (!st) return jsonError("state required (e.g. ?state=California)", 400);
+    if (!isValidState(st)) return jsonError("unknown state — use a full state name, e.g. ?state=California", 400);
     // Long TTL: OpenStates is rate-limited (500/day) and state data changes slowly.
     return jsonCached(await getStateData(st, KEYS.openStates), { request, sMaxAge: 1800 });
   }
@@ -183,8 +183,32 @@ async function route(url: URL, request: Request): Promise<Response> {
   return jsonError("not found", 404);
 }
 
+// Security headers applied to every response (static + API). The app is inline-script heavy, so the
+// CSP allows 'unsafe-inline' for scripts but still locks down object/base/frame and restricts where
+// scripts, styles, images, and fetches may come from — defense-in-depth on top of output escaping.
+const CSP = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "font-src https://fonts.gstatic.com",
+  "img-src 'self' https: data:",
+  "connect-src 'self'",
+  "frame-ancestors 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "form-action 'self'",
+].join("; ");
+function setSecurityHeaders(res: http.ServerResponse): void {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "SAMEORIGIN");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("Permissions-Policy", "geolocation=(self), microphone=(), camera=()");
+  res.setHeader("Content-Security-Policy", CSP);
+}
+
 const server = http.createServer(async (req, res) => {
   try {
+    setSecurityHeaders(res);
     const url = new URL(req.url ?? "/", "http://localhost");
     // Static web client for everything that isn't the API.
     if (!url.pathname.startsWith("/api") && url.pathname !== "/healthz") {
