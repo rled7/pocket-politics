@@ -1,0 +1,70 @@
+{
+  "note": "Government has many layers. We list the people directly where clean data exists (federal Congress + all 50 state legislatures). For county/city/local offices — which have no single national database — we route you to the authoritative finders to look up the actual people who hold those offices where YOU live.",
+  "levels": [
+    {
+      "level": "Federal", "icon": "🇺🇸",
+      "what": "President, Vice President, your two U.S. Senators, and your U.S. House Representative.",
+      "offices": ["President & Vice President", "U.S. Senators (2 per state)", "U.S. Representative (your district)"],
+      "haveData": true,
+      "finds": [
+        { "name": "Find your members of Congress", "url": "./home.html" },
+        { "name": "Browse all of Congress", "url": "./explore.html" },
+        { "name": "Presidents", "url": "./presidents.html" }
+      ]
+    },
+    {
+      "level": "State", "icon": "🏛️",
+      "what": "Governor, Lieutenant Governor, Attorney General, and your state legislature (Senate + House/Assembly).",
+      "offices": ["Governor & Lt. Governor", "Attorney General, Secretary of State, Comptroller", "State Senators & Representatives/Assembly"],
+      "haveData": true,
+      "finds": [
+        { "name": "Your state's legislators & bills", "url": "./states.html" },
+        { "name": "New York (deep coverage)", "url": "./ny.html" },
+        { "name": "Ballotpedia — who represents me", "url": "https://ballotpedia.org/Sample_Ballot_Lookup" }
+      ]
+    },
+    {
+      "level": "County", "icon": "🗂️",
+      "what": "The county government that runs courts, the sheriff, elections, and many services.",
+      "offices": ["County Executive / Board of Supervisors / Legislature", "Sheriff", "District Attorney", "County Clerk & Comptroller", "Surrogate / Probate judges"],
+      "haveData": false,
+      "finds": [
+        { "name": "USA.gov — state & local governments", "url": "https://www.usa.gov/state-local-governments" },
+        { "name": "NACo — find your county", "url": "https://www.naco.org/counties" },
+        { "name": "Ballotpedia — sample ballot lookup", "url": "https://ballotpedia.org/Sample_Ballot_Lookup" }
+      ]
+    },
+    {
+      "level": "City / Town / Village", "icon": "🏙️",
+      "what": "Your municipal government — the officials closest to daily life.",
+      "offices": ["Mayor", "City / Town Council", "City Clerk & Comptroller", "Local department heads"],
+      "haveData": false,
+      "finds": [
+        { "name": "USA.gov — find your local government", "url": "https://www.usa.gov/local-governments" },
+        { "name": "Ballotpedia — sample ballot lookup", "url": "https://ballotpedia.org/Sample_Ballot_Lookup" }
+      ]
+    },
+    {
+      "level": "Local boards & districts", "icon": "🏫",
+      "what": "Elected and appointed boards that decide schools, zoning, and neighborhood matters.",
+      "offices": ["School board", "Zoning / Planning board", "Community boards", "Library & special districts"],
+      "haveData": false,
+      "finds": [
+        { "name": "Ballotpedia — school boards", "url": "https://ballotpedia.org/School_board_elections" },
+        { "name": "Your county/city Board of Elections", "url": "https://www.usa.gov/state-election-office" }
+      ]
+    },
+    {
+      "level": "Judges & administrative law judges", "icon": "⚖️",
+      "what": "Trial & appellate judges, plus the administrative law judges (ALJs) who decide parking & traffic tickets, benefits, and licensing disputes.",
+      "offices": ["State trial & appellate judges", "Administrative law judges (ALJs)", "Parking/traffic hearing officers", "Benefits & licensing tribunals"],
+      "haveData": false,
+      "finds": [
+        { "name": "How law & the courts work (our guide)", "url": "./courts.html" },
+        { "name": "NYC OATH — administrative tribunal", "url": "https://www.nyc.gov/site/oath/index.page" },
+        { "name": "NY DMV — traffic ticket hearings", "url": "https://dmv.ny.gov/tickets" },
+        { "name": "National Center for State Courts", "url": "https://www.ncsc.org/" }
+      ]
+    }
+  ]
+}

@@ -4,6 +4,17 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.26.0] — build 68 — 2026-06-15 — Find every official (federal → ALJs)
+### Added
+- **Find every official** (`web/local.html` + `local.json`) — every layer of government from the
+  President down to the administrative law judge who hears your parking ticket. Where clean data exists
+  (federal Congress + all 50 state legislatures) we link straight to the people we already list; for
+  county/city/local/judges — which have **no single national database** — we route to the authoritative
+  finders (USA.gov, Ballotpedia, NACo, NYC OATH, NY DMV, NCSC) rather than fabricate. Honest "we list
+  these / find yours" badges per level. Linked from Home, site map, and the HUD nav.
+- Addresses #35 (officials at every level) and the intent of #19 (down to ALJs) via honest finder
+  routing — no fake local data.
+
 ## [0.25.0] — build 67 — 2026-06-15 — Security hardening v1
 ### Security
 - **Security headers on every response**: Content-Security-Policy (locks object/base/frame, restricts

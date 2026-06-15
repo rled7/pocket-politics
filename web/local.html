@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocket Politics — Find Every Official</title>
+  <link rel="stylesheet" href="./style.css" />
+  <style>
+    .lvl { background: var(--paper-2); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; margin-top: 14px; box-shadow: var(--shadow); }
+    .lvl h3 { margin: 0 0 4px; font-family: "Fraunces", serif; font-size: 18px; }
+    .lvl .what { font-size: 14.5px; color: var(--ink-soft); }
+    .offices { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+    .office { font-size: 12.5px; background: #f1ede0; border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; }
+    .have { font-size: 11px; font-weight: 700; border-radius: 6px; padding: 2px 7px; margin-left: 6px; }
+    .have.y { background: #effaf7; color: var(--p-d); border: 1px solid #b8ddd6; }
+    .have.n { background: #fdf5ea; color: var(--brass-2); border: 1px solid #f0d5b0; }
+    .finds a { display: inline-block; margin: 3px 8px 3px 0; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="./home.html" class="brand">Pocket Politics</a>
+    <nav class="nav">
+      <a href="./home.html">My Government</a>
+      <a href="./states.html">Your state</a>
+      <a href="./local.html" class="on">Find officials</a>
+      <a href="./courts.html">Law &amp; courts</a>
+      <a href="./howto.html">Take Action</a>
+    </nav>
+    <h1>Find every official — top to bottom</h1>
+    <div class="meta">From the President down to the administrative law judge who hears your parking ticket.
+      Where clean data exists, we list the people directly. Where it doesn't (county/city/local have no single
+      national database), we send you straight to the authoritative finder for your address.</div>
+    <div id="levels"></div>
+    <div class="src">Honest note: there's no national API for every local official, so local levels link to the
+      official finders (USA.gov, Ballotpedia, your Board of Elections) rather than guess.</div>
+  </div>
+  <script>
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    fetch("./local.json").then(r => r.json()).then(d => {
+      document.getElementById("levels").innerHTML = (d.levels || []).map(L => {
+        const ext = u => /^https?:/.test(u);
+        return `<div class="lvl">
+          <h3>${esc(L.icon || "")} ${esc(L.level)}<span class="have ${L.haveData ? "y" : "n"}">${L.haveData ? "we list these" : "find yours"}</span></h3>
+          <div class="what">${esc(L.what)}</div>
+          <div class="offices">${(L.offices || []).map(o => `<span class="office">${esc(o)}</span>`).join("")}</div>
+          <div class="finds">${(L.finds || []).map(f => `<a href="${esc(f.url)}"${ext(f.url) ? ' target="_blank" rel="noopener noreferrer"' : ""}>${esc(f.name)}${ext(f.url) ? " ↗" : " →"}</a>`).join("")}</div>
+        </div>`;
+      }).join("");
+    }).catch(() => { document.getElementById("levels").innerHTML = `<div class="empty">Could not load.</div>`; });
+  </script>
+  <script src="./app-shell.js" defer></script>
+  <script src="./build-tag.js" defer></script>
+  <script src="./bw-mode.js" defer></script>
+</body>
+</html>
