@@ -1,0 +1,48 @@
+{
+  "note": "The full body of binding rules sits in many places. Where we have live data (federal bills, all-50-state bills, NY laws) we link straight in; for the rest — federal & state regulations and local ordinances — we route to the authoritative full-text sources.",
+  "groups": [
+    {
+      "id": "fed-laws", "label": "Federal laws (statutes)", "icon": "📜",
+      "blurb": "Bills that became law, and the codified United States Code.",
+      "links": [
+        { "name": "Bills in Congress (live)", "url": "./bills.html" },
+        { "name": "U.S. Code — Cornell Law (free)", "url": "https://www.law.cornell.edu/uscode/text" },
+        { "name": "U.S. Code — official (uscode.house.gov)", "url": "https://uscode.house.gov/" }
+      ]
+    },
+    {
+      "id": "fed-regs", "label": "Federal regulations", "icon": "📋",
+      "blurb": "Rules agencies write to carry out statutes — the eCFR is the always-current full text.",
+      "links": [
+        { "name": "eCFR — Electronic Code of Federal Regulations", "url": "https://www.ecfr.gov/" },
+        { "name": "Regulations.gov — read & comment on proposed rules", "url": "https://www.regulations.gov/" },
+        { "name": "Federal Register — daily rules", "url": "https://www.federalregister.gov/" }
+      ]
+    },
+    {
+      "id": "state-laws", "label": "State legislation", "icon": "🏛️",
+      "blurb": "Bills and laws in all 50 state legislatures.",
+      "links": [
+        { "name": "Your state's bills & legislators (live)", "url": "./states.html" },
+        { "name": "New York — bills, laws & transcripts (live)", "url": "./ny.html" }
+      ]
+    },
+    {
+      "id": "state-regs", "label": "State regulations", "icon": "📑",
+      "blurb": "The rules state agencies issue (e.g., the NY Codes, Rules & Regulations — NYCRR).",
+      "links": [
+        { "name": "NY Codes, Rules & Regulations (NYCRR)", "url": "https://govt.westlaw.com/nycrr/" },
+        { "name": "Find your state's register / admin code", "url": "https://www.usa.gov/state-government" }
+      ]
+    },
+    {
+      "id": "local", "label": "Local ordinances & codes", "icon": "🏙️",
+      "blurb": "City, town, and county codes — most are published full-text in these libraries.",
+      "links": [
+        { "name": "Municode Library", "url": "https://library.municode.com/" },
+        { "name": "American Legal Publishing — Code Library", "url": "https://codelibrary.amlegal.com/" },
+        { "name": "Code Publishing Co.", "url": "https://www.codepublishing.com/" }
+      ]
+    }
+  ]
+}

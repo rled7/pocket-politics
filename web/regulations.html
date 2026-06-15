@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocket Politics — Laws, Regulations & Ordinances</title>
+  <link rel="stylesheet" href="./style.css" />
+  <style>
+    .grp { background: var(--paper-2); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; margin-top: 14px; box-shadow: var(--shadow); }
+    .grp h3 { margin: 0 0 4px; font-family: "Fraunces", serif; font-size: 18px; }
+    .grp .bl { font-size: 14px; color: var(--ink-soft); margin-bottom: 8px; }
+    .grp a.lnk { display: inline-block; margin: 3px 8px 3px 0; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="./home.html" class="brand">Pocket Politics</a>
+    <nav class="nav">
+      <a href="./home.html">My Government</a>
+      <a href="./bills.html">Bills</a>
+      <a href="./regulations.html" class="on">Laws &amp; rules</a>
+      <a href="./glossary.html">Glossary</a>
+      <a href="./courts.html">Law &amp; courts</a>
+    </nav>
+    <h1>Laws, regulations &amp; ordinances</h1>
+    <div class="meta">Every layer of binding rules — federal statutes &amp; regulations, all-50-state legislation,
+      state administrative codes, and local ordinances. We link straight into our live data where we have it,
+      and to the authoritative full-text source everywhere else.</div>
+    <div id="groups"></div>
+    <div class="src">There's no single feed for all regulations &amp; ordinances, so each layer routes to its
+      authoritative full-text source (eCFR, Regulations.gov, Municode, American Legal).</div>
+  </div>
+  <script>
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    fetch("./regulations.json").then(r => r.json()).then(d => {
+      document.getElementById("groups").innerHTML = (d.groups || []).map(g => {
+        const ext = u => /^https?:/.test(u);
+        return `<div class="grp"><h3>${esc(g.icon || "")} ${esc(g.label)}</h3><div class="bl">${esc(g.blurb)}</div>
+          ${(g.links || []).map(l => `<a class="lnk" href="${esc(l.url)}"${ext(l.url) ? ' target="_blank" rel="noopener noreferrer"' : ""}>${esc(l.name)}${ext(l.url) ? " ↗" : " →"}</a>`).join("")}</div>`;
+      }).join("");
+    }).catch(() => { document.getElementById("groups").innerHTML = `<div class="empty">Could not load.</div>`; });
+  </script>
+  <script src="./app-shell.js" defer></script>
+  <script src="./build-tag.js" defer></script>
+  <script src="./bw-mode.js" defer></script>
+</body>
+</html>

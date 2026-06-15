@@ -4,6 +4,14 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.28.0] — build 70 — 2026-06-15 — Laws, regulations & ordinances finder
+### Added
+- **Laws, regulations & ordinances** (`web/regulations.html` + `regulations.json`) — every layer of
+  binding rules: federal statutes (our live bills + U.S. Code), federal regulations (eCFR,
+  Regulations.gov, Federal Register), all-50-state legislation (our live data), state admin codes
+  (NYCRR + finders), and local ordinances (Municode, American Legal, Code Publishing). Links into live
+  data where we have it, authoritative full-text everywhere else. Closes #25.
+
 ## [0.27.0] — build 69 — 2026-06-15 — Civic events (filterable)
 ### Added
 - **Civic events** (`web/events.html` + `events.json`) — town halls with your reps, elections &
