@@ -18,7 +18,7 @@
   const NAV = [
     ["🏛️ My government", "home.html"], ["👥 Browse Congress", "explore.html"], ["📜 Bills", "bills.html"],
     ["💡 Ideas", "ideas.html"], ["📅 Congressional calendar", "calendar.html"], ["💵 Budget & shutdown", "budget.html"],
-    ["🛑 Filibuster", "filibuster.html"], ["🗺️ Your state", "states.html"], ["🔎 Find officials", "local.html"], ["🗽 New York", "ny.html"],
+    ["🛑 Filibuster", "filibuster.html"], ["📣 Events", "events.html"], ["🗺️ Your state", "states.html"], ["🔎 Find officials", "local.html"], ["🗽 New York", "ny.html"],
     ["🇺🇸 Presidents", "presidents.html"], ["⚖️ Justices", "scotus.html"], ["📖 Glossary", "glossary.html"],
     ["✊ Take action", "howto.html"], ["🤝 Get help", "assistance.html"], ["🛡️ Defend yourself", "defend.html"],
     ["💳 Pricing", "pricing.html"], ["🧭 Site map", "sitemap.html"],

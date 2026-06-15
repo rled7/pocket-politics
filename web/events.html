@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocket Politics — Civic Events</title>
+  <link rel="stylesheet" href="./style.css" />
+  <style>
+    .evcat { background: var(--paper-2); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; margin-top: 14px; box-shadow: var(--shadow); }
+    .evcat h3 { margin: 0 0 4px; font-family: "Fraunces", serif; font-size: 18px; }
+    .evcat .bl { font-size: 14px; color: var(--ink-soft); margin-bottom: 8px; }
+    .evcat a.lnk { display: inline-block; margin: 3px 8px 3px 0; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="./home.html" class="brand">Pocket Politics</a>
+    <nav class="nav">
+      <a href="./home.html">My Government</a>
+      <a href="./calendar.html">Calendar</a>
+      <a href="./events.html" class="on">Events</a>
+      <a href="./local.html">Find officials</a>
+      <a href="./howto.html">Take Action</a>
+    </nav>
+    <h1>Civic events near you</h1>
+    <div class="meta">Town halls, elections, public meetings, and ways to get involved. Filter by what matters
+      to you — each links to the authoritative source for that kind of event.</div>
+    <div class="chips" id="filters"></div>
+    <div id="cats"></div>
+    <div class="src">No single national events feed exists, so each category routes to the official finder
+      rather than show stale listings.</div>
+  </div>
+  <script>
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    let CATS = [], filter = "all";
+    function render() {
+      const cats = filter === "all" ? CATS : CATS.filter(c => c.id === filter);
+      document.getElementById("cats").innerHTML = cats.map(c => {
+        const ext = u => /^https?:/.test(u);
+        return `<div class="evcat"><h3>${esc(c.icon || "")} ${esc(c.label)}</h3><div class="bl">${esc(c.blurb)}</div>
+          ${(c.links || []).map(l => `<a class="lnk" href="${esc(l.url)}"${ext(l.url) ? ' target="_blank" rel="noopener noreferrer"' : ""}>${esc(l.name)}${ext(l.url) ? " ↗" : " →"}</a>`).join("")}</div>`;
+      }).join("");
+    }
+    fetch("./events.json").then(r => r.json()).then(d => {
+      CATS = d.categories || [];
+      const mk = (id, label) => `<button class="chip${filter === id ? " on" : ""}" data-f="${id}">${esc(label)}</button>`;
+      document.getElementById("filters").innerHTML = mk("all", "All") + CATS.map(c => mk(c.id, c.label)).join("");
+      document.querySelectorAll("#filters .chip").forEach(b => b.addEventListener("click", () => {
+        filter = b.dataset.f;
+        document.querySelectorAll("#filters .chip").forEach(x => x.classList.toggle("on", x.dataset.f === filter));
+        render();
+      }));
+      render();
+    }).catch(() => { document.getElementById("cats").innerHTML = `<div class="empty">Could not load events.</div>`; });
+  </script>
+  <script src="./app-shell.js" defer></script>
+  <script src="./build-tag.js" defer></script>
+  <script src="./bw-mode.js" defer></script>
+</body>
+</html>

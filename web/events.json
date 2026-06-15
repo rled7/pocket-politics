@@ -1,0 +1,40 @@
+{
+  "note": "Civic events come from many places with no single national feed, so we route you to the authoritative finders for each kind — filter by what you care about.",
+  "categories": [
+    {
+      "id": "townhalls", "label": "Town halls with your reps", "icon": "🗣️",
+      "blurb": "In-person and virtual town halls where you can question the people who represent you.",
+      "links": [
+        { "name": "Town Hall Project — find events near you", "url": "https://townhallproject.com/" },
+        { "name": "Find & contact your members of Congress", "url": "./home.html" },
+        { "name": "Your representative's official events page", "url": "https://www.house.gov/representatives" }
+      ]
+    },
+    {
+      "id": "elections", "label": "Elections & deadlines", "icon": "🗳️",
+      "blurb": "Registration deadlines, early voting, and election dates — never miss a vote.",
+      "links": [
+        { "name": "Vote.gov — register & deadlines", "url": "https://vote.gov/" },
+        { "name": "Your state election office", "url": "https://www.usa.gov/state-election-office" },
+        { "name": "Ballotpedia — upcoming elections", "url": "https://ballotpedia.org/Elections_calendar" }
+      ]
+    },
+    {
+      "id": "meetings", "label": "Public meetings", "icon": "🏛️",
+      "blurb": "City council, school board, zoning, and community board meetings — where local decisions happen.",
+      "links": [
+        { "name": "Find your local government", "url": "https://www.usa.gov/local-governments" },
+        { "name": "Congressional committee calendar (federal)", "url": "./calendar.html" },
+        { "name": "NY Senate floor calendars", "url": "./ny.html" }
+      ]
+    },
+    {
+      "id": "organize", "label": "Volunteer & organize", "icon": "✊",
+      "blurb": "Ways to get involved — campaigns, causes, and community organizing.",
+      "links": [
+        { "name": "Take Action (our guide)", "url": "./howto.html" },
+        { "name": "USA.gov — volunteer & serve", "url": "https://www.usa.gov/volunteer" }
+      ]
+    }
+  ]
+}

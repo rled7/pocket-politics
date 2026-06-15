@@ -4,6 +4,13 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.27.0] — build 69 — 2026-06-15 — Civic events (filterable)
+### Added
+- **Civic events** (`web/events.html` + `events.json`) — town halls with your reps, elections &
+  deadlines, public meetings, and ways to volunteer/organize — **filterable by category**. Each routes
+  to the authoritative finder (Town Hall Project, Vote.gov, USA.gov, our calendars) since no single
+  national events feed exists. Linked from Home, site map, HUD nav. Closes #29.
+
 ## [0.26.0] — build 68 — 2026-06-15 — Find every official (federal → ALJs)
 ### Added
 - **Find every official** (`web/local.html` + `local.json`) — every layer of government from the
