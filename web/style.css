@@ -216,6 +216,20 @@ a.fact { text-decoration: none; } a.fact:hover { background: #ece6d4; border-col
 input, textarea { font-family: inherit; color: var(--ink); }
 textarea { resize: vertical; }
 
+/* App shell — optional 3-column HUD on wide screens (Facebook-like): left nav rail · center
+   reading column (unchanged width) · right "what's relevant now" rail. Below 1120px it collapses
+   back to the simple single column, so mobile stays clean. Injected by app-shell.js. */
+.appshell { display: grid; grid-template-columns: 210px minmax(0, 760px) 290px; gap: 22px; justify-content: center; align-items: start; max-width: 1340px; margin: 0 auto; }
+.appshell > .wrap { max-width: none; margin: 0; }
+.rail { position: sticky; top: 16px; align-self: start; }
+.rail-sec { background: var(--paper-2); border: 1px solid var(--line); border-radius: 14px; padding: 12px 12px 8px; box-shadow: var(--shadow); margin-bottom: 12px; }
+.rail-sec h4 { margin: 0 0 6px; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--brass-2); }
+.rail a { display: block; padding: 6px 9px; border-radius: 8px; text-decoration: none; color: var(--ink); font-size: 14px; font-weight: 500; }
+.rail a:hover { background: var(--paper); }
+.rail a.on { background: var(--forest); color: #fbf9f2; }
+.rail .hud b { color: var(--ink); }
+@media (max-width: 1120px) { .appshell { display: block; max-width: none; } .rail { display: none; } }
+
 /* Build/version badge (footer) */
 .buildtag { margin-top: 40px; text-align: center; font-size: 11px; letter-spacing: .04em; color: var(--ink-soft); opacity: .7; }
 

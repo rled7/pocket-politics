@@ -80,6 +80,7 @@
       document.querySelectorAll("#citizen button[data-tier]").forEach(b => b.addEventListener("click", () => checkout(b.dataset.tier, b)));
     }).catch(() => { statusEl.textContent = "Could not load plans."; });
   </script>
+  <script src="./app-shell.js" defer></script>
   <script src="./build-tag.js" defer></script>
   <script src="./bw-mode.js" defer></script>
 </body>

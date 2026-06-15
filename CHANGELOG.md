@@ -4,6 +4,14 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.24.0] — build 66 — 2026-06-15 — Facebook-style HUD layout (progressive)
+### Added
+- **3-column HUD layout** (`web/app-shell.js` + `.appshell`/`.rail` styles) — on wide screens (≥1120px)
+  the page gains a **left nav rail** (every section, so you never page-hop blindly) and a **right rail**
+  that keeps relevant info ON the page: the next item in Congress + quick actions. The center reading
+  column is unchanged. Below 1120px it collapses back to the clean single column, so mobile stays simple.
+  Injected on every page as a progressive enhancement (content untouched, fully reversible). Closes #26.
+
 ## [0.23.0] — build 65 — 2026-06-14 — NY Senate floor calendars + committee agendas
 ### Added
 - **NY Senate floor calendars** (`GET /api/ny/calendars`) and **committee agendas**
