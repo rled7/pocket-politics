@@ -16,6 +16,13 @@
     <div class="sec-title" style="margin-top:18px">Who introduced this — and what it does</div>
     <div class="card" id="sponsor"><div class="meta" style="margin-top:0">Loading sponsor…</div></div>
 
+    <div class="sec-title" style="margin-top:18px">Plain-English translation</div>
+    <div class="card" id="xlate">
+      <div class="meta" style="margin-top:0">Turn this bill's legalese into plain English — with the key points shown in <strong>both</strong> plain English and the original legal wording, side by side.</div>
+      <button id="xbtn" class="btn" style="margin-top:10px">✨ Translate this bill</button>
+      <div id="xout" style="margin-top:12px"></div>
+    </div>
+
     <div class="card" style="margin-top:14px">
       <div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">📖</span>
         <div><strong>Understand the law</strong>
@@ -104,6 +111,7 @@
       try { d = await (await fetch(`/api/bill?congress=${congress}&type=${type}&number=${number}`)).json(); }
       catch (_) { document.getElementById("sponsor").innerHTML = `<div class="meta" style="margin-top:0">Sponsor info unavailable.</div>`; return; }
       const sp = d.sponsor;
+      window.__billText = d.summary || ""; // fed to the AI translator
       const facts = [];
       if (d.introducedDate) facts.push(`<span class="pill">Introduced ${esc(d.introducedDate)}</span>`);
       if (d.policyArea) facts.push(`<span class="pill">${esc(d.policyArea)}</span>`);
@@ -146,6 +154,30 @@
         roster +
         `<div class="src" style="margin-top:12px">Sponsor, cosponsors &amp; summary: ${esc(d.source || "Congress.gov API")}${d.live === false ? " · demo data" : ""}</div>`;
     })();
+
+    // ── AI bill translator (legalese → plain English + dual key points) ──
+    document.getElementById("xbtn").addEventListener("click", async () => {
+      const btn = document.getElementById("xbtn"), out = document.getElementById("xout");
+      const text = window.__billText || "";
+      const done = (label) => { btn.disabled = false; btn.textContent = label; };
+      btn.disabled = true; btn.textContent = "Translating…";
+      let d;
+      try { d = await (await fetch("/api/translate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ billId, text }) })).json(); }
+      catch (_) { out.innerHTML = `<div class="meta">Translation unavailable right now.</div>`; return done("✨ Translate this bill"); }
+      if (!d.enabled || (d.note && !(d.keyPoints || []).length && !d.plainEnglish)) {
+        out.innerHTML = `<div class="meta">${esc(d.note || "AI translation isn't enabled yet.")}</div>`; return done("✨ Translate this bill");
+      }
+      const kp = (d.keyPoints || []).map(k => `
+        <div class="cols" style="margin-top:10px">
+          <div class="col y"><h3>Plain English</h3><div class="meta" style="color:var(--ink)">${esc(k.plain)}</div></div>
+          <div class="col n"><h3>Legalese</h3><div class="meta">${esc(k.legalese)}</div></div>
+        </div>`).join("");
+      out.innerHTML =
+        (d.plainEnglish ? `<div><strong>In plain English</strong><div class="meta" style="color:var(--ink);margin-top:4px">${esc(d.plainEnglish)}</div></div>` : "") +
+        kp +
+        `<div class="src" style="margin-top:10px">AI translation${d.cached ? " (cached — no tokens used)" : ""}${d.model ? " · " + esc(d.model) : ""} — always verify against the official text above.</div>`;
+      done("✓ Translated");
+    });
 
     // ── Voter comments ──
     const billId = `${congress}-${type}-${number}`.toLowerCase();

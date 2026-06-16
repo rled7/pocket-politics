@@ -4,6 +4,19 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.30.0] — build 72 — 2026-06-15 — Bill translator (AI) — scaffolded & cost-controlled
+### Added
+- **Bill translator** (`src/translate.ts`, `POST /api/translate`, UI on `web/bill.html`) — turns a bill's
+  legalese into plain English, with key points shown in **both plain English and the original legal
+  wording, side by side** (the #7 spec). Built on the Anthropic API; **activates the moment
+  `ANTHROPIC_API_KEY` is set**, and degrades cleanly to "not enabled yet" otherwise (same honest pattern
+  as Stripe). Verified: no-key path returns `enabled:false`, no fabrication.
+- **Cost controls baked in** (always-on cost-optimizer): cheapest reliable model (Sonnet, override via
+  `TRANSLATE_MODEL`), hard `max_tokens` cap, input-length cap, per-call usage logging, and — critically —
+  a **per-bill cache** so each bill is translated once then served free forever (the token-saving core of
+  pricing #38). Tests 107/107.
+- `anthropic` registered in the integrations status.
+
 ## [0.29.0] — build 71 — 2026-06-15 — "My City" location-aware local dashboard
 ### Added
 - **My City** (`web/mycity.html`) — a local heads-up set automatically from your device location (or an

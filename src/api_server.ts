@@ -26,6 +26,7 @@ import { getCalendar, OFFICIAL_CALENDARS } from "./calendar.ts";
 import { getBudgetWatch } from "./budget.ts";
 import { createCheckout, tiersPublic, paymentsConfigured } from "./payments.ts";
 import { getCloture } from "./cloture.ts";
+import { getTranslation } from "./translate.ts";
 import { SwrCache, mapLimit, type LoadResult } from "./swr_cache.ts";
 import { KEYS, integrations, keySummary } from "./config.ts";
 
@@ -231,6 +232,15 @@ const server = http.createServer(async (req, res) => {
       const bill = url.searchParams.get("bill") ?? "";
       if (!validBillId(bill)) return sendJson(res, 400, { error: "invalid bill id" });
       return sendJson(res, 200, { comments: await getComments(store, bill) });
+    }
+
+    // Bill translation (AI) — legalese → plain English + dual key points. Cached per bill in the Store.
+    if (url.pathname === "/api/translate" && req.method === "POST") {
+      const payload = JSON.parse((await readBody(req)) || "{}");
+      const bill = String(payload.billId ?? "");
+      if (!validBillId(bill)) return sendJson(res, 400, { error: "invalid bill id" });
+      const text = String(payload.text ?? "").slice(0, 8000);
+      return sendJson(res, 200, await getTranslation(bill, text, KEYS.anthropic, store));
     }
 
     // Stripe Checkout — create a hosted-checkout session and hand back the URL. Never cached.

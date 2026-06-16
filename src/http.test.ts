@@ -305,6 +305,15 @@ check("isValidState accepts real states", isValidState("California") && isValidS
 check("isValidState rejects junk / injection attempts",
   !isValidState("../etc/passwd") && !isValidState("California&jurisdiction=x") && !isValidState("") && !isValidState("Atlantis"));
 
+// Bill translator (AI) — pure body builder + cost caps + cleanly-disabled no-key path
+const { buildBody, getTranslation, MODEL } = await import("./translate.ts");
+const txBody = JSON.parse(buildBody("x".repeat(99999)));
+check("translate buildBody sets model + capped max_tokens", txBody.model === MODEL && txBody.max_tokens <= 1024);
+check("translate buildBody caps the input length sent", txBody.messages[0].content.length < 7000);
+const tstore = new MemoryStore();
+const noKey = await getTranslation("119-hr-1", "some bill text", undefined, tstore);
+check("getTranslation without a key is cleanly disabled (no fabrication)", noKey.enabled === false && /ANTHROPIC_API_KEY/.test(noKey.note ?? ""));
+
 // summary
 console.log(`\n  ${pass} passed, ${fails.length} failed`);
 if (fails.length) { console.error("  FAILED: " + fails.join(", ")); process.exit(1); }
