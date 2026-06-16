@@ -4,6 +4,14 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.34.0] — build 76 — 2026-06-16 — Congressional Record (federal floor record)
+### Added
+- **Congressional Record** (`web/record.html`, `GET /api/record`, `src/record.ts`) — the official daily
+  House & Senate floor record from Congress.gov (5,822 issues), most recent first, each linking to the
+  official record. The federal parallel to the NY Senate transcripts. Verified live. Linked from Home,
+  site map, HUD nav. This is the access half of #32; plain-language AI summaries layer on via the
+  translator once `ANTHROPIC_API_KEY` is set. Tests 116/116.
+
 ## [0.33.0] — build 75 — 2026-06-16 — Passed-appropriations view + Trending surface
 ### Added
 - **Budget: "passed / enacted this year"** — the budget & shutdown page now derives each appropriations

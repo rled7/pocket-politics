@@ -29,6 +29,7 @@ import { getCloture } from "./cloture.ts";
 import { getTranslation } from "./translate.ts";
 import { rateLimit } from "./ratelimit.ts";
 import { track, getTrending, validKind } from "./trending.ts";
+import { getRecord } from "./record.ts";
 import { SwrCache, mapLimit, type LoadResult } from "./swr_cache.ts";
 import { KEYS, integrations, keySummary } from "./config.ts";
 
@@ -161,6 +162,9 @@ async function route(url: URL, request: Request): Promise<Response> {
   }
   if (segs[0] === "api" && segs[1] === "cloture") {
     return jsonCached(await getCloture(), { request, sMaxAge: 1800 });
+  }
+  if (segs[0] === "api" && segs[1] === "record") {
+    return jsonCached(await getRecord(clampLimit(q.get("limit"), 14, 30), KEYS.congress), { request, sMaxAge: 3600 });
   }
   if (segs[0] === "api" && segs[1] === "calendar") {
     const cal = await getCalendar(KEYS.congress);

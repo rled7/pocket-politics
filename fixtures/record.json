@@ -1,0 +1,85 @@
+{
+  "total": 5822,
+  "issues": [
+    {
+      "volume": 172,
+      "issue": "100",
+      "date": "2026-06-15T04:00:00Z",
+      "session": 2,
+      "congress": 119,
+      "url": "https://www.congress.gov/congressional-record"
+    },
+    {
+      "volume": 172,
+      "issue": "99",
+      "date": "2026-06-11T04:00:00Z",
+      "session": 2,
+      "congress": 119,
+      "url": "https://www.congress.gov/congressional-record"
+    },
+    {
+      "volume": 172,
+      "issue": "98",
+      "date": "2026-06-10T04:00:00Z",
+      "session": 2,
+      "congress": 119,
+      "url": "https://www.congress.gov/congressional-record"
+    },
+    {
+      "volume": 172,
+      "issue": "97",
+      "date": "2026-06-09T04:00:00Z",
+      "session": 2,
+      "congress": 119,
+      "url": "https://www.congress.gov/congressional-record"
+    },
+    {
+      "volume": 172,
+      "issue": "96",
+      "date": "2026-06-08T04:00:00Z",
+      "session": 2,
+      "congress": 119,
+      "url": "https://www.congress.gov/congressional-record"
+    },
+    {
+      "volume": 172,
+      "issue": "95",
+      "date": "2026-06-04T04:00:00Z",
+      "session": 2,
+      "congress": 119,
+      "url": "https://www.congress.gov/congressional-record"
+    },
+    {
+      "volume": 172,
+      "issue": "94",
+      "date": "2026-06-03T04:00:00Z",
+      "session": 2,
+      "congress": 119,
+      "url": "https://www.congress.gov/congressional-record"
+    },
+    {
+      "volume": 172,
+      "issue": "93",
+      "date": "2026-06-02T04:00:00Z",
+      "session": 2,
+      "congress": 119,
+      "url": "https://www.congress.gov/congressional-record"
+    },
+    {
+      "volume": 172,
+      "issue": "92",
+      "date": "2026-06-01T04:00:00Z",
+      "session": 2,
+      "congress": 119,
+      "url": "https://www.congress.gov/congressional-record"
+    },
+    {
+      "volume": 172,
+      "issue": "91",
+      "date": "2026-05-29T04:00:00Z",
+      "session": 2,
+      "congress": 119,
+      "url": "https://www.congress.gov/congressional-record"
+    }
+  ]
+}

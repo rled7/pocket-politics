@@ -344,6 +344,12 @@ const top = await getTrending(trStore, "bill", 5);
 check("trending ranks by count and keeps the label", top[0].id === "119-hr-1" && top[0].count === 2 && top[0].label === "HR 1");
 check("trending rejects bad kind/id (no key-listing leak)", (await getTrending(trStore, "bogus")).length === 0 && (await (async () => { await track(trStore, "bill", "../x"); return getTrending(trStore, "bill", 20); })()).every(i => i.id !== "../x"));
 
+// Congressional Record (federal floor record, #32 access half)
+const { getRecord } = await import("./record.ts");
+const rec = await getRecord();
+check("getRecord fixture: issues have volume/issue/date + official url",
+  rec.issues.length > 0 && rec.issues.every(i => i.volume != null && !!i.issue && "date" in i && /congress\.gov/.test(i.url)));
+
 // summary
 console.log(`\n  ${pass} passed, ${fails.length} failed`);
 if (fails.length) { console.error("  FAILED: " + fails.join(", ")); process.exit(1); }

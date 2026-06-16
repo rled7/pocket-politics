@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocket Politics — Congressional Record</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <a href="./home.html" class="brand">Pocket Politics</a>
+    <nav class="nav">
+      <a href="./home.html">My Government</a>
+      <a href="./calendar.html">Calendar</a>
+      <a href="./record.html" class="on">Floor record</a>
+      <a href="./ny.html">New York</a>
+      <a href="./bills.html">Bills</a>
+    </nav>
+    <h1>Congressional Record</h1>
+    <div class="meta">The official daily record of what's said and done on the House &amp; Senate floors.
+      Plain-language summaries ("in lay terms") turn on once an AI key is added — until then, each issue
+      links to the official record.</div>
+    <div class="list" id="list"><div class="row"><div class="meta">Loading the record…</div></div></div>
+    <div class="src" id="src"></div>
+  </div>
+  <script>
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    const dayFmt = s => { try { return new Date(s).toLocaleDateString([], { weekday: "long", month: "long", day: "numeric", year: "numeric" }); } catch { return s; } };
+    (async () => {
+      let d;
+      try { d = await (await fetch("/api/record")).json(); }
+      catch (_) { try { d = await (await fetch("./fixtures/record.json")).json(); } catch { d = null; } }
+      const el = document.getElementById("list");
+      if (!d || !(d.issues || []).length) { el.innerHTML = `<div class="row"><div class="meta">Could not load the record.</div></div>`; return; }
+      el.innerHTML = d.issues.map(x => `
+        <a class="row" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">
+          <div class="av" style="display:flex;align-items:center;justify-content:center;font-size:15px">📜</div>
+          <div><div class="nm">${esc(dayFmt(x.date))}</div>
+          <div class="sub">Vol. ${esc(x.volume)}, No. ${esc(x.issue)}${x.session ? " · Session " + esc(x.session) : ""} · ${esc(x.congress)}th Congress ↗</div></div>
+        </a>`).join("");
+      document.getElementById("src").innerHTML = `${d.live === false ? "Demo data — live record on with the Congress key. " : ""}${d.total ? "<b>" + Number(d.total).toLocaleString() + "</b> daily issues. " : ""}Source: Congress.gov · official record at congress.gov/congressional-record`;
+    })();
+  </script>
+  <script src="./app-shell.js" defer></script>
+  <script src="./build-tag.js" defer></script>
+  <script src="./bw-mode.js" defer></script>
+</body>
+</html>
