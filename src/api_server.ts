@@ -27,6 +27,7 @@ import { getBudgetWatch } from "./budget.ts";
 import { createCheckout, tiersPublic, paymentsConfigured } from "./payments.ts";
 import { getCloture } from "./cloture.ts";
 import { getTranslation } from "./translate.ts";
+import { rateLimit } from "./ratelimit.ts";
 import { SwrCache, mapLimit, type LoadResult } from "./swr_cache.ts";
 import { KEYS, integrations, keySummary } from "./config.ts";
 
@@ -45,6 +46,17 @@ function sendJson(res: http.ServerResponse, status: number, obj: unknown): void 
   res.setHeader("Content-Type", "application/json");
   res.setHeader("Cache-Control", "no-store");
   res.end(JSON.stringify(obj));
+}
+
+function clientIp(req: http.IncomingMessage): string {
+  const xff = req.headers["x-forwarded-for"];
+  return (Array.isArray(xff) ? xff[0] : xff)?.split(",")[0]?.trim() || req.socket.remoteAddress || "unknown";
+}
+/** Enforce a per-IP rate limit on a POST endpoint; returns true if the request was rejected (429). */
+function limited(req: http.IncomingMessage, res: http.ServerResponse, bucket: string, max: number): boolean {
+  const r = rateLimit(`${bucket}:${clientIp(req)}`, max, 60_000);
+  if (!r.ok) { res.setHeader("Retry-After", String(r.retryAfter)); sendJson(res, 429, { error: "Too many requests — slow down a moment." }); return true; }
+  return false;
 }
 
 // In-memory stale-while-revalidate cache (the L1 tier the persistent server unlocks — serverless
@@ -219,6 +231,7 @@ const server = http.createServer(async (req, res) => {
     // Bill comments — read + write, never cached.
     if (url.pathname === "/api/comments") {
       if (req.method === "POST") {
+        if (limited(req, res, "comments", 20)) return;
         const payload = JSON.parse((await readBody(req)) || "{}");
         const bill = String(payload.bill ?? "");
         if (!validBillId(bill)) return sendJson(res, 400, { error: "invalid bill id" });
@@ -236,6 +249,7 @@ const server = http.createServer(async (req, res) => {
 
     // Bill translation (AI) — legalese → plain English + dual key points. Cached per bill in the Store.
     if (url.pathname === "/api/translate" && req.method === "POST") {
+      if (limited(req, res, "translate", 10)) return; // paid AI path — strictest cap
       const payload = JSON.parse((await readBody(req)) || "{}");
       const bill = String(payload.billId ?? "");
       if (!validBillId(bill)) return sendJson(res, 400, { error: "invalid bill id" });
@@ -245,6 +259,7 @@ const server = http.createServer(async (req, res) => {
 
     // Stripe Checkout — create a hosted-checkout session and hand back the URL. Never cached.
     if (url.pathname === "/api/checkout" && req.method === "POST") {
+      if (limited(req, res, "checkout", 20)) return;
       const payload = JSON.parse((await readBody(req)) || "{}");
       const tier = String(payload.tier ?? "");
       const proto = (req.headers["x-forwarded-proto"] as string) || "http";
@@ -256,6 +271,7 @@ const server = http.createServer(async (req, res) => {
     // Bill reactions (like / dislike / neutral) — read + write, never cached.
     if (url.pathname === "/api/reactions") {
       if (req.method === "POST") {
+        if (limited(req, res, "reactions", 60)) return;
         const payload = JSON.parse((await readBody(req)) || "{}");
         const bill = String(payload.bill ?? "");
         const client = String(payload.client ?? "");

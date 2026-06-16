@@ -328,6 +328,14 @@ try { await addComment(modStore, "119-hr-1", { author: "X", district: "1", email
 catch { blocked = true; }
 check("addComment blocks a promo/link comment via moderation", blocked);
 
+// Rate limiter — protects the paid AI endpoint + write spam
+const { rateLimit } = await import("./ratelimit.ts");
+const rlKey = "t-" + Math.random();
+let allowed = true; for (let i = 0; i < 5; i++) allowed = allowed && rateLimit(rlKey, 5, 60_000).ok;
+check("rateLimit allows up to the cap", allowed);
+const over = rateLimit(rlKey, 5, 60_000);
+check("rateLimit rejects past the cap with a retryAfter", !over.ok && over.retryAfter > 0);
+
 // summary
 console.log(`\n  ${pass} passed, ${fails.length} failed`);
 if (fails.length) { console.error("  FAILED: " + fails.join(", ")); process.exit(1); }

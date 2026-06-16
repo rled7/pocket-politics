@@ -4,6 +4,15 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.32.0] — build 74 — 2026-06-15 — Rate limiting (cost/abuse protection)
+### Security
+- **Per-IP rate limiting** (`src/ratelimit.ts`) on all unauthenticated POST endpoints, **strictest on
+  the paid `/api/translate`** (10/min) — closing the cost-DoS hole where someone could spam the AI
+  endpoint and run up tokens. Also caps checkout (20/min), comments (20/min), reactions (60/min) with a
+  `429 + Retry-After`. Verified: 10× `/api/translate` → 200, then 429. Part of #16. Tests 113/113.
+- **#14 done** — the inline "OpenCase translation preview, no copy-paste" the user wanted is delivered
+  natively by the bill translator (#7), no external dependency.
+
 ## [0.31.0] — build 73 — 2026-06-15 — Comment moderation (rules-based)
 ### Added
 - **Comment moderation** (`src/moderation.ts`) — a no-key, rules-based first line of defense against the
