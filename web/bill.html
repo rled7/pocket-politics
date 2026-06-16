@@ -112,6 +112,8 @@
       catch (_) { document.getElementById("sponsor").innerHTML = `<div class="meta" style="margin-top:0">Sponsor info unavailable.</div>`; return; }
       const sp = d.sponsor;
       window.__billText = d.summary || ""; // fed to the AI translator
+      // track engagement for the trending surface (#39)
+      fetch("/api/track", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind: "bill", id: `${congress}-${type}-${number}`.toLowerCase(), label: d.title || `${type.toUpperCase()} ${number}` }) }).catch(() => {});
       const facts = [];
       if (d.introducedDate) facts.push(`<span class="pill">Introduced ${esc(d.introducedDate)}</span>`);
       if (d.policyArea) facts.push(`<span class="pill">${esc(d.policyArea)}</span>`);

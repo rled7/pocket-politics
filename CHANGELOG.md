@@ -4,6 +4,17 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.33.0] — build 75 — 2026-06-16 — Passed-appropriations view + Trending surface
+### Added
+- **Budget: "passed / enacted this year"** — the budget & shutdown page now derives each appropriations
+  bill's stage from its latest action (Enacted-into-law / Passed Senate / Passed House / In progress),
+  shows a count of how many have passed, and groups passed/enacted bills above in-progress ones. (User
+  request: list the appropriations bills that have passed so far this year.)
+- **Trending surface** (`src/trending.ts`, `POST /api/track`, `GET /api/trending`) — the "observe what
+  people engage with" half of #39: bill/member opens are tracked into a bounded popularity map, surfaced
+  as a 🔥 Trending widget in the HUD rail. Rate-limited, validated, no key. The AI "reframe content"
+  half waits for the Anthropic key. Tests 115/115.
+
 ## [0.32.0] — build 74 — 2026-06-15 — Rate limiting (cost/abuse protection)
 ### Security
 - **Per-IP rate limiting** (`src/ratelimit.ts`) on all unauthenticated POST endpoints, **strictest on

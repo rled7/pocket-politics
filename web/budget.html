@@ -59,16 +59,32 @@
       document.getElementById("official").innerHTML = `<div class="facts">` +
         off.map(o => `<a class="fact" href="${esc(o.url)}" target="_blank" rel="noopener noreferrer">🏛️ ${esc(o.name)} ↗</a>`).join("") + `</div>`;
 
-      const el = document.getElementById("bills");
-      const ap = (d && d.appropriations) || [];
-      if (!ap.length) { el.innerHTML = `<div class="empty">No appropriations bills found in the recent feed. Check the official status table above.</div>`; }
-      else el.innerHTML = `<div class="card">` + ap.map(b => `
+      // Derive how far each appropriations bill has gotten, from its latest action.
+      const stageOf = (a) => {
+        const t = (a || "").toLowerCase();
+        if (t.includes("became public law") || t.includes("public law no") || t.includes("signed by president")) return { k: "enacted", label: "✅ Enacted (law)", passed: true };
+        if (t.includes("passed senate") || t.includes("passed/agreed to in senate")) return { k: "senate", label: "Passed Senate", passed: true };
+        if (t.includes("passed house") || t.includes("passed/agreed to in house")) return { k: "house", label: "Passed House", passed: true };
+        return { k: "prog", label: "In progress", passed: false };
+      };
+      const badge = (s) => `<span style="font-size:11px;font-weight:700;border-radius:6px;padding:2px 7px;border:1px solid var(--line);${s.passed ? "background:#effaf7;color:var(--p-d);border-color:#b8ddd6" : "background:#f1ede0;color:var(--brass-2)"}">${esc(s.label)}</span>`;
+      const item = (b) => { const s = stageOf(b.latestAction); return `
         <a class="item" style="display:block;text-decoration:none;color:inherit" href="${esc(b.url)}" target="_blank" rel="noopener noreferrer">
-          <span class="date">${esc(b.actionDate || "")}</span><span class="bill">${esc(b.type)} ${esc(b.number)} ↗</span>
+          <span class="date">${esc(b.actionDate || "")}</span><span class="bill">${esc(b.type)} ${esc(b.number)} · ${badge(s)} ↗</span>
           <div class="title">${esc(b.title)}</div>
           ${b.latestAction ? `<div class="action">${esc(b.latestAction)}</div>` : ""}
-        </a>`).join("") + `</div>`;
-      document.getElementById("src").innerHTML = `${d && d.live === false ? "Demo data — live appropriations on with the Congress key. " : ""}Appropriations bills are matched from the recent bill feed (it can miss some) — the official status table above is authoritative. Source: Congress.gov`;
+        </a>`; };
+
+      const el = document.getElementById("bills");
+      const ap = (d && d.appropriations) || [];
+      const passed = ap.filter(b => stageOf(b.latestAction).passed);
+      const prog = ap.filter(b => !stageOf(b.latestAction).passed);
+      if (!ap.length) { el.innerHTML = `<div class="empty">No appropriations bills found in the recent feed. Check the official status table above.</div>`; }
+      else el.innerHTML =
+        `<div class="meta" style="margin:0 0 8px"><b>${passed.length}</b> of ${ap.length} tracked appropriations bills have passed a chamber or become law this year.</div>` +
+        (passed.length ? `<div class="sec-title" style="margin-top:6px">✅ Passed / enacted this year</div><div class="card">${passed.map(item).join("")}</div>` : "") +
+        (prog.length ? `<div class="sec-title" style="margin-top:14px">⏳ Still in progress</div><div class="card">${prog.map(item).join("")}</div>` : "");
+      document.getElementById("src").innerHTML = `${d && d.live === false ? "Demo data — live appropriations on with the Congress key. " : ""}Matched from the recent bill feed (can miss some) — the official status table above is authoritative. Source: Congress.gov`;
     })();
   </script>
   <script src="./app-shell.js" defer></script>

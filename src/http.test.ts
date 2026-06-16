@@ -336,6 +336,14 @@ check("rateLimit allows up to the cap", allowed);
 const over = rateLimit(rlKey, 5, 60_000);
 check("rateLimit rejects past the cap with a retryAfter", !over.ok && over.retryAfter > 0);
 
+// Trending — the "observe engagement" surface (#39)
+const { track, getTrending } = await import("./trending.ts");
+const trStore = new MemoryStore();
+await track(trStore, "bill", "119-hr-1", "HR 1"); await track(trStore, "bill", "119-hr-1"); await track(trStore, "bill", "119-s-5", "S 5");
+const top = await getTrending(trStore, "bill", 5);
+check("trending ranks by count and keeps the label", top[0].id === "119-hr-1" && top[0].count === 2 && top[0].label === "HR 1");
+check("trending rejects bad kind/id (no key-listing leak)", (await getTrending(trStore, "bogus")).length === 0 && (await (async () => { await track(trStore, "bill", "../x"); return getTrending(trStore, "bill", 20); })()).every(i => i.id !== "../x"));
+
 // summary
 console.log(`\n  ${pass} passed, ${fails.length} failed`);
 if (fails.length) { console.error("  FAILED: " + fails.join(", ")); process.exit(1); }

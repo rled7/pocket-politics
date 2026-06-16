@@ -28,6 +28,7 @@ import { createCheckout, tiersPublic, paymentsConfigured } from "./payments.ts";
 import { getCloture } from "./cloture.ts";
 import { getTranslation } from "./translate.ts";
 import { rateLimit } from "./ratelimit.ts";
+import { track, getTrending, validKind } from "./trending.ts";
 import { SwrCache, mapLimit, type LoadResult } from "./swr_cache.ts";
 import { KEYS, integrations, keySummary } from "./config.ts";
 
@@ -111,6 +112,12 @@ async function route(url: URL, request: Request): Promise<Response> {
   if (segs[0] === "api" && segs[1] === "integrations") return jsonCached({ integrations: integrations() }, { request });
   // Build / release version (human-facing app version + build number + data version).
   if (segs[0] === "api" && segs[1] === "version") return jsonCached({ ...buildInfo(), dataVersion: dataVersion() }, { request });
+  // Trending — what people are engaging with most (the "observe" half of #39).
+  if (segs[0] === "api" && segs[1] === "trending") {
+    const kind = q.get("kind") ?? "bill";
+    if (!validKind(kind)) return jsonError("kind must be bill or member", 400);
+    return jsonCached({ kind, items: await getTrending(store, kind, clampLimit(q.get("limit"), 8, 15)) }, { request, sMaxAge: 30 });
+  }
   // Pricing tiers (no secrets) + whether payments are configured.
   if (segs[0] === "api" && segs[1] === "pricing") return jsonCached({ tiers: tiersPublic(), configured: paymentsConfigured(KEYS.stripeSecret) }, { request });
   if (segs[0] === "api" && segs[1] === "members") {
@@ -245,6 +252,14 @@ const server = http.createServer(async (req, res) => {
       const bill = url.searchParams.get("bill") ?? "";
       if (!validBillId(bill)) return sendJson(res, 400, { error: "invalid bill id" });
       return sendJson(res, 200, { comments: await getComments(store, bill) });
+    }
+
+    // Engagement tracking — feeds the "trending" surface (#39). Fire-and-forget, rate-limited.
+    if (url.pathname === "/api/track" && req.method === "POST") {
+      if (limited(req, res, "track", 60)) return;
+      const p = JSON.parse((await readBody(req)) || "{}");
+      await track(store, String(p.kind ?? ""), String(p.id ?? ""), p.label ? String(p.label) : undefined);
+      return sendJson(res, 200, { ok: true });
     }
 
     // Bill translation (AI) — legalese → plain English + dual key points. Cached per bill in the Store.

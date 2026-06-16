@@ -29,6 +29,7 @@
 
   right.innerHTML =
     `<div class="rail-sec"><h4>Next in Congress</h4><div id="hud-cal" class="hud meta" style="margin:0">Loading…</div></div>
+     <div class="rail-sec" id="hud-trend-sec" style="display:none"><h4>🔥 Trending bills</h4><div id="hud-trend"></div></div>
      <div class="rail-sec"><h4>Quick actions</h4>
        <a href="./home.html">📍 Find my reps</a><a href="./bills.html">📜 Latest bills</a>
        <a href="./states.html">🏛️ My state</a><a href="./filibuster.html">🛑 What got filibustered</a></div>`;
@@ -40,4 +41,16 @@
     const el = document.getElementById("hud-cal");
     if (el) el.innerHTML = m ? `<b>${esc(m.committee || m.title || "Committee meeting")}</b><br>${esc(when)}` : "No upcoming meetings.";
   } catch (_) { const el = document.getElementById("hud-cal"); if (el) el.textContent = "—"; }
+
+  // Trending bills (the "observe what people engage with" surface, #39).
+  try {
+    const t = await (await fetch("/api/trending?kind=bill&limit=5")).json();
+    const items = t.items || [];
+    if (items.length) {
+      const billHref = id => { const m = String(id).match(/^(\d+)-([a-z]+)-(\w+)$/i); return m ? `./bill.html?congress=${m[1]}&type=${m[2]}&number=${m[3]}` : "./bills.html"; };
+      document.getElementById("hud-trend").innerHTML = items.map(i =>
+        `<a href="${billHref(i.id)}">${esc(i.label || i.id)} <span style="color:var(--ink-soft)">· ${i.count}</span></a>`).join("");
+      document.getElementById("hud-trend-sec").style.display = "";
+    }
+  } catch (_) { /* no trending yet */ }
 })();
