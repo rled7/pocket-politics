@@ -4,6 +4,14 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.35.0] — build 77 — 2026-06-16 — Security audit document (blue-team)
+### Added
+- **SECURITY.md** — a blue-team audit of the shipped surface: endpoint inventory, mitigations in place
+  (secret hygiene, output encoding, CSP/headers, input validation + state allowlist, SSRF defense, rate
+  limiting incl. the paid AI endpoint, PII minimization, moderation, path-traversal guard, minimal deps),
+  plus a red-team threat list with TODOs for when accounts/payments/identity-verification land. The full
+  #16 red/blue pass still runs after the feature set locks; this documents the current posture.
+
 ## [0.34.0] — build 76 — 2026-06-16 — Congressional Record (federal floor record)
 ### Added
 - **Congressional Record** (`web/record.html`, `GET /api/record`, `src/record.ts`) — the official daily
