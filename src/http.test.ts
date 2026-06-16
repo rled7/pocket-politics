@@ -314,6 +314,20 @@ const tstore = new MemoryStore();
 const noKey = await getTranslation("119-hr-1", "some bill text", undefined, tstore);
 check("getTranslation without a key is cleanly disabled (no fabrication)", noKey.enabled === false && /ANTHROPIC_API_KEY/.test(noKey.note ?? ""));
 
+// Comment moderation — rules-based spam/promo/nonsense filter (no key)
+const { moderate } = await import("./moderation.ts");
+check("moderate accepts a real on-topic comment", moderate("I support this bill — it helps families in my district.").ok);
+check("moderate rejects links / promotion",
+  !moderate("Check out www.mysite.com for deals").ok && !moderate("BUY NOW discount click here").ok);
+check("moderate rejects phone numbers + all-caps + nonsense",
+  !moderate("call me at 555-123-4567").ok && !moderate("THIS IS COMPLETELY UNACCEPTABLE NONSENSE").ok && !moderate("!!!!!!!!!!!!!!!").ok);
+// integration: a promo comment is blocked at post time
+const modStore = new MemoryStore();
+let blocked = false;
+try { await addComment(modStore, "119-hr-1", { author: "X", district: "1", email: "x@y.com", text: "buy bitcoin now www.scam.io" }); }
+catch { blocked = true; }
+check("addComment blocks a promo/link comment via moderation", blocked);
+
 // summary
 console.log(`\n  ${pass} passed, ${fails.length} failed`);
 if (fails.length) { console.error("  FAILED: " + fails.join(", ")); process.exit(1); }

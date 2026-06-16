@@ -12,6 +12,7 @@
  * separately (needs an email provider + accounts).
  */
 import type { Store } from "./store.ts";
+import { moderate } from "./moderation.ts";
 
 /** Public shape returned to everyone — note: NO email (kept private). */
 export interface Comment {
@@ -61,6 +62,8 @@ export async function addComment(store: Store, billId: string, input: NewComment
   if (!district) throw new Error("Your district number is required to comment");
   if (!validEmail(email)) throw new Error("A valid email address is required to comment");
   if (!text) throw new Error("Comment text is required");
+  const mod = moderate(text);
+  if (!mod.ok) throw new Error(mod.reason ?? "Comment was held by moderation.");
 
   const list = await readStored(store, billId);
   const stored: StoredComment = {

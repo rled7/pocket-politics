@@ -4,6 +4,16 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.31.0] — build 73 — 2026-06-15 — Comment moderation (rules-based)
+### Added
+- **Comment moderation** (`src/moderation.ts`) — a no-key, rules-based first line of defense against the
+  abuse the user called out: links/promotion, phone numbers, all-caps shouting, spammy character runs,
+  and nonsense. Enforced at post time in `addComment` with a clear user-facing reason. A smarter AI
+  topic-relevance pass can layer on later behind the Anthropic key. Part of #15. Tests 111/111.
+### Note on #41 (stock trades)
+- The free congressional stock-trade datasets (house/senate-stock-watcher S3) now return 403 — that data
+  requires a paid source (Quiver/Capitol Trades). Flagged; not fabricated.
+
 ## [0.30.0] — build 72 — 2026-06-15 — Bill translator (AI) — scaffolded & cost-controlled
 ### Added
 - **Bill translator** (`src/translate.ts`, `POST /api/translate`, UI on `web/bill.html`) — turns a bill's
