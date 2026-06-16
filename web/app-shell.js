@@ -19,7 +19,7 @@
     ["🏛️ My government", "home.html"], ["👥 Browse Congress", "explore.html"], ["📜 Bills", "bills.html"],
     ["💡 Ideas", "ideas.html"], ["📅 Congressional calendar", "calendar.html"], ["💵 Budget & shutdown", "budget.html"],
     ["🛑 Filibuster", "filibuster.html"], ["📜 Floor record", "record.html"], ["📣 Events", "events.html"], ["🗺️ Your state", "states.html"], ["📍 My City", "mycity.html"], ["🔎 Find officials", "local.html"], ["🗽 New York", "ny.html"],
-    ["🇺🇸 Presidents", "presidents.html"], ["⚖️ Justices", "scotus.html"], ["📖 Glossary", "glossary.html"], ["📑 Laws & rules", "regulations.html"],
+    ["🇺🇸 Presidents", "presidents.html"], ["⚖️ Justices", "scotus.html"], ["📖 Glossary", "glossary.html"], ["🧭 How a bill becomes law", "process.html"], ["📑 Laws & rules", "regulations.html"],
     ["✊ Take action", "howto.html"], ["🤝 Get help", "assistance.html"], ["🛡️ Defend yourself", "defend.html"],
     ["💳 Pricing", "pricing.html"], ["🧭 Site map", "sitemap.html"],
   ];

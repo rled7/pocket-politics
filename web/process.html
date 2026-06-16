@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocket Politics — How a Bill Becomes Law</title>
+  <link rel="stylesheet" href="./style.css" />
+  <style>
+    .stage { background: var(--paper-2); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; margin-top: 14px; box-shadow: var(--shadow); position: relative; }
+    .stage .n { position: absolute; left: -10px; top: -10px; width: 30px; height: 30px; border-radius: 50%; background: var(--forest); color: #fbf9f2; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; box-shadow: var(--shadow); }
+    .stage h3 { margin: 2px 0 8px; font-family: "Fraunces", serif; font-size: 18px; }
+    .stage .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 560px) { .stage .row2 { grid-template-columns: 1fr; } }
+    .stage h4 { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; margin: 0 0 4px; }
+    .can h4 { color: var(--p-d); } .die h4 { color: var(--p-r); }
+    .stage ul { margin: 0; padding-left: 18px; font-size: 14px; }
+    .stage li { margin-bottom: 3px; }
+    .lead-in { font-size: 14.5px; color: var(--ink); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="./home.html" class="brand">Pocket Politics</a>
+    <nav class="nav">
+      <a href="./home.html">My Government</a>
+      <a href="./bills.html">Bills</a>
+      <a href="./process.html" class="on">How a bill becomes law</a>
+      <a href="./glossary.html">Glossary</a>
+      <a href="./courts.html">Law &amp; courts</a>
+    </nav>
+    <h1>How a bill becomes law</h1>
+    <div class="meta">Every step a bill takes — what <b>must</b> happen, what <b>can</b> happen, and where bills
+      <b>die</b> (most do). Federal process; states mirror it closely.</div>
+
+    <div id="stages"></div>
+
+    <div class="sec-title">How amendments happen</div>
+    <div class="card">
+      <p class="lead-in">An <strong>amendment</strong> changes a bill's text. There are three main moments:</p>
+      <ul style="font-size:14.5px">
+        <li><strong>In committee (markup):</strong> members offer amendments and vote them up or down before the bill is reported out. Most changes happen here.</li>
+        <li><strong>On the floor:</strong> members propose amendments during debate. The <strong>House</strong> limits them (often a "closed" or "structured" rule set by the Rules Committee, and amendments must be <em>germane</em> — on-topic). The <strong>Senate</strong> usually allows non-germane amendments — this is how unrelated provisions ("riders") get attached.</li>
+        <li><strong>Reconciling the two chambers:</strong> if the House and Senate pass different versions, a conference committee (or amendment exchange) merges them — itself a round of amending.</li>
+      </ul>
+      <p class="lead-in">A constitutional amendment is entirely different and far rarer: 2/3 of both chambers (or a convention) propose it, then 3/4 of the states (38) must ratify it.</p>
+    </div>
+
+    <div class="src">This is the standard federal path; exact procedure varies (e.g., budget reconciliation bypasses the Senate filibuster). For the official version see
+      <a href="https://www.congress.gov/legislative-process" target="_blank" rel="noopener noreferrer">Congress.gov — The Legislative Process ↗</a>.</div>
+  </div>
+  <script>
+    const STAGES = [
+      { t: "Idea → drafting", must: ["A member of Congress agrees to sponsor it", "It's drafted as a bill and given a number (H.R. for House, S. for Senate)"], can: ["Anyone — a citizen, group, or the President — can suggest the idea", "Co-sponsors sign on to show support"], die: ["Never introduced — it stays just an idea"] },
+      { t: "Introduction", must: ["The sponsor formally introduces it in their chamber", "It's referred to the committee(s) with jurisdiction"], can: ["Identical 'companion' bills can start in both chambers at once"], die: ["—"] },
+      { t: "Committee", must: ["The committee (often a subcommittee first) reviews it"], can: ["Hold hearings, debate, and 'mark up' (amend) the bill", "Vote to report it to the full chamber — with or without changes"], die: ["MOST BILLS DIE HERE — the committee simply never takes it up ('dies in committee')", "Voted down in committee"] },
+      { t: "Floor scheduling", must: ["Leadership must schedule it for floor time"], can: ["HOUSE: the Rules Committee sets the terms of debate and which amendments are allowed", "SENATE: brought up by unanimous consent or a motion to proceed"], die: ["Leadership never schedules it"] },
+      { t: "Floor debate, amendments & vote", must: ["The chamber debates, may amend, and votes", "A simple majority passes it in that chamber"], can: ["SENATE: a filibuster can block a final vote — it takes 60 votes (cloture) to overcome", "Amendments are added or rejected on the floor"], die: ["Voted down", "Filibustered and cloture fails (Senate)"] },
+      { t: "The other chamber", must: ["The bill repeats the whole process in the second chamber"], can: ["Pass it unchanged → goes straight to the President", "Pass a DIFFERENT version → the chambers must reconcile"], die: ["The second chamber rejects it or never takes it up"] },
+      { t: "Reconciling differences", must: ["Both chambers must pass the EXACT same text"], can: ["A conference committee merges the versions, or they trade amendments until they match"], die: ["They can't agree on a single version"] },
+      { t: "The President", must: ["The final, identical bill is sent to the President"], can: ["SIGN it → it becomes law", "Do nothing for 10 days while Congress is in session → it becomes law without a signature", "VETO it → back to Congress", "POCKET VETO → if Congress adjourns within those 10 days and the President doesn't sign, it dies"], die: ["Vetoed (unless overridden)", "Pocket-vetoed"] },
+      { t: "Veto override (only if vetoed)", must: ["2/3 of BOTH chambers must vote to override"], can: ["Override succeeds → it becomes law despite the veto"], die: ["Override fails (the usual outcome) → the bill is dead"] },
+      { t: "It's law", must: ["Assigned a Public Law number and codified into the U.S. Code"], can: ["Agencies write regulations to carry it out", "Courts can later review it"], die: ["—"] },
+    ];
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    const ul = arr => arr.filter(x => x && x !== "—").length ? `<ul>${arr.filter(x => x && x !== "—").map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : `<div class="meta" style="margin:0">—</div>`;
+    document.getElementById("stages").innerHTML = STAGES.map((s, i) => `
+      <div class="stage"><div class="n">${i + 1}</div>
+        <h3>${esc(s.t)}</h3>
+        <div class="row2">
+          <div class="must"><h4>What must happen</h4>${ul(s.must)}</div>
+          <div class="can"><h4>What can happen</h4>${ul(s.can)}</div>
+        </div>
+        ${s.die.filter(x => x && x !== "—").length ? `<div class="die" style="margin-top:8px"><h4>Where it can die</h4>${ul(s.die)}</div>` : ""}
+      </div>`).join("");
+  </script>
+  <script src="./app-shell.js" defer></script>
+  <script src="./build-tag.js" defer></script>
+  <script src="./bw-mode.js" defer></script>
+</body>
+</html>

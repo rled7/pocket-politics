@@ -4,6 +4,13 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.36.0] — build 78 — 2026-06-16 — How a bill becomes law (explainer)
+### Added
+- **How a bill becomes law** (`web/process.html`) — the full federal legislative process as 10 stages,
+  each showing what MUST happen, what CAN happen, and where bills die (most die in committee), plus a
+  section on how amendments get added (committee markup, floor amendments incl. Senate riders, conference)
+  and how a veto override works. Curated + linked to Congress.gov's official process page. Closes #51.
+
 ## [0.35.0] — build 77 — 2026-06-16 — Security audit document (blue-team)
 ### Added
 - **SECURITY.md** — a blue-team audit of the shipped surface: endpoint inventory, mitigations in place
