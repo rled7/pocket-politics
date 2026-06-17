@@ -305,14 +305,16 @@ check("isValidState accepts real states", isValidState("California") && isValidS
 check("isValidState rejects junk / injection attempts",
   !isValidState("../etc/passwd") && !isValidState("California&jurisdiction=x") && !isValidState("") && !isValidState("Atlantis"));
 
-// Bill translator (AI) — pure body builder + cost caps + cleanly-disabled no-key path
-const { buildBody, getTranslation, MODEL } = await import("./translate.ts");
-const txBody = JSON.parse(buildBody("x".repeat(99999)));
-check("translate buildBody sets model + capped max_tokens", txBody.model === MODEL && txBody.max_tokens <= 1024);
-check("translate buildBody caps the input length sent", txBody.messages[0].content.length < 7000);
+// Bill translator (AI) — provider-agnostic body builders + cost caps + cleanly-disabled no-key path
+const { buildBody, getTranslation, providerName } = await import("./translate.ts");
+const aBody = JSON.parse(buildBody("x".repeat(99999), { kind: "anthropic", key: "k", base: "b", model: "claude-sonnet-4-6" }));
+check("translate Anthropic body: model + capped max_tokens + system field", aBody.model === "claude-sonnet-4-6" && aBody.max_tokens <= 1024 && !!aBody.system);
+check("translate caps input length sent", aBody.messages[0].content.length < 7000);
+const oBody = JSON.parse(buildBody("hi", { kind: "openai", key: "k", base: "b", model: "gpt-4o-mini" }));
+check("translate OpenAI body: system+user messages (OpenAI-compatible shape)", oBody.messages.length === 2 && oBody.messages[0].role === "system" && oBody.messages[1].role === "user");
 const tstore = new MemoryStore();
-const noKey = await getTranslation("119-hr-1", "some bill text", undefined, tstore);
-check("getTranslation without a key is cleanly disabled (no fabrication)", noKey.enabled === false && /ANTHROPIC_API_KEY/.test(noKey.note ?? ""));
+const noKey = await getTranslation("119-hr-1", "some bill text", tstore);
+check("getTranslation without any provider key is cleanly disabled", noKey.enabled === false && /API_KEY/.test(noKey.note ?? "") && providerName() === null);
 
 // Comment moderation — rules-based spam/promo/nonsense filter (no key)
 const { moderate } = await import("./moderation.ts");

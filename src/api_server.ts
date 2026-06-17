@@ -273,7 +273,7 @@ const server = http.createServer(async (req, res) => {
       const bill = String(payload.billId ?? "");
       if (!validBillId(bill)) return sendJson(res, 400, { error: "invalid bill id" });
       const text = String(payload.text ?? "").slice(0, 8000);
-      return sendJson(res, 200, await getTranslation(bill, text, KEYS.anthropic, store));
+      return sendJson(res, 200, await getTranslation(bill, text, store));
     }
 
     // Stripe Checkout — create a hosted-checkout session and hand back the URL. Never cached.

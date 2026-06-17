@@ -1,83 +1,77 @@
 /**
- * Bill translator — legalese → plain English, with key points shown in BOTH plain English and the
- * original legalese (the #7 spec). Powered by the Anthropic API; activates when ANTHROPIC_API_KEY is
- * set, and degrades cleanly to "not enabled" otherwise (same pattern as Stripe/FEC/etc.).
+ * Bill translator — legalese → plain English + key points in BOTH plain English and legalese (#7).
  *
- * COST CONTROLS (always-on cost-optimizer applies — this is the priciest call in the app):
- *   - Cheapest RELIABLE model by default (Sonnet; override via TRANSLATE_MODEL). Configurable so we
- *     can drop to a cheaper model per-tier later.
- *   - Hard `max_tokens` cap (output) + input length cap (we never send a whole 200-page bill).
- *   - PER-BILL CACHE in the Store: a bill is translated once, then served from cache forever — this is
- *     the token-saving core of the pricing model (#38), so the same bill never burns tokens twice.
- *   - Usage is logged per call so per-feature cost is visible.
+ * PROVIDER-AGNOSTIC: works with whichever AI key you have —
+ *   - Anthropic native (ANTHROPIC_API_KEY, sk-ant-…), or
+ *   - any OpenAI-compatible endpoint (OPENAI_API_KEY + optional OPENAI_BASE_URL): OpenRouter
+ *     (https://openrouter.ai/api/v1, sk-or-…), OpenAI, or a local Ollama (http://localhost:11434/v1).
+ * Activates as soon as either key is set; otherwise degrades cleanly to "not enabled" (no fabrication).
+ *
+ * COST CONTROLS (always-on): cheap model by default, hard max_tokens + input caps, per-bill cache in the
+ * Store (translate once, serve free forever — the token-saving core of pricing #38), usage logged.
  */
 import type { Store } from "./store.ts";
+import { KEYS } from "./config.ts";
 
-const API = "https://api.anthropic.com/v1/messages";
-export const MODEL = process.env.TRANSLATE_MODEL || "claude-sonnet-4-6"; // reliable; override to go cheaper
-const MAX_INPUT = 6000;   // chars of bill text we send (cap cost + latency)
-const MAX_TOKENS = 1024;  // output cap
-const CACHE_TTL = 60 * 60 * 24 * 30; // 30 days — bills change slowly
-
-export interface KeyPoint { plain: string; legalese: string; }
-export interface Translation { plainEnglish: string; keyPoints: KeyPoint[]; }
-export interface TranslateResult extends Partial<Translation> {
-  enabled: boolean; cached?: boolean; model?: string; note?: string;
-}
+const MAX_INPUT = 6000, MAX_TOKENS = 1024, CACHE_TTL = 60 * 60 * 24 * 30;
 
 const SYSTEM =
   "You translate U.S. legislative text into plain English for ordinary citizens. Be accurate and neutral — " +
-  "never invent provisions. Respond ONLY with minified JSON of the form " +
-  '{"plainEnglish":"<2-4 sentence plain summary>","keyPoints":[{"plain":"<plain English>","legalese":"<the original/legal phrasing>"}]}. ' +
-  "Give 3-6 key points. If the text is too thin to summarize, return an empty keyPoints array.";
+  "never invent provisions. Respond ONLY with minified JSON: " +
+  '{"plainEnglish":"<2-4 sentence plain summary>","keyPoints":[{"plain":"<plain English>","legalese":"<original/legal phrasing>"}]}. ' +
+  "Give 3-6 key points. If the text is too thin, return an empty keyPoints array.";
 
-/** Pure: build the request body (unit-testable without network). */
-export function buildBody(text: string): string {
-  return JSON.stringify({
-    model: MODEL, max_tokens: MAX_TOKENS, system: SYSTEM,
-    messages: [{ role: "user", content: `Translate this legislative text:\n\n${text.slice(0, MAX_INPUT)}` }],
-  });
+export interface KeyPoint { plain: string; legalese: string; }
+export interface Translation { plainEnglish: string; keyPoints: KeyPoint[]; }
+export interface TranslateResult extends Partial<Translation> { enabled: boolean; cached?: boolean; model?: string; note?: string; }
+
+/** Resolve which provider to use from configured keys. Anthropic wins if both are set. */
+function provider() {
+  if (KEYS.anthropic) return { kind: "anthropic" as const, key: KEYS.anthropic, base: "https://api.anthropic.com/v1", model: KEYS.llmModel || "claude-sonnet-4-6" };
+  if (KEYS.openai) return { kind: "openai" as const, key: KEYS.openai, base: (KEYS.openaiBase || "https://api.openai.com/v1").replace(/\/$/, ""), model: KEYS.llmModel || "gpt-4o-mini" };
+  return null;
+}
+export function providerName(): string | null { return provider()?.kind ?? null; }
+
+/** Pure, unit-testable request builder for each provider. */
+export function buildBody(text: string, p: NonNullable<ReturnType<typeof provider>>): string {
+  const content = `Translate this legislative text:\n\n${text.slice(0, MAX_INPUT)}`;
+  if (p.kind === "anthropic") return JSON.stringify({ model: p.model, max_tokens: MAX_TOKENS, system: SYSTEM, messages: [{ role: "user", content }] });
+  return JSON.stringify({ model: p.model, max_tokens: MAX_TOKENS, messages: [{ role: "system", content: SYSTEM }, { role: "user", content }] });
 }
 
 function parseTranslation(raw: string): Translation {
-  const m = raw.match(/\{[\s\S]*\}/); // tolerate stray prose around the JSON
-  const obj = JSON.parse(m ? m[0] : raw);
+  const m = raw.match(/\{[\s\S]*\}/); const obj = JSON.parse(m ? m[0] : raw);
   return {
     plainEnglish: String(obj.plainEnglish ?? "").trim(),
-    keyPoints: Array.isArray(obj.keyPoints)
-      ? obj.keyPoints.slice(0, 8).map((k: any) => ({ plain: String(k?.plain ?? ""), legalese: String(k?.legalese ?? "") }))
-      : [],
+    keyPoints: Array.isArray(obj.keyPoints) ? obj.keyPoints.slice(0, 8).map((k: any) => ({ plain: String(k?.plain ?? ""), legalese: String(k?.legalese ?? "") })) : [],
   };
 }
 
-/** Live call to Anthropic. Throws on non-200 so callers fall back gracefully. */
-export async function translateText(text: string, key: string): Promise<Translation> {
-  const res = await fetch(API, {
-    method: "POST",
-    headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-    body: buildBody(text),
-  });
-  if (!res.ok) throw new Error(`Anthropic ${res.status}`);
+async function callLLM(text: string, p: NonNullable<ReturnType<typeof provider>>): Promise<Translation> {
+  const url = p.kind === "anthropic" ? `${p.base}/messages` : `${p.base}/chat/completions`;
+  const headers: Record<string, string> = { "content-type": "application/json" };
+  if (p.kind === "anthropic") { headers["x-api-key"] = p.key!; headers["anthropic-version"] = "2023-06-01"; }
+  else headers["authorization"] = `Bearer ${p.key}`;
+  const res = await fetch(url, { method: "POST", headers, body: buildBody(text, p) });
+  if (!res.ok) throw new Error(`${p.kind} ${res.status}`);
   const d: any = await res.json();
-  if (d?.usage) console.log(`  [cost] translate model=${MODEL} in=${d.usage.input_tokens} out=${d.usage.output_tokens}`);
-  return parseTranslation((d?.content ?? []).map((c: any) => c?.text ?? "").join(""));
+  const u = d?.usage; if (u) console.log(`  [cost] translate ${p.kind}/${p.model} in=${u.input_tokens ?? u.prompt_tokens} out=${u.output_tokens ?? u.completion_tokens}`);
+  const textOut = p.kind === "anthropic" ? (d?.content ?? []).map((c: any) => c?.text ?? "").join("") : (d?.choices?.[0]?.message?.content ?? "");
+  return parseTranslation(textOut);
 }
 
-/**
- * Translate a bill, cached per bill id. With a key: cache-hit → served free; miss → translate + cache.
- * Without a key: cleanly disabled (no fabrication).
- */
-export async function getTranslation(billId: string, text: string, key: string | undefined, store: Store): Promise<TranslateResult> {
+/** Translate a bill, cached per bill id; serves cache-hits free; cleanly disabled with no provider key. */
+export async function getTranslation(billId: string, text: string, store: Store): Promise<TranslateResult> {
   const cacheKey = `tr:${billId}`;
   const hit = await store.get(cacheKey);
-  if (hit) { try { return { enabled: true, cached: true, model: MODEL, ...(JSON.parse(hit) as Translation) }; } catch { /* re-translate */ } }
-  if (!key) return { enabled: false, note: "AI translation isn't enabled yet — add ANTHROPIC_API_KEY to switch it on." };
+  const p = provider();
+  if (hit) { try { return { enabled: true, cached: true, model: p?.model, ...(JSON.parse(hit) as Translation) }; } catch { /* re-translate */ } }
+  if (!p) return { enabled: false, note: "AI translation isn't enabled yet — set ANTHROPIC_API_KEY or OPENAI_API_KEY (OpenRouter works too)." };
   if (!text.trim()) return { enabled: true, note: "No bill text available to translate yet.", plainEnglish: "", keyPoints: [] };
   try {
-    const t = await translateText(text, key);
-    await store.put(cacheKey, JSON.stringify(t), CACHE_TTL); // never pay to translate this bill again
-    return { enabled: true, cached: false, model: MODEL, ...t };
-  } catch (e) {
-    return { enabled: true, note: `Translation unavailable (${e instanceof Error ? e.message : "error"}).` };
-  }
+    const t = await callLLM(text, p);
+    await store.put(cacheKey, JSON.stringify(t), CACHE_TTL);
+    return { enabled: true, cached: false, model: p.model, ...t };
+  } catch (e) { return { enabled: true, note: `Translation unavailable (${e instanceof Error ? e.message : "error"}).` }; }
 }

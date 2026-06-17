@@ -4,6 +4,14 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.43.0] — build 85 — 2026-06-17 — Translator is provider-agnostic
+### Changed
+- The bill translator (#7) now works with **any** AI provider — Anthropic native (`ANTHROPIC_API_KEY`)
+  **or** any OpenAI-compatible endpoint (`OPENAI_API_KEY` + optional `OPENAI_BASE_URL`): **OpenRouter**
+  (one key, many models incl. Claude + cheap ones), OpenAI, or a **local Ollama**. Anthropic wins if both
+  set; otherwise OpenAI-compatible. Same cost controls (cheap model, capped tokens, per-bill cache). It
+  activates the moment any AI key is present; degrades cleanly otherwise. Tests 117/117.
+
 ## [0.42.0] — build 84 — 2026-06-17 — Election integrity (responsible core of #53)
 ### Added
 - **Election integrity** (`web/election.html` + `election.json`) — how voting is secured (paper trails,
