@@ -16,6 +16,9 @@
     <div class="sec-title" style="margin-top:18px">Who introduced this — and what it does</div>
     <div class="card" id="sponsor"><div class="meta" style="margin-top:0">Loading sponsor…</div></div>
 
+    <div class="sec-title" style="margin-top:18px">Where this bill is</div>
+    <div class="card" id="lifecycle"><div class="meta" style="margin-top:0">Loading status…</div></div>
+
     <div class="sec-title" style="margin-top:18px">Plain-English translation</div>
     <div class="card" id="xlate">
       <div class="meta" style="margin-top:0">Turn this bill's legalese into plain English — with the key points shown in <strong>both</strong> plain English and the original legal wording, side by side.</div>
@@ -64,6 +67,37 @@
     const pc = p => /^D/i.test(p) ? "D" : /^R/i.test(p) ? "R" : /^I/i.test(p) ? "I" : "U";
     const qp = new URLSearchParams(location.search);
     const congress = qp.get("congress") || "118", type = qp.get("type") || "hr", number = qp.get("number") || "1";
+
+    // ── Dynamic bill-lifecycle visual: infer the current stage from the latest action ──
+    function renderLifecycle(d) {
+      const el = document.getElementById("lifecycle");
+      if (!el) return;
+      const origin = /senate/i.test(d.originChamber || "") ? "Senate" : "House";
+      const other = origin === "House" ? "Senate" : "House";
+      const stages = ["Introduced", "In committee", "Passed " + origin, "Passed " + other, "To President", "Became law"];
+      const t = ((d.latestAction && d.latestAction.text) || "").toLowerCase();
+      const pH = /passed[ /](the )?house|agreed to in house/.test(t), pS = /passed[ /](the )?senate|agreed to in senate/.test(t);
+      let reached = 1; // introduced → in committee by default
+      if (/referred to|introduced/.test(t)) reached = 1;
+      if (/reported|placed on .*calendar|ordered to be reported/.test(t)) reached = 1;
+      if (pH || pS) reached = (origin === "House" ? pH : pS) ? 2 : 3;
+      if (pH && pS) reached = 3;
+      if (/presented to (the )?president|received .* by president/.test(t)) reached = 4;
+      if (/became public law|public law no|signed by the president|enacted/.test(t)) reached = 5;
+      const vetoed = /vetoed/.test(t);
+      const step = (label, i) => {
+        const done = i < reached, cur = i === reached;
+        const bg = done ? "var(--forest)" : cur ? "var(--paper-2)" : "var(--paper)";
+        const col = done ? "#fbf9f2" : cur ? "var(--ink)" : "var(--ink-soft)";
+        const bd = cur ? "2px solid var(--brass)" : "1px solid var(--line)";
+        return `<div style="flex:1;min-width:88px;text-align:center">
+          <div style="height:30px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:${bg};color:${col};border:${bd};font-size:12px;font-weight:600">${done ? "✓ " : ""}${esc(label)}</div></div>`;
+      };
+      el.innerHTML =
+        `<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:stretch">${stages.map(step).join("")}</div>` +
+        (vetoed ? `<div class="meta" style="margin-top:8px;color:var(--p-r)">⚠️ Vetoed — needs a 2/3 override in both chambers to become law.</div>` : "") +
+        `<div class="meta" style="margin-top:8px">${d.latestAction ? `<b>Latest:</b> ${esc(d.latestAction.text)}${d.latestAction.actionDate ? " (" + esc(d.latestAction.actionDate) + ")" : ""}` : "Status unavailable."} · <a href="./process.html">how a bill becomes law →</a></div>`;
+    }
 
     function mlist(members) {
       return members.map(m =>
@@ -114,6 +148,7 @@
       window.__billText = d.summary || ""; // fed to the AI translator
       // track engagement for the trending surface (#39)
       fetch("/api/track", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind: "bill", id: `${congress}-${type}-${number}`.toLowerCase(), label: d.title || `${type.toUpperCase()} ${number}` }) }).catch(() => {});
+      renderLifecycle(d);
       const facts = [];
       if (d.introducedDate) facts.push(`<span class="pill">Introduced ${esc(d.introducedDate)}</span>`);
       if (d.policyArea) facts.push(`<span class="pill">${esc(d.policyArea)}</span>`);

@@ -4,6 +4,13 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.38.0] — build 80 — 2026-06-17 — Dynamic bill-lifecycle visual
+### Added
+- **"Where this bill is"** on `web/bill.html` — a 6-stage visual tracker (Introduced → In committee →
+  Passed origin chamber → Passed other chamber → To President → Became law) that infers and highlights the
+  current stage from the bill's latest action, flags vetoes (needs 2/3 override), shows the latest action +
+  date, and links to the "how a bill becomes law" explainer. Closes #49.
+
 ## [0.37.0] — build 79 — 2026-06-17 — Visual calendar (month grid + linked bills)
 ### Added
 - **Visual month calendar** on `web/calendar.html` — a tappable month grid above the list view. Days with
