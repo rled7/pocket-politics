@@ -4,6 +4,14 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.41.0] — build 83 — 2026-06-17 — Filibuster: who's holding it up
+### Added
+- **"Who's holding it up?"** on `web/filibuster.html` — clarifies that senators who vote NO on cloture are
+  the ones sustaining a filibuster, and the per-vote roll-call link shows exactly who. HONEST NOTE: there's
+  no official "who started the filibuster" field, so the roll call is the authoritative record of who
+  blocked it. A member's own cloture votes are reachable via the GovTrack voting-record link on their
+  profile (build 82). Closes #50.
+
 ## [0.40.0] — build 82 — 2026-06-17 — Voting record on profiles
 ### Added
 - **Voting record** on the member profile (`web/index.html`) — the "Present · votes" tab is now live, and
