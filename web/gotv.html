@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocket Politics — Vote (GOTV)</title>
+  <link rel="stylesheet" href="./style.css" />
+  <style>
+    .grp { background: var(--paper-2); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; margin-top: 14px; box-shadow: var(--shadow); }
+    .grp h3 { margin: 0 0 8px; font-family: "Fraunces", serif; font-size: 18px; }
+    .grp a.lnk { display: inline-block; margin: 3px 8px 3px 0; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="./home.html" class="brand">Pocket Politics</a>
+    <nav class="nav">
+      <a href="./home.html">My Government</a>
+      <a href="./gotv.html" class="on">Vote</a>
+      <a href="./events.html">Events</a>
+      <a href="./howto.html">Take Action</a>
+      <a href="./mycity.html">My City</a>
+    </nav>
+    <h1>Vote — get registered, find your place, make a plan</h1>
+    <div class="meta">Everything you need to actually cast a ballot — registering, where &amp; when to vote,
+      what to bring, and help if something goes wrong. Each links to the official tool for your state.</div>
+    <div id="groups"></div>
+    <div class="src">Live address → polling-place lookup can be added with a Google Civic Information API key;
+      until then these route to the official state finders. Not affiliated with any election authority.</div>
+  </div>
+  <script>
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    fetch("./gotv.json").then(r => r.json()).then(d => {
+      document.getElementById("groups").innerHTML = (d.groups || []).map(g =>
+        `<div class="grp"><h3>${esc(g.icon || "")} ${esc(g.label)}</h3>${(g.links || []).map(l =>
+          `<a class="lnk" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">${esc(l.name)} ↗</a>`).join("")}</div>`).join("");
+    }).catch(() => { document.getElementById("groups").innerHTML = `<div class="empty">Could not load.</div>`; });
+  </script>
+  <script src="./app-shell.js" defer></script>
+  <script src="./build-tag.js" defer></script>
+  <script src="./bw-mode.js" defer></script>
+</body>
+</html>

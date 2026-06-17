@@ -4,6 +4,13 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.39.0] — build 81 — 2026-06-17 — Vote (GOTV) finder
+### Added
+- **Vote / GOTV** (`web/gotv.html` + `gotv.json`) — register & check status, find your polling place,
+  early/absentee voting, voter-ID rules by state, sample ballot, key deadlines, and the Election
+  Protection hotline (866-OUR-VOTE). Routes to the official state tools. Closes #52. (A live address →
+  polling-site lookup can be added with a Google Civic Information API key.)
+
 ## [0.38.0] — build 80 — 2026-06-17 — Dynamic bill-lifecycle visual
 ### Added
 - **"Where this bill is"** on `web/bill.html` — a 6-stage visual tracker (Introduced → In committee →

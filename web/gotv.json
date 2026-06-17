@@ -1,0 +1,36 @@
+{
+  "note": "Get out the vote. Registering, finding your polling place, and ID rules all run through official state systems — we route you to the authoritative tool for each. (A live address→polling-site lookup can be added with a Google Civic Information API key.)",
+  "groups": [
+    {
+      "id": "register", "label": "Register & check your status", "icon": "📝",
+      "links": [
+        { "name": "Vote.gov — register in your state", "url": "https://vote.gov/" },
+        { "name": "Check if you're registered (Vote.org)", "url": "https://www.vote.org/am-i-registered-to-vote/" },
+        { "name": "Your state election office", "url": "https://www.usa.gov/state-election-office" }
+      ]
+    },
+    {
+      "id": "where", "label": "Where & when to vote", "icon": "📍",
+      "links": [
+        { "name": "Find your polling place (Vote.org)", "url": "https://www.vote.org/polling-place-locator/" },
+        { "name": "Early voting dates & locations", "url": "https://www.vote.org/early-voting-calendar/" },
+        { "name": "Vote by mail / absentee ballot", "url": "https://www.vote.org/absentee-ballot/" }
+      ]
+    },
+    {
+      "id": "prepare", "label": "What to bring & how to prepare", "icon": "🪪",
+      "links": [
+        { "name": "Voter ID requirements by state", "url": "https://www.vote.org/voter-id-laws/" },
+        { "name": "Preview your sample ballot (Ballotpedia)", "url": "https://ballotpedia.org/Sample_Ballot_Lookup" },
+        { "name": "Key election dates & deadlines", "url": "https://www.vote.org/election-calendar/" }
+      ]
+    },
+    {
+      "id": "help", "label": "Problems at the polls", "icon": "🆘",
+      "links": [
+        { "name": "Election Protection hotline — 866-OUR-VOTE", "url": "https://866ourvote.org/" },
+        { "name": "Report a problem / get help voting", "url": "https://www.usa.gov/voter-registration-problems" }
+      ]
+    }
+  ]
+}
