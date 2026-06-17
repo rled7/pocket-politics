@@ -4,6 +4,15 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.40.0] — build 82 — 2026-06-17 — Voting record on profiles
+### Added
+- **Voting record** on the member profile (`web/index.html`) — the "Present · votes" tab is now live, and
+  a Voting-record block links to their **full roll-call history (GovTrack)** and **sponsored legislation
+  (Congress.gov)** — the validated official sources. HONEST NOTE: no free API exposes per-member roll-call
+  votes cleanly, so rather than fabricate "voted YES on X" we route to the authoritative record the user
+  asked to validate against; sponsored bills are shown on the profile and link to the bill + its live
+  status. Closes #47.
+
 ## [0.39.0] — build 81 — 2026-06-17 — Vote (GOTV) finder
 ### Added
 - **Vote / GOTV** (`web/gotv.html` + `gotv.json`) — register & check status, find your polling place,

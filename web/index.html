@@ -63,10 +63,16 @@
         ${contact}
         <div class="tabs">
           <span class="tab on">Past · record</span>
-          <span class="tab soon">Present · votes (soon)</span>
+          <a class="tab" href="https://www.govtrack.us/congress/members/${esc(p.bioguideId)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none">Present · votes ↗</a>
           <span class="tab soon">Future · schedule (soon)</span>
         </div>
         <div style="margin-top:8px">${items || "<p>No records.</p>"}</div>
+        <div class="sec-title" style="margin-top:16px">Voting record</div>
+        <div class="facts">
+          <a class="fact" href="https://www.govtrack.us/congress/members/${esc(p.bioguideId)}" target="_blank" rel="noopener noreferrer">🗳️ How they voted — every roll call (GovTrack) ↗</a>
+          <a class="fact" href="https://www.congress.gov/member/${esc(p.bioguideId)}" target="_blank" rel="noopener noreferrer">🏛️ Sponsored legislation (Congress.gov) ↗</a>
+        </div>
+        <div class="meta" style="margin-top:6px;font-size:13px">Their full roll-call voting history, validated at the official source. The bills they sponsored are listed above — each links to the bill and its live status.</div>
         <div class="src">Source: ${esc((p.sources||[]).join("; "))} · generated ${new Date(p.generatedAt).toLocaleString()}</div>`;
       // Web presence research: official site (from the profile) + social media, sourced from
       // the public @unitedstates dataset (keyed by bioguide). Graceful — if it fails, the
