@@ -4,6 +4,16 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.42.0] — build 84 — 2026-06-17 — Election integrity (responsible core of #53)
+### Added
+- **Election integrity** (`web/election.html` + `election.json`) — how voting is secured (paper trails,
+  risk-limiting audits, chain of custody, L&A testing, certification), how to REPORT a problem or
+  suspected fraud through official channels (Election Protection 866-OUR-VOTE, state election office, DOJ,
+  FBI), and where to read VERIFIED results & audits (EAC, CISA, state audits, MIT Election Lab).
+- DELIBERATELY does NOT publish unverified "suspicion" about specific polling sites (misinformation/
+  defamation risk). The site-flagging part of #53 stays pending a user decision + an authoritative,
+  verifiable incident source. Partial #53 (safe core shipped).
+
 ## [0.41.0] — build 83 — 2026-06-17 — Filibuster: who's holding it up
 ### Added
 - **"Who's holding it up?"** on `web/filibuster.html` — clarifies that senators who vote NO on cloture are

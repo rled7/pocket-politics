@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocket Politics — Election Integrity</title>
+  <link rel="stylesheet" href="./style.css" />
+  <style>
+    .grp { background: var(--paper-2); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; margin-top: 14px; box-shadow: var(--shadow); }
+    .grp h3 { margin: 0 0 8px; font-family: "Fraunces", serif; font-size: 18px; }
+    .grp a.lnk { display: inline-block; margin: 3px 8px 3px 0; }
+    .note { background: #fdf5ea; border: 1px solid #f0d5b0; border-radius: 12px; padding: 12px 14px; font-size: 13.5px; color: var(--brass-2); margin-top: 14px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="./home.html" class="brand">Pocket Politics</a>
+    <nav class="nav">
+      <a href="./home.html">My Government</a>
+      <a href="./gotv.html">Vote</a>
+      <a href="./election.html" class="on">Election integrity</a>
+      <a href="./howto.html">Take Action</a>
+    </nav>
+    <h1>Election integrity</h1>
+    <div class="meta">How your vote is secured, how to <b>report</b> a problem or suspected fraud through official
+      channels, and where to read <b>verified</b> audit results.</div>
+
+    <div class="sec-title">How elections are secured</div>
+    <div class="card"><ul id="secured" style="margin:0;padding-left:18px;font-size:14.5px"></ul></div>
+
+    <div id="groups"></div>
+
+    <div class="note" id="note"></div>
+  </div>
+  <script>
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    fetch("./election.json").then(r => r.json()).then(d => {
+      document.getElementById("secured").innerHTML = (d.secured || []).map(x => `<li style="margin-bottom:4px">${esc(x)}</li>`).join("");
+      document.getElementById("groups").innerHTML = (d.groups || []).map(g =>
+        `<div class="sec-title">${esc(g.icon || "")} ${esc(g.label)}</div><div class="grp">${(g.links || []).map(l =>
+          `<a class="lnk" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">${esc(l.name)} ↗</a>`).join("")}</div>`).join("");
+      document.getElementById("note").textContent = d.note || "";
+    }).catch(() => { document.getElementById("groups").innerHTML = `<div class="empty">Could not load.</div>`; });
+  </script>
+  <script src="./app-shell.js" defer></script>
+  <script src="./build-tag.js" defer></script>
+  <script src="./bw-mode.js" defer></script>
+</body>
+</html>

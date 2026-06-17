@@ -1,0 +1,37 @@
+{
+  "note": "Election integrity — done responsibly. We explain how voting is secured, how to REPORT a problem or suspected fraud through official channels, and where to read VERIFIED audit results. We do NOT publish unverified 'suspicion' about specific polling places — that would spread misinformation. Flagging a specific site would require an authoritative, verifiable record (a certified audit, court finding, or election-board report).",
+  "secured": [
+    "Most U.S. votes are cast on paper ballots (or produce a paper trail) that can be recounted by hand.",
+    "Risk-limiting & post-election audits compare paper ballots against the machine count.",
+    "Voting machines are tested before each election (logic & accuracy testing) and are not connected to the internet during voting.",
+    "Bipartisan poll workers and observers watch the process; ballots follow a documented chain of custody.",
+    "Results are unofficial until canvassed and certified by election officials."
+  ],
+  "groups": [
+    {
+      "id": "report", "label": "Report a problem or suspected fraud", "icon": "🚨",
+      "links": [
+        { "name": "Election Protection hotline — 866-OUR-VOTE", "url": "https://866ourvote.org/" },
+        { "name": "Your state election office (file a complaint)", "url": "https://www.usa.gov/state-election-office" },
+        { "name": "U.S. DOJ — report an election crime", "url": "https://www.justice.gov/voting" },
+        { "name": "FBI tips (election crimes)", "url": "https://tips.fbi.gov/" }
+      ]
+    },
+    {
+      "id": "verify", "label": "Read verified results & audits", "icon": "✅",
+      "links": [
+        { "name": "U.S. Election Assistance Commission (EAC)", "url": "https://www.eac.gov/" },
+        { "name": "CISA — election security & rumor control", "url": "https://www.cisa.gov/topics/election-security" },
+        { "name": "Your state's official results & audit reports", "url": "https://www.usa.gov/state-election-office" },
+        { "name": "MIT Election Data & Science Lab", "url": "https://electionlab.mit.edu/" }
+      ]
+    },
+    {
+      "id": "learn", "label": "How elections are run & secured", "icon": "🔒",
+      "links": [
+        { "name": "EAC — how elections work", "url": "https://www.eac.gov/voters" },
+        { "name": "CISA — #Protect the vote (myths vs facts)", "url": "https://www.cisa.gov/election-security-rumor-vs-reality" }
+      ]
+    }
+  ]
+}
