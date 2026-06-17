@@ -4,6 +4,14 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.37.0] — build 79 — 2026-06-17 — Visual calendar (month grid + linked bills)
+### Added
+- **Visual month calendar** on `web/calendar.html` — a tappable month grid above the list view. Days with
+  committee meetings are highlighted with a count; tap one to see that day's agenda. Prev/Next month nav,
+  today highlighted, auto-opens the soonest day. **Bill references in agendas ("S.4668", "H.R. 1234") are
+  auto-linked to the bill page** so people don't go digging. The list view stays below the calendar.
+  Closes #48. (Past-day outcome summaries still to come — needs historical data + AI.)
+
 ## [0.36.0] — build 78 — 2026-06-16 — How a bill becomes law (explainer)
 ### Added
 - **How a bill becomes law** (`web/process.html`) — the full federal legislative process as 10 stages,

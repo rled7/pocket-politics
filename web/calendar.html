@@ -6,15 +6,30 @@
   <title>Pocket Politics — Congressional Calendar</title>
   <link rel="stylesheet" href="./style.css" />
   <style>
-    .daygroup { margin-top: 16px; }
-    .dayhead { font-family: "Fraunces", serif; font-size: 16px; color: var(--ink); background: #f6f2e6;
-      border: 1px solid var(--line); border-radius: 10px; padding: 8px 14px; }
-    .mtg { padding: 13px 4px; border-bottom: 1px solid var(--line); }
+    .calnav { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 14px 0 8px; }
+    .calnav button { background: var(--paper-2); border: 1px solid var(--line); border-radius: 8px; padding: 6px 13px; cursor: pointer; font: inherit; }
+    .calnav button:hover { border-color: var(--brass); }
+    .calnav .mo { font-family: "Fraunces", serif; font-size: 17px; }
+    .calgrid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .cald { aspect-ratio: 1 / 1; border: 1px solid var(--line); border-radius: 8px; background: var(--paper-2); padding: 4px 5px; font-size: 12px; position: relative; }
+    .cald.dow { aspect-ratio: auto; border: 0; background: none; text-align: center; font-weight: 700; color: var(--ink-soft); font-size: 11px; padding: 2px 0; }
+    .cald.empty { background: none; border: 0; }
+    .cald .dn { font-weight: 600; color: var(--ink-soft); }
+    .cald.has { cursor: pointer; border-color: var(--brass); }
+    .cald.has .dn { color: var(--ink); }
+    .cald.has:hover, .cald.sel { background: var(--forest); }
+    .cald.has:hover .dn, .cald.sel .dn { color: #fbf9f2; }
+    .cald.today { outline: 2px solid var(--brass); }
+    .cald .badge { position: absolute; bottom: 3px; right: 4px; font-size: 10px; background: var(--brass); color: #fff; border-radius: 8px; padding: 0 5px; }
+    .daypanel { margin-top: 10px; }
+    .mtg { padding: 12px 4px; border-bottom: 1px solid var(--line); }
     .mtg:last-child { border-bottom: 0; }
     .mtg .tt { font-weight: 600; }
     .mtg .mate { font-size: 13px; color: var(--ink-soft); margin-top: 3px; }
+    .mtg a.billref { font-weight: 700; text-decoration: underline; }
     .chip { font-size: 10px; text-transform: uppercase; letter-spacing: .06em; border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; color: var(--brass-2); }
     .chip.house { color: var(--p-i); } .chip.senate { color: var(--p-d); }
+    .dayhead { font-family: "Fraunces", serif; font-size: 16px; background: #f6f2e6; border: 1px solid var(--line); border-radius: 10px; padding: 8px 14px; margin-top: 16px; }
     .official a { display: inline-block; margin: 4px 8px 4px 0; }
   </style>
 </head>
@@ -29,21 +44,74 @@
       <a href="./howto.html">Take Action</a>
     </nav>
     <h1>Congressional calendar</h1>
-    <div class="meta">What's scheduled in Congress — upcoming committee hearings and markups, soonest first.
-      For the live floor schedule, use the official calendars below.</div>
+    <div class="meta">What's scheduled in Congress — tap a highlighted day to see that day's agenda; bills on the
+      agenda link straight to the bill. The full list is below the calendar.</div>
 
     <div class="sec-title">Official schedules</div>
     <div class="card official" id="official"></div>
 
-    <div class="sec-title">Upcoming committee meetings</div>
+    <div class="sec-title">Calendar</div>
+    <div class="card">
+      <div class="calnav"><button id="prev">‹ Prev</button><span class="mo" id="month"></span><button id="next">Next ›</button></div>
+      <div class="calgrid" id="grid"></div>
+      <div class="daypanel" id="daypanel"><div class="meta" style="margin:6px 0 0">Tap a highlighted day to see its agenda.</div></div>
+    </div>
+
+    <div class="sec-title">List view — upcoming</div>
     <div id="list"><div class="card"><div class="meta" style="margin-top:0">Loading the calendar…</div></div></div>
     <div class="src" id="src"></div>
   </div>
   <script>
     const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
-    const dayKey = iso => { try { return new Date(iso).toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" }); } catch { return iso; } };
     const time = iso => { try { return new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }); } catch { return ""; } };
     const chamberClass = c => /house/i.test(c) ? "house" : /senate/i.test(c) ? "senate" : "";
+    const ymd = iso => { const d = new Date(iso); return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; };
+
+    // Turn bill references in agenda text ("S.4668", "H.R. 1234") into links to the bill page.
+    const TYPE = { HR: "hr", S: "s", HJRES: "hjres", SJRES: "sjres", HCONRES: "hconres", SCONRES: "sconres", HRES: "hres", SRES: "sres" };
+    function linkifyBills(text) {
+      const t = esc(text);
+      return t.replace(/\b(H\.?\s?J\.?\s?Res\.?|S\.?\s?J\.?\s?Res\.?|H\.?\s?Con\.?\s?Res\.?|S\.?\s?Con\.?\s?Res\.?|H\.?\s?Res\.?|S\.?\s?Res\.?|H\.?\s?R\.?|S\.?)\s?(\d{1,5})\b/gi, (m, pre, num) => {
+        const slug = TYPE[pre.replace(/[.\s]/g, "").toUpperCase()];
+        if (!slug) return m;
+        return `<a class="billref" href="./bill.html?congress=119&type=${slug}&number=${num}">${m}</a>`;
+      });
+    }
+    function mtgHtml(m) {
+      return `<div class="mtg">
+        <div class="tt">${linkifyBills(m.title || m.committee || "Committee meeting")}</div>
+        <div class="mate"><span class="chip ${chamberClass(m.chamber)}">${esc(m.chamber || "")}</span>
+          ${m.committee ? " " + esc(m.committee) : ""}${m.date ? " · " + esc(time(m.date)) : ""}${m.status ? " · " + esc(m.status) : ""}
+          ${m.building ? " · " + esc(m.building) + (m.room ? " " + esc(m.room) : "") : ""}</div>
+      </div>`;
+    }
+
+    let MEETINGS = [], byDay = {}, viewY, viewM;
+    function renderMonth() {
+      const monthEl = document.getElementById("month"), grid = document.getElementById("grid");
+      const first = new Date(viewY, viewM, 1), today = new Date();
+      monthEl.textContent = first.toLocaleDateString([], { month: "long", year: "numeric" });
+      const dows = ["S", "M", "T", "W", "T", "F", "S"].map(d => `<div class="cald dow">${d}</div>`).join("");
+      let cells = "";
+      for (let i = 0; i < first.getDay(); i++) cells += `<div class="cald empty"></div>`;
+      const days = new Date(viewY, viewM + 1, 0).getDate();
+      for (let day = 1; day <= days; day++) {
+        const key = `${viewY}-${viewM}-${day}`;
+        const has = byDay[key];
+        const isToday = today.getFullYear() === viewY && today.getMonth() === viewM && today.getDate() === day;
+        cells += `<div class="cald${has ? " has" : ""}${isToday ? " today" : ""}" ${has ? `data-key="${key}"` : ""}>
+          <span class="dn">${day}</span>${has ? `<span class="badge">${has.length}</span>` : ""}</div>`;
+      }
+      grid.innerHTML = dows + cells;
+      grid.querySelectorAll(".cald.has").forEach(c => c.addEventListener("click", () => selectDay(c.dataset.key, c)));
+    }
+    function selectDay(key, cell) {
+      document.querySelectorAll(".cald.sel").forEach(c => c.classList.remove("sel"));
+      if (cell) cell.classList.add("sel");
+      const mtgs = byDay[key] || [];
+      const label = new Date(mtgs[0].date).toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" });
+      document.getElementById("daypanel").innerHTML = `<div class="dayhead">${esc(label)} — ${mtgs.length} meeting${mtgs.length === 1 ? "" : "s"}</div>` + mtgs.map(mtgHtml).join("");
+    }
 
     (async () => {
       let d;
@@ -55,20 +123,23 @@
         { name: "All committee meetings", url: "https://www.congress.gov/committees/meetings" }
       ]).map(o => `<a class="fact" href="${esc(o.url)}" target="_blank" rel="noopener noreferrer">📅 ${esc(o.name)} ↗</a>`).join(" ");
 
+      MEETINGS = (d && d.meetings) || [];
+      byDay = {};
+      MEETINGS.forEach(m => { if (m.date) (byDay[ymd(m.date)] = byDay[ymd(m.date)] || []).push(m); });
+      const start = MEETINGS.length ? new Date(MEETINGS[0].date) : new Date();
+      viewY = start.getFullYear(); viewM = start.getMonth();
+      renderMonth();
+      document.getElementById("prev").addEventListener("click", () => { if (--viewM < 0) { viewM = 11; viewY--; } renderMonth(); });
+      document.getElementById("next").addEventListener("click", () => { if (++viewM > 11) { viewM = 0; viewY++; } renderMonth(); });
+      // auto-open the soonest day with meetings
+      if (MEETINGS.length) selectDay(ymd(MEETINGS[0].date), document.querySelector(`.cald.has[data-key="${ymd(MEETINGS[0].date)}"]`));
+
       const list = document.getElementById("list");
-      if (!d || !(d.meetings || []).length) { list.innerHTML = `<div class="empty">No upcoming committee meetings loaded. See the official schedules above.</div>`; return; }
+      if (!MEETINGS.length) { list.innerHTML = `<div class="empty">No upcoming committee meetings loaded. See the official schedules above.</div>`; return; }
       const groups = {};
-      d.meetings.forEach(m => { const k = dayKey(m.date); (groups[k] = groups[k] || []).push(m); });
-      list.innerHTML = Object.entries(groups).map(([day, mtgs]) => `
-        <div class="daygroup"><div class="dayhead">${esc(day)}</div>
-        <div class="card">${mtgs.map(m => `
-          <div class="mtg">
-            <div class="tt">${esc(m.title || m.committee || "Committee meeting")}</div>
-            <div class="mate"><span class="chip ${chamberClass(m.chamber)}">${esc(m.chamber || "")}</span>
-              ${m.committee ? " " + esc(m.committee) : ""}${m.date ? " · " + esc(time(m.date)) : ""}${m.status ? " · " + esc(m.status) : ""}
-              ${m.building ? " · " + esc(m.building) + (m.room ? " " + esc(m.room) : "") : ""}</div>
-          </div>`).join("")}</div></div>`).join("");
-      document.getElementById("src").innerHTML = `${d.live === false ? "Demo data — live calendar on with the Congress key. " : ""}Source: ${esc(d.source || "Congress.gov")} ↗`;
+      MEETINGS.forEach(m => { const k = new Date(m.date).toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" }); (groups[k] = groups[k] || []).push(m); });
+      list.innerHTML = Object.entries(groups).map(([day, mtgs]) => `<div class="dayhead">${esc(day)}</div><div class="card">${mtgs.map(mtgHtml).join("")}</div>`).join("");
+      document.getElementById("src").innerHTML = `${d.live === false ? "Demo data — live calendar on with the Congress key. " : ""}Bill references link to the bill. Source: ${esc(d.source || "Congress.gov")} ↗`;
     })();
   </script>
   <script src="./app-shell.js" defer></script>
