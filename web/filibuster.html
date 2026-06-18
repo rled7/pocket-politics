@@ -62,11 +62,25 @@
           <div class="mate">
             <span class="tag ${v.invoked ? "broke" : "held"}">${v.invoked ? "filibuster broken" : "filibuster held"}</span>
             · Vote #${esc(v.voteNumber)} · ${esc(v.date)} · <b>${esc(v.yeas)}–${esc(v.nays)}</b>${v.issue ? " · " + esc(v.issue) : ""}
+            · <button class="who" data-num="${esc(v.voteNumber)}" style="background:none;border:0;color:var(--forest);text-decoration:underline;cursor:pointer;font:inherit;padding:0">see who voted ▾</button>
             · <a href="${esc(v.url)}" target="_blank" rel="noopener noreferrer">roll call ↗</a>
           </div>
+          <div class="detail" id="vd-${esc(v.voteNumber)}"></div>
         </div>`).join("") + `</div>`;
+      window.__cong = d.congress; window.__sess = d.session;
       document.getElementById("src").innerHTML = `${d.live === false ? "Demo data — live cloture votes load from senate.gov. " : ""}Source: ${esc(d.source || "U.S. Senate")} · 60 votes are needed to invoke cloture`;
     })();
+    // expand a vote to see each senator's Yea/Nay
+    document.getElementById("list").addEventListener("click", async (e) => {
+      const b = e.target.closest("button.who"); if (!b) return;
+      const num = b.dataset.num, box = document.getElementById("vd-" + num);
+      if (box.innerHTML) { box.innerHTML = ""; b.textContent = "see who voted ▾"; return; }
+      b.textContent = "loading…";
+      let d; try { d = await (await fetch(`/api/cloture/vote?congress=${window.__cong}&session=${window.__sess}&num=${encodeURIComponent(num)}`)).json(); } catch (_) { b.textContent = "see who voted ▾"; return; }
+      const col = (label, arr, cls) => `<div class="col ${cls}"><h3>${label} (${arr.length})</h3>${arr.map(s => `<div class="mv">${esc(s.name)} <span style="color:var(--ink-soft)">${esc(s.party || "")}-${esc(s.state || "")}</span></div>`).join("") || "—"}</div>`;
+      box.innerHTML = `<div class="cols" style="margin-top:8px">${col("Voted YES (for cloture)", d.yea || [], "y")}${col("Voted NO (sustained filibuster)", d.nay || [], "n")}</div>${(d.other||[]).length ? `<div class="meta" style="margin-top:4px">Not voting/present: ${(d.other).map(s=>esc(s.name)).join(", ")}</div>` : ""}`;
+      b.textContent = "hide ▴";
+    });
   </script>
   <script src="./app-shell.js" defer></script>
   <script src="./build-tag.js" defer></script>

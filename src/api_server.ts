@@ -25,7 +25,7 @@ import { getStateData, isValidState } from "./openstates.ts";
 import { getCalendar, OFFICIAL_CALENDARS } from "./calendar.ts";
 import { getBudgetWatch } from "./budget.ts";
 import { createCheckout, tiersPublic, paymentsConfigured } from "./payments.ts";
-import { getCloture } from "./cloture.ts";
+import { getCloture, getVoteDetail } from "./cloture.ts";
 import { getTranslation } from "./translate.ts";
 import { rateLimit } from "./ratelimit.ts";
 import { track, getTrending, validKind } from "./trending.ts";
@@ -170,6 +170,12 @@ async function route(url: URL, request: Request): Promise<Response> {
   }
   if (segs[0] === "api" && segs[1] === "budget") {
     return jsonCached(await getBudgetWatch(KEYS.congress), { request, sMaxAge: 3600 });
+  }
+  if (segs[0] === "api" && segs[1] === "cloture" && segs[2] === "vote") {
+    const c = parseInt(q.get("congress") ?? "119", 10) || 119, s = parseInt(q.get("session") ?? "2", 10) || 2;
+    const num = (q.get("num") ?? "").replace(/\D/g, "").slice(0, 5);
+    if (!num) return jsonError("num required (vote number)", 400);
+    return jsonCached(await getVoteDetail(c, s, num), { request, sMaxAge: 86400 }); // votes are final → cache a day
   }
   if (segs[0] === "api" && segs[1] === "cloture") {
     return jsonCached(await getCloture(), { request, sMaxAge: 1800 });

@@ -61,6 +61,28 @@ function summarize(congress: number, session: number, votes: ClotureVote[]): Clo
   };
 }
 
+// ── Per-senator detail for one roll-call vote (who voted Yea/Nay) ──
+const VOTES = "https://www.senate.gov/legislative/LIS/roll_call_votes";
+export interface SenatorVote { name: string; party?: string; state?: string; vote: string; }
+export interface VoteDetail { congress: number; session: number; voteNumber: string; yea: SenatorVote[]; nay: SenatorVote[]; other: SenatorVote[]; live: boolean; note?: string; }
+
+export async function getVoteDetail(congress: number, session: number, num: string): Promise<VoteDetail> {
+  const base: VoteDetail = { congress, session, voteNumber: num, yea: [], nay: [], other: [], live: false };
+  const padded = num.replace(/\D/g, "").padStart(5, "0");
+  try {
+    const res = await fetch(`${VOTES}/vote${congress}${session}/vote_${congress}_${session}_${padded}.xml`, { headers: UA });
+    if (!res.ok) throw new Error(`Senate ${res.status}`);
+    const xml = await res.text();
+    const yea: SenatorVote[] = [], nay: SenatorVote[] = [], other: SenatorVote[] = [];
+    for (const m of xml.matchAll(/<member>([\s\S]*?)<\/member>/g)) {
+      const b = m[1];
+      const sv: SenatorVote = { name: tag(b, "member_full"), party: tag(b, "party"), state: tag(b, "state"), vote: tag(b, "vote_cast") };
+      if (/^yea$/i.test(sv.vote)) yea.push(sv); else if (/^nay$/i.test(sv.vote)) nay.push(sv); else other.push(sv);
+    }
+    return { ...base, live: true, yea, nay, other };
+  } catch (e) { return { ...base, note: `Vote detail unavailable (${e instanceof Error ? e.message : "error"}).` }; }
+}
+
 /** Cloture votes for the current congress (tries the given session, falls back to session 1). */
 export async function getCloture(congress = 119, session = 2): Promise<ClotureResult> {
   try {

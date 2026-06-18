@@ -4,6 +4,13 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.47.0] — build 89 — 2026-06-17 — Senate roll-call detail (per-senator)
+### Added
+- **"See who voted"** on the filibuster page — each cloture vote now expands to show **every senator's
+  Yea/Nay** (the Nays are who sustained the filibuster), from the official senate.gov roll-call XML.
+  `src/cloture.ts getVoteDetail`, `GET /api/cloture/vote?congress=&session=&num=`. Verified live (47–43).
+  No key needed. Closes #58.
+
 ## [0.46.0] — build 88 — 2026-06-17 — NY bill detail + votes (member positions)
 ### Added
 - **NY bill detail page** (`web/nybill.html`, `GET /api/ny/bill?printNo=&session=`) — sponsor, summary,
