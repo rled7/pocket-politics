@@ -11,7 +11,7 @@
 import {
   fetchMember, fetchSponsored, fetchMembers, fetchBills,
   fetchBillRecordedVotes, fetchHouseVoteMembers, type MemberVote,
-  fetchBillDetail, fetchBillSummary, fetchBillCosponsors,
+  fetchBillDetail, fetchBillSummary, fetchBillCosponsors, fetchBillActions,
 } from "./congress.ts";
 import { buildProfile } from "./profile.ts";
 import type { ApiMember, ApiSponsored } from "./congress.ts";
@@ -88,12 +88,13 @@ export async function getBill(congress: number, type: string, number: string, ke
   if (!key) {
     return { ...billDetailFixture, source: "Congress.gov (demo)", live: false, note: note("the live sponsor & summary") };
   }
-  const [detail, summary, cos] = await Promise.all([
+  const [detail, summary, cos, actions] = await Promise.all([
     fetchBillDetail(congress, type, number, key),
     fetchBillSummary(congress, type, number, key),
     fetchBillCosponsors(congress, type, number, key).catch(() => ({ cosponsors: [], total: 0 })),
+    fetchBillActions(congress, type, number, key).catch(() => []),
   ]);
-  return { ...detail, summary, cosponsors: cos.cosponsors, cosponsorsTotal: cos.total, source: "Congress.gov API", live: true };
+  return { ...detail, summary, cosponsors: cos.cosponsors, cosponsorsTotal: cos.total, actions, source: "Congress.gov API", live: true };
 }
 
 /**

@@ -4,6 +4,14 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.45.0] — build 87 — 2026-06-17 — Full bill timeline (every action)
+### Added
+- **Full timeline** on the bill page (`web/bill.html`) — every action the bill took, dated, in
+  chronological order (we previously showed only the *latest* action). `src/congress.ts fetchBillActions`
+  (same `/actions` endpoint that powers the votes feature) is now included in `getBill`. Pairs with the
+  lifecycle tracker. Tests 117/117, typecheck clean. (Live data verification pending — Congress.gov was
+  temporarily unreachable at commit time; the endpoint is the proven one used for recorded votes.)
+
 ## [0.44.0] — build 86 — 2026-06-17 — Fixes: state-map target + local transcript reader
 ### Fixed
 - **"Where are the other states?"** — the home US map linked to *federal* members; it now opens each

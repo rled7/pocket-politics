@@ -176,6 +176,19 @@ export async function fetchBillSummary(
   } catch { return undefined; }
 }
 
+/** The full action timeline for a bill (every step, dated) — the complete legislative history. */
+export interface BillAction { date?: string; text: string; type?: string; }
+export async function fetchBillActions(
+  congress: number, type: string, number: string, key: string,
+): Promise<BillAction[]> {
+  try {
+    const data = await get<{ actions?: { actionDate?: string; text?: string; type?: string }[] }>(
+      `/bill/${congress}/${type.toLowerCase()}/${number}/actions?limit=250`, key);
+    // API returns newest-first; reverse to chronological (oldest → newest) for a timeline.
+    return (data.actions ?? []).map(a => ({ date: a.actionDate, text: a.text ?? "", type: a.type })).reverse();
+  } catch { return []; }
+}
+
 // ── Voting records ───────────────────────────────────────────────────────────
 // "Who voted on this bill." House per-member positions come from Congress.gov's JSON
 // house-vote endpoint; Senate per-member positions need the LIS XML (not yet wired).

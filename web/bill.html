@@ -19,6 +19,9 @@
     <div class="sec-title" style="margin-top:18px">Where this bill is</div>
     <div class="card" id="lifecycle"><div class="meta" style="margin-top:0">Loading status…</div></div>
 
+    <div class="sec-title" style="margin-top:18px">Full timeline — every step</div>
+    <div class="card" id="timeline"><div class="meta" style="margin-top:0">Loading history…</div></div>
+
     <div class="sec-title" style="margin-top:18px">Plain-English translation</div>
     <div class="card" id="xlate">
       <div class="meta" style="margin-top:0">Turn this bill's legalese into plain English — with the key points shown in <strong>both</strong> plain English and the original legal wording, side by side.</div>
@@ -139,6 +142,18 @@
       document.getElementById("src").textContent = "Source: Congress.gov house-vote / House Clerk roll calls";
     })();
 
+    // ── Full action timeline (every step the bill took, dated) ──
+    function renderTimeline(d) {
+      const el = document.getElementById("timeline"); if (!el) return;
+      const a = d.actions || [];
+      if (!a.length) { el.innerHTML = `<div class="meta" style="margin-top:0">No detailed action history available.</div>`; return; }
+      el.innerHTML = `<div style="max-height:360px;overflow:auto;padding-right:4px">` + a.map(x => `
+        <div style="padding:8px 0;border-bottom:1px solid var(--line)">
+          <span class="date">${esc(x.date || "")}</span>${x.type ? ` <span class="bill">${esc(x.type)}</span>` : ""}
+          <div style="font-size:14px;margin-top:2px">${esc(x.text || "")}</div>
+        </div>`).join("") + `</div><div class="src" style="margin-top:8px">${a.length} action${a.length === 1 ? "" : "s"} · Source: Congress.gov</div>`;
+    }
+
     // ── Who introduced it & what it does ──
     (async () => {
       let d;
@@ -149,6 +164,7 @@
       // track engagement for the trending surface (#39)
       fetch("/api/track", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind: "bill", id: `${congress}-${type}-${number}`.toLowerCase(), label: d.title || `${type.toUpperCase()} ${number}` }) }).catch(() => {});
       renderLifecycle(d);
+      renderTimeline(d);
       const facts = [];
       if (d.introducedDate) facts.push(`<span class="pill">Introduced ${esc(d.introducedDate)}</span>`);
       if (d.policyArea) facts.push(`<span class="pill">${esc(d.policyArea)}</span>`);
