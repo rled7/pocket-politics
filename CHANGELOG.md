@@ -4,6 +4,14 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.48.0] — build 90 — 2026-06-17 — Live city officials (deep local, #19)
+### Added
+- **City-officials lookup** on `web/local.html` (`GET /api/local/officials?state=&city=`) — real local
+  officials (mayor / council) for cities in **OpenStates' municipal coverage**, using the key we already
+  have (no new signup). `src/openstates.ts getCityOfficials` builds the municipal OCD jurisdiction id from
+  state+city and fetches /people. Verified live (Albany NY → Mayor). Falls back to the finders for
+  uncovered cities. Real deep-local data, not just routing. Tests 117/117. Advances #19.
+
 ## [0.47.0] — build 89 — 2026-06-17 — Senate roll-call detail (per-senator)
 ### Added
 - **"See who voted"** on the filibuster page — each cloture vote now expands to show **every senator's

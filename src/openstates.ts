@@ -24,6 +24,34 @@ export const US_STATES = new Set([
 ]);
 export const isValidState = (s: string): boolean => US_STATES.has(s);
 
+/** State name → 2-letter (for building OpenStates municipal OCD ids). */
+const ABBR: Record<string, string> = {
+  Alabama: "al", Alaska: "ak", Arizona: "az", Arkansas: "ar", California: "ca", Colorado: "co", Connecticut: "ct",
+  Delaware: "de", Florida: "fl", Georgia: "ga", Hawaii: "hi", Idaho: "id", Illinois: "il", Indiana: "in", Iowa: "ia",
+  Kansas: "ks", Kentucky: "ky", Louisiana: "la", Maine: "me", Maryland: "md", Massachusetts: "ma", Michigan: "mi",
+  Minnesota: "mn", Mississippi: "ms", Missouri: "mo", Montana: "mt", Nebraska: "ne", Nevada: "nv", "New Hampshire": "nh",
+  "New Jersey": "nj", "New Mexico": "nm", "New York": "ny", "North Carolina": "nc", "North Dakota": "nd", Ohio: "oh",
+  Oklahoma: "ok", Oregon: "or", Pennsylvania: "pa", "Rhode Island": "ri", "South Carolina": "sc", "South Dakota": "sd",
+  Tennessee: "tn", Texas: "tx", Utah: "ut", Vermont: "vt", Virginia: "va", Washington: "wa", "West Virginia": "wv",
+  Wisconsin: "wi", Wyoming: "wy",
+};
+
+export interface CityOfficials { state: string; city: string; officials: StateLegislator[]; live: boolean; note?: string; }
+/** Local officials (mayor / council) for a covered municipality, via OpenStates' municipal OCD jurisdictions. */
+export async function getCityOfficials(state: string, city: string, key?: string): Promise<CityOfficials> {
+  const abbr = ABBR[state] || (/^[a-z]{2}$/i.test(state) ? state.toLowerCase() : "");
+  const slug = city.toLowerCase().trim().replace(/[^a-z0-9 ]/g, "").replace(/\s+/g, "_");
+  const base: CityOfficials = { state, city, officials: [], live: false };
+  if (!key) return { ...base, note: "Set OPENSTATES_API_KEY for live local officials." };
+  if (!abbr || !slug) return { ...base, note: "Pick a state and enter a city." };
+  const ocd = `ocd-jurisdiction/country:us/state:${abbr}/place:${slug}/government`;
+  try {
+    const d = await osGet(`/people?jurisdiction=${encodeURIComponent(ocd)}&per_page=50`, key);
+    const officials = (d?.results ?? []).map(mapPerson);
+    return { ...base, live: true, officials, note: officials.length ? undefined : "This city isn't in OpenStates' municipal coverage yet — use the finders below." };
+  } catch (e) { return { ...base, note: `Lookup unavailable (${e instanceof Error ? e.message : "error"}).` }; }
+}
+
 export interface StateBill {
   identifier: string; title: string; classification?: string | null;
   session?: string; latestAction?: string | null; latestDate?: string | null; url?: string;

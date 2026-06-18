@@ -31,6 +31,17 @@
     <div class="meta">From the President down to the administrative law judge who hears your parking ticket.
       Where clean data exists, we list the people directly. Where it doesn't (county/city/local have no single
       national database), we send you straight to the authoritative finder for your address.</div>
+    <div class="sec-title">Look up your city's officials</div>
+    <div class="card">
+      <div class="meta" style="margin-top:0">Live local officials (mayor / council) for cities in OpenStates' municipal coverage — try yours.</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+        <select id="lstate" class="search" style="margin:0;flex:1;min-width:150px"></select>
+        <input id="lcity" class="search" style="margin:0;flex:1;min-width:150px" placeholder="City (e.g. Albany)" />
+        <button id="lgo" class="btn" type="button">Find officials</button>
+      </div>
+      <div id="lresult" style="margin-top:12px"></div>
+    </div>
+
     <div id="levels"></div>
     <div class="src">Honest note: there's no national API for every local official, so local levels link to the
       official finders (USA.gov, Ballotpedia, your Board of Elections) rather than guess.</div>
@@ -48,6 +59,25 @@
         </div>`;
       }).join("");
     }).catch(() => { document.getElementById("levels").innerHTML = `<div class="empty">Could not load.</div>`; });
+
+    // ── live city-officials lookup (OpenStates municipal coverage) ──
+    const ST = ["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming"];
+    const sel = document.getElementById("lstate");
+    sel.innerHTML = `<option value="">— state —</option>` + ST.map(s => `<option>${s}</option>`).join("");
+    async function lookup() {
+      const st = sel.value, city = document.getElementById("lcity").value.trim(), out = document.getElementById("lresult");
+      if (!st || !city) { out.innerHTML = `<div class="meta">Pick a state and enter a city.</div>`; return; }
+      out.innerHTML = `<div class="meta">Looking up ${esc(city)}…</div>`;
+      let d; try { d = await (await fetch(`/api/local/officials?state=${encodeURIComponent(st)}&city=${encodeURIComponent(city)}`)).json(); }
+      catch (_) { out.innerHTML = `<div class="meta">Lookup unavailable.</div>`; return; }
+      if (!(d.officials || []).length) { out.innerHTML = `<div class="meta">${esc(d.note || ("No officials found for " + city + "."))}</div>`; return; }
+      out.innerHTML = `<div class="list">` + d.officials.map(o => {
+        const inner = `<div class="nm">${esc(o.name)}</div><div class="sub">${esc(o.role || "Official")}${o.party ? " · " + esc(o.party) : ""}${o.district ? " · Dist " + esc(o.district) : ""}</div>`;
+        return o.url ? `<a class="row" href="${esc(o.url)}" target="_blank" rel="noopener noreferrer">${inner}</a>` : `<div class="row">${inner}</div>`;
+      }).join("") + `</div>`;
+    }
+    document.getElementById("lgo").addEventListener("click", lookup);
+    document.getElementById("lcity").addEventListener("keydown", e => { if (e.key === "Enter") lookup(); });
   </script>
   <script src="./app-shell.js" defer></script>
   <script src="./build-tag.js" defer></script>

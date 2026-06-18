@@ -21,7 +21,7 @@ import { getReactions, setReaction, isReaction, validClientId } from "./reaction
 import { getLobbying } from "./lobbying.ts";
 import { buildInfo } from "./build.ts";
 import { getNyBills, getNyLaws, getNyTranscripts, getNyTranscript, getNyCalendars, getNyAgendas, getNyBill } from "./nystate.ts";
-import { getStateData, isValidState } from "./openstates.ts";
+import { getStateData, isValidState, getCityOfficials } from "./openstates.ts";
 import { getCalendar, OFFICIAL_CALENDARS } from "./calendar.ts";
 import { getBudgetWatch } from "./budget.ts";
 import { createCheckout, tiersPublic, paymentsConfigured } from "./payments.ts";
@@ -186,6 +186,11 @@ async function route(url: URL, request: Request): Promise<Response> {
   if (segs[0] === "api" && segs[1] === "calendar") {
     const cal = await getCalendar(KEYS.congress);
     return jsonCached({ ...cal, official: OFFICIAL_CALENDARS }, { request, sMaxAge: 3600 });
+  }
+  if (segs[0] === "api" && segs[1] === "local" && segs[2] === "officials") {
+    const st = (q.get("state") ?? "").slice(0, 40).trim(), city = (q.get("city") ?? "").slice(0, 60).trim();
+    if (!isValidState(st) || !city) return jsonError("state + city required", 400);
+    return jsonCached(await getCityOfficials(st, city, KEYS.openStates), { request, sMaxAge: 1800 });
   }
   if (segs[0] === "api" && segs[1] === "state") {
     const st = (q.get("state") ?? "").slice(0, 40).trim();
