@@ -4,6 +4,16 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.44.0] — build 86 — 2026-06-17 — Fixes: state-map target + local transcript reader
+### Fixed
+- **"Where are the other states?"** — the home US map linked to *federal* members; it now opens each
+  state's **own legislature & bills** (`states.html`), with the caption clarified. (The states feature was
+  working; it just wasn't where you'd click for it.)
+- **Dead transcript links** — NY Senate transcripts linked to a nysenate.gov page that 404s. Now there's a
+  **local transcript reader** (`web/transcript.html`, `GET /api/ny/transcript?dateTime=`) that fetches the
+  **full text from Open Legislation and displays it on our page**, with in-page find/highlight. (Verified:
+  287K-char transcript renders.) Plain-language AI summaries can layer on with an AI key.
+
 ## [0.43.0] — build 85 — 2026-06-17 — Translator is provider-agnostic
 ### Changed
 - The bill translator (#7) now works with **any** AI provider — Anthropic native (`ANTHROPIC_API_KEY`)

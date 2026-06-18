@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocket Politics — NY Senate Transcript</title>
+  <link rel="stylesheet" href="./style.css" />
+  <style>
+    .tbar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:12px; }
+    .doc { margin-top:14px; background:var(--paper-2); border:1px solid var(--line); border-radius:14px; padding:14px 16px; box-shadow:var(--shadow);
+      max-height:70vh; overflow:auto; white-space:pre-wrap; font-family:"Public Sans",monospace; font-size:13px; line-height:1.55; }
+    .doc mark { background:#ffe9a8; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="./home.html" class="brand">Pocket Politics</a>
+    <a class="back" href="./ny.html">← New York</a>
+    <h1 id="title">NY Senate floor transcript</h1>
+    <div class="meta" id="meta">Loading…</div>
+    <div class="tbar">
+      <input id="find" class="search" style="margin:0;flex:1;min-width:200px" placeholder="Find in transcript…" />
+      <span class="meta" id="count" style="margin:0"></span>
+    </div>
+    <div class="doc" id="doc">Loading the transcript…</div>
+    <div class="src">Full text from NY Open Legislation, displayed here (the nysenate.gov transcript page isn't a stable link). Plain-language AI summaries can layer on with an AI key.</div>
+  </div>
+  <script>
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    const dt = new URLSearchParams(location.search).get("dt") || "";
+    let FULL = "";
+    function render(q) {
+      const doc = document.getElementById("doc");
+      if (!q) { doc.innerHTML = esc(FULL); document.getElementById("count").textContent = ""; return; }
+      let n = 0; const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
+      doc.innerHTML = esc(FULL).replace(re, m => { n++; return `<mark>${m}</mark>`; });
+      document.getElementById("count").textContent = `${n} match${n === 1 ? "" : "es"}`;
+      const first = doc.querySelector("mark"); if (first) first.scrollIntoView({ block: "center" });
+    }
+    (async () => {
+      if (!dt) { document.getElementById("doc").textContent = "No transcript specified."; return; }
+      let d;
+      try { d = await (await fetch("/api/ny/transcript?dateTime=" + encodeURIComponent(dt))).json(); }
+      catch (_) { document.getElementById("doc").textContent = "Could not load."; return; }
+      const when = (() => { try { return new Date(d.dateTime).toLocaleString([], { dateStyle: "full", timeStyle: "short" }); } catch { return d.dateTime; } })();
+      document.getElementById("title").textContent = "NY Senate — " + when;
+      document.getElementById("meta").textContent = [d.sessionType, d.location].filter(Boolean).join(" · ") || "";
+      if (!d.text) { document.getElementById("doc").textContent = d.note || "No text available for this transcript."; return; }
+      FULL = d.text; render("");
+    })();
+    document.getElementById("find").addEventListener("input", e => render(e.target.value.trim()));
+  </script>
+  <script src="./build-tag.js" defer></script>
+  <script src="./bw-mode.js" defer></script>
+</body>
+</html>

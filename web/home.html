@@ -44,8 +44,8 @@
       </div>
     </a>
 
-    <div class="sec-title">Or pick your state</div>
-    <div class="meta" style="margin-top:6px">Click a state to see its members of Congress.</div>
+    <div class="sec-title">Pick your state</div>
+    <div class="meta" style="margin-top:6px">Click a state to see its <b>legislature &amp; bills</b> (its own government). For that state's members of <em>Congress</em>, use <a href="./explore.html">Browse Congress</a>.</div>
     <div class="usmap" id="usmap"></div>
 
     <div class="sec-title">Explore everything</div>
@@ -100,7 +100,7 @@
     };
     const NAME = { AL:"Alabama",AK:"Alaska",AZ:"Arizona",AR:"Arkansas",CA:"California",CO:"Colorado",CT:"Connecticut",DE:"Delaware",DC:"District of Columbia",FL:"Florida",GA:"Georgia",HI:"Hawaii",ID:"Idaho",IL:"Illinois",IN:"Indiana",IA:"Iowa",KS:"Kansas",KY:"Kentucky",LA:"Louisiana",ME:"Maine",MD:"Maryland",MA:"Massachusetts",MI:"Michigan",MN:"Minnesota",MS:"Mississippi",MO:"Missouri",MT:"Montana",NE:"Nebraska",NV:"Nevada",NH:"New Hampshire",NJ:"New Jersey",NM:"New Mexico",NY:"New York",NC:"North Carolina",ND:"North Dakota",OH:"Ohio",OK:"Oklahoma",OR:"Oregon",PA:"Pennsylvania",RI:"Rhode Island",SC:"South Carolina",SD:"South Dakota",TN:"Tennessee",TX:"Texas",UT:"Utah",VT:"Vermont",VA:"Virginia",WA:"Washington",WV:"West Virginia",WI:"Wisconsin",WY:"Wyoming" };
     document.getElementById("usmap").innerHTML = Object.entries(GRID).map(([ab,[r,c]]) =>
-      `<a style="grid-row:${r};grid-column:${c}" title="${esc(NAME[ab])}" href="./explore.html?state=${encodeURIComponent(NAME[ab])}">${ab}</a>`
+      `<a style="grid-row:${r};grid-column:${c}" title="${esc(NAME[ab])}" href="./states.html?state=${encodeURIComponent(NAME[ab])}">${ab}</a>`
     ).join("");
 
     // ── Smart, remembered home ──────────────────────────────────────────────────────────────

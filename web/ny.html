@@ -111,9 +111,9 @@
       if (!d || !(d.transcripts || []).length) { el.innerHTML = `<div class="row"><div class="meta">Could not load transcripts.</div></div>`; return; }
       const fmtDate = s => { try { return new Date(s).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }); } catch { return s; } };
       el.innerHTML = d.transcripts.map(t => `
-        <a class="row" href="${esc(t.url)}" target="_blank" rel="noopener noreferrer">
+        <a class="row" href="./transcript.html?dt=${encodeURIComponent(t.dateTime)}">
           <div class="av" style="display:flex;align-items:center;justify-content:center;font-size:16px">🎙️</div>
-          <div><div class="nm">${esc(fmtDate(t.dateTime))}</div><div class="sub">${esc(t.sessionType || "Session")} ↗</div></div>
+          <div><div class="nm">${esc(fmtDate(t.dateTime))}</div><div class="sub">${esc(t.sessionType || "Session")} · read the full transcript →</div></div>
         </a>`).join("");
       document.getElementById("transrc").innerHTML = `${d.live === false ? "Demo data. " : ""}${d.total ? "<b>" + Number(d.total).toLocaleString() + "</b> transcripts since 1993. " : ""}Source: NY Open Legislation ↗`;
     })();

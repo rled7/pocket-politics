@@ -148,6 +148,18 @@ export async function getNyTranscripts(limit = 12, key?: string): Promise<NyTran
   return { ...base, note: "Demo data unavailable. Set NY_OPENLEG_API_KEY for live NY transcripts." };
 }
 
+// ── A single transcript's full text (displayed locally — the public nysenate.gov page 404s) ──
+export interface NyTranscriptText { dateTime: string; sessionType?: string; location?: string; text?: string; live: boolean; note?: string; }
+export async function getNyTranscript(dateTime: string, key?: string): Promise<NyTranscriptText> {
+  if (!key) return { dateTime, live: false, note: "Set NY_OPENLEG_API_KEY to load transcript text." };
+  try {
+    const res = await fetch(`${API}/transcripts/${encodeURIComponent(dateTime)}?key=${encodeURIComponent(key)}`);
+    if (!res.ok) throw new Error(`OpenLeg ${res.status}`);
+    const r: any = (await res.json())?.result ?? {};
+    return { dateTime, sessionType: r.sessionType, location: r.location, text: r.text ?? "", live: true };
+  } catch (e) { return { dateTime, live: false, note: `Transcript unavailable (${e instanceof Error ? e.message : "error"}).` }; }
+}
+
 // ── NY Senate floor calendars + committee agendas ───────────────────────────────────────────────
 export interface NyCalendar { calendarNumber: number; calDate: string | null; year?: number; url: string; }
 export interface NyAgenda { number: number; year?: number; weekOf: string | null; billsConsidered?: number; committees?: number; url: string; }

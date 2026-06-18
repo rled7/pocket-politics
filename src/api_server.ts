@@ -20,7 +20,7 @@ import { getComments, addComment, validBillId } from "./comments.ts";
 import { getReactions, setReaction, isReaction, validClientId } from "./reactions.ts";
 import { getLobbying } from "./lobbying.ts";
 import { buildInfo } from "./build.ts";
-import { getNyBills, getNyLaws, getNyTranscripts, getNyCalendars, getNyAgendas } from "./nystate.ts";
+import { getNyBills, getNyLaws, getNyTranscripts, getNyTranscript, getNyCalendars, getNyAgendas } from "./nystate.ts";
 import { getStateData, isValidState } from "./openstates.ts";
 import { getCalendar, OFFICIAL_CALENDARS } from "./calendar.ts";
 import { getBudgetWatch } from "./budget.ts";
@@ -150,6 +150,11 @@ async function route(url: URL, request: Request): Promise<Response> {
   }
   if (segs[0] === "api" && segs[1] === "ny" && segs[2] === "transcripts") {
     return jsonCached(await getNyTranscripts(clampLimit(q.get("limit"), 12, 30), KEYS.nyOpenLeg), { request });
+  }
+  if (segs[0] === "api" && segs[1] === "ny" && segs[2] === "transcript") {
+    const dt = (q.get("dateTime") ?? "").slice(0, 25);
+    if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(dt)) return jsonError("dateTime required (e.g. 2026-05-21T11:17)", 400);
+    return jsonCached(await getNyTranscript(dt, KEYS.nyOpenLeg), { request, sMaxAge: 86400 }); // immutable record → cache a day
   }
   if (segs[0] === "api" && segs[1] === "ny" && segs[2] === "calendars") {
     return jsonCached(await getNyCalendars(KEYS.nyOpenLeg), { request });
