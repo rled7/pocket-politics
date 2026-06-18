@@ -148,6 +148,41 @@ export async function getNyTranscripts(limit = 12, key?: string): Promise<NyTran
   return { ...base, note: "Demo data unavailable. Set NY_OPENLEG_API_KEY for live NY transcripts." };
 }
 
+// ── A single NY bill: detail + actions + VOTES (member positions) ──
+export interface NyVote { date: string | null; type?: string; committee?: string; aye: string[]; nay: string[]; other: string[]; }
+export interface NyBillDetail {
+  printNo: string; title: string; type: string; sponsor: string | null; summary?: string | null;
+  status?: string | null; actionsList: { date: string | null; text: string }[]; votes: NyVote[];
+  url: string; live: boolean; note?: string;
+}
+function mapNyVote(v: any): NyVote {
+  const items = v?.memberVotes?.items ?? {};
+  const names = (slot: any) => ((slot?.items ?? []).map((m: any) => m?.fullName || m?.shortName || String(m)));
+  const other: string[] = [];
+  for (const k of Object.keys(items)) if (!["AYE", "NAY"].includes(k)) other.push(...names(items[k]).map((n: string) => `${n} (${k})`));
+  return { date: v?.voteDate ?? null, type: v?.voteType, committee: v?.committee?.name, aye: names(items.AYE), nay: names(items.NAY), other };
+}
+export async function getNyBill(session: number, printNo: string, key?: string): Promise<NyBillDetail> {
+  const base: NyBillDetail = { printNo, title: "", type: "Bill", sponsor: null, actionsList: [], votes: [], url: `https://www.nysenate.gov/legislation/bills/${session}/${printNo}`, live: false };
+  if (!key) return { ...base, note: "Set NY_OPENLEG_API_KEY to load this bill." };
+  try {
+    const res = await fetch(`${API}/bills/${session}/${encodeURIComponent(printNo)}?key=${encodeURIComponent(key)}`);
+    if (!res.ok) throw new Error(`OpenLeg ${res.status}`);
+    const r: any = (await res.json())?.result ?? {};
+    const st = r?.status ?? {};
+    return {
+      ...base, live: true,
+      title: (r?.title ?? "").trim(),
+      type: r?.billType?.resolution ? "Resolution" : "Bill",
+      sponsor: r?.sponsor?.member?.fullName ?? null,
+      summary: (r?.summary ?? "").trim() || null,
+      status: st?.statusDesc ?? st?.statusType ?? null,
+      actionsList: (r?.actions?.items ?? []).map((a: any) => ({ date: a?.date ?? null, text: (a?.text ?? "").trim() })),
+      votes: (r?.votes?.items ?? []).map(mapNyVote),
+    };
+  } catch (e) { return { ...base, note: `Bill unavailable (${e instanceof Error ? e.message : "error"}).` }; }
+}
+
 // ── A single transcript's full text (displayed locally — the public nysenate.gov page 404s) ──
 export interface NyTranscriptText { dateTime: string; sessionType?: string; location?: string; text?: string; live: boolean; note?: string; }
 export async function getNyTranscript(dateTime: string, key?: string): Promise<NyTranscriptText> {

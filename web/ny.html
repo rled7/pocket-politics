@@ -51,7 +51,7 @@
 
     function card(b) {
       return `<div class="post">
-        <a class="row" style="border:0" href="${esc(b.url)}" target="_blank" rel="noopener noreferrer">
+        <a class="row" style="border:0" href="./nybill.html?pn=${encodeURIComponent(b.printNo || "")}&session=${encodeURIComponent(b.year || 2025)}">
           <div class="av" style="display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--forest);background:var(--paper);font-size:12px">${esc(b.printNo || "NY")}</div>
           <div>
             <div class="nm">${esc(b.title || "(untitled)")}</div>

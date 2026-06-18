@@ -4,6 +4,13 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.46.0] — build 88 — 2026-06-17 — NY bill detail + votes (member positions)
+### Added
+- **NY bill detail page** (`web/nybill.html`, `GET /api/ny/bill?printNo=&session=`) — sponsor, summary,
+  status, full action list, and **VOTES with each legislator's Aye/Nay** (committee + floor) when a bill
+  has been voted. NY bill feed now links here instead of the external site. `src/nystate.ts getNyBill`.
+  Verified live. Closes #57.
+
 ## [0.45.0] — build 87 — 2026-06-17 — Full bill timeline (every action)
 ### Added
 - **Full timeline** on the bill page (`web/bill.html`) — every action the bill took, dated, in

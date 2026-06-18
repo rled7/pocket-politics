@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocket Politics — NY Bill</title>
+  <link rel="stylesheet" href="./style.css" />
+  <style>
+    .vote { border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-top:10px; background:var(--paper-2); }
+    .vcols { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:8px; }
+    @media (max-width:560px){ .vcols{ grid-template-columns:1fr; } }
+    .vcol h4 { margin:0 0 4px; font-size:12px; text-transform:uppercase; letter-spacing:.06em; }
+    .vcol.y h4 { color:var(--p-d); } .vcol.n h4 { color:var(--p-r); }
+    .vcol .mv { font-size:13px; padding:2px 0; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="./home.html" class="brand">Pocket Politics</a>
+    <a class="back" href="./ny.html">← New York</a>
+    <h1 id="title">NY bill</h1>
+    <div class="meta" id="meta">Loading…</div>
+
+    <div class="card" id="detail"><div class="meta" style="margin-top:0">Loading bill…</div></div>
+
+    <div class="sec-title">Votes — who voted Yes / No</div>
+    <div id="votes"><div class="card"><div class="meta" style="margin-top:0">Loading votes…</div></div></div>
+
+    <div class="sec-title">Actions</div>
+    <div class="card" id="actions"></div>
+    <div class="src" id="src"></div>
+  </div>
+  <script>
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    const qp = new URLSearchParams(location.search);
+    const pn = qp.get("pn") || "", session = qp.get("session") || "2025";
+    (async () => {
+      let d;
+      try { d = await (await fetch(`/api/ny/bill?printNo=${encodeURIComponent(pn)}&session=${encodeURIComponent(session)}`)).json(); }
+      catch (_) { document.getElementById("detail").textContent = "Could not load."; return; }
+      document.getElementById("title").textContent = `${esc(d.printNo)} — ${esc(d.type || "Bill")}`;
+      document.getElementById("meta").textContent = d.title || "";
+      document.getElementById("detail").innerHTML =
+        `${d.sponsor ? `<div><strong>Sponsor:</strong> ${esc(d.sponsor)}</div>` : ""}
+         ${d.status ? `<div style="margin-top:4px"><strong>Status:</strong> ${esc(d.status)}</div>` : ""}
+         ${d.summary ? `<div style="margin-top:8px"><strong>What it does</strong><div class="meta" style="color:var(--ink);margin-top:4px">${esc(d.summary)}</div></div>` : ""}
+         <div class="src" style="margin-top:10px"><a href="${esc(d.url)}" target="_blank" rel="noopener noreferrer">Official bill page ↗</a></div>`;
+
+      const ve = document.getElementById("votes"), votes = d.votes || [];
+      if (!votes.length) ve.innerHTML = `<div class="card"><div class="meta" style="margin-top:0">No recorded votes yet — this bill hasn't been voted on (most bills die in committee without a vote).</div></div>`;
+      else ve.innerHTML = votes.map(v => `
+        <div class="vote">
+          <div><strong>${esc(v.type || "Vote")}</strong>${v.committee ? " · " + esc(v.committee) : ""}${v.date ? " · " + esc(v.date) : ""}
+            · <b style="color:var(--p-d)">${v.aye.length} Aye</b> / <b style="color:var(--p-r)">${v.nay.length} Nay</b></div>
+          <div class="vcols">
+            <div class="vcol y"><h4>Aye (${v.aye.length})</h4>${v.aye.map(n => `<div class="mv">${esc(n)}</div>`).join("") || "—"}</div>
+            <div class="vcol n"><h4>Nay (${v.nay.length})</h4>${v.nay.map(n => `<div class="mv">${esc(n)}</div>`).join("") || "—"}</div>
+          </div>
+          ${v.other && v.other.length ? `<div class="meta" style="margin-top:6px">Other: ${v.other.map(esc).join(", ")}</div>` : ""}
+        </div>`).join("");
+
+      document.getElementById("actions").innerHTML = (d.actionsList || []).length
+        ? (d.actionsList || []).map(a => `<div class="item" style="padding:7px 0"><span class="date">${esc(a.date || "")}</span><div style="font-size:14px;margin-top:2px">${esc(a.text)}</div></div>`).join("")
+        : `<div class="meta" style="margin-top:0">No actions listed.</div>`;
+      document.getElementById("src").innerHTML = `${d.live === false ? "Demo data. " : ""}Source: NY Open Legislation`;
+    })();
+  </script>
+  <script src="./build-tag.js" defer></script>
+  <script src="./bw-mode.js" defer></script>
+</body>
+</html>

@@ -20,7 +20,7 @@ import { getComments, addComment, validBillId } from "./comments.ts";
 import { getReactions, setReaction, isReaction, validClientId } from "./reactions.ts";
 import { getLobbying } from "./lobbying.ts";
 import { buildInfo } from "./build.ts";
-import { getNyBills, getNyLaws, getNyTranscripts, getNyTranscript, getNyCalendars, getNyAgendas } from "./nystate.ts";
+import { getNyBills, getNyLaws, getNyTranscripts, getNyTranscript, getNyCalendars, getNyAgendas, getNyBill } from "./nystate.ts";
 import { getStateData, isValidState } from "./openstates.ts";
 import { getCalendar, OFFICIAL_CALENDARS } from "./calendar.ts";
 import { getBudgetWatch } from "./budget.ts";
@@ -144,6 +144,12 @@ async function route(url: URL, request: Request): Promise<Response> {
   }
   if (segs[0] === "api" && segs[1] === "ny" && segs[2] === "bills") {
     return jsonCached(await getNyBills(clampLimit(q.get("limit"), 20, 50), KEYS.nyOpenLeg), { request });
+  }
+  if (segs[0] === "api" && segs[1] === "ny" && segs[2] === "bill") {
+    const pn = (q.get("printNo") ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
+    const sess = parseInt(q.get("session") ?? "", 10) || new Date().getFullYear();
+    if (!/^[A-Z]\d+$/.test(pn)) return jsonError("printNo required (e.g. A8506)", 400);
+    return jsonCached(await getNyBill(sess, pn, KEYS.nyOpenLeg), { request, sMaxAge: 1800 });
   }
   if (segs[0] === "api" && segs[1] === "ny" && segs[2] === "laws") {
     return jsonCached(await getNyLaws(KEYS.nyOpenLeg), { request });
