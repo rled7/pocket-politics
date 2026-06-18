@@ -12,7 +12,7 @@ import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join, extname, normalize } from "node:path";
 import { getMembers, getBills, getBillsWithSponsors, getBill, getProfile, getBillVotes, getReps, getRepsByCoords, clampLimit, isBioguide, DEFAULT_BIOGUIDE } from "./handlers.ts";
-import { getMoney } from "./money.ts";
+import { getMoney, getDonors } from "./money.ts";
 import { jsonCached, jsonImmutable, jsonPointer, jsonError } from "./http.ts";
 import { dataVersion } from "./version.ts";
 import { MemoryStore } from "./store.ts";
@@ -207,6 +207,11 @@ async function route(url: URL, request: Request): Promise<Response> {
     const b = (q.get("bioguide") || DEFAULT_BIOGUIDE).toUpperCase();
     if (!isBioguide(b)) return jsonError("Invalid bioguide id (expected e.g. O000172)", 400);
     return jsonCached(await getMoney(b, FEC_KEY), { request });
+  }
+  if (segs[0] === "api" && segs[1] === "donors") {
+    const b = (q.get("bioguide") || DEFAULT_BIOGUIDE).toUpperCase();
+    if (!isBioguide(b)) return jsonError("Invalid bioguide id", 400);
+    return jsonCached(await getDonors(b, FEC_KEY), { request, sMaxAge: 86400 });
   }
   if (segs[0] === "api" && segs[1] === "reps") {
     const lat = parseFloat(q.get("lat") ?? ""), lon = parseFloat(q.get("lon") ?? "");

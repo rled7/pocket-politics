@@ -131,11 +131,29 @@
         const m = await (await fetch("/api/money?bioguide=" + encodeURIComponent(bioguide))).json();
         if (!m.totals) { el.innerHTML = `<div class="meta">${esc(m.note || "No campaign-finance data.")}</div>`; return; }
         const usd = n => "$" + Number(n).toLocaleString();
+        const o = m.outside;
+        const outside = (o && (o.support || o.oppose))
+          ? `<div style="margin-top:8px"><strong>Outside spending</strong> <span class="meta">(independent groups, not their campaign)</span>
+               <div class="facts"><span class="fact" style="color:var(--p-d)">📣 For <b>${usd(o.support || 0)}</b></span><span class="fact" style="color:var(--p-r)">🛑 Against <b>${usd(o.oppose || 0)}</b></span></div></div>`
+          : "";
+        let sources = "";
+        if (m.sources) {
+          const s = m.sources, tot = (s.individuals + s.pacs + s.party + s.self) || 1;
+          const pct = n => Math.round((n / tot) * 100);
+          const row = (label, n, color) => n > 0 ? `<span class="fact" style="color:${color}">${label} <b>${pct(n)}%</b> <span class="meta">(${usd(n)})</span></span>` : "";
+          sources = `<div style="margin-top:8px"><strong>Where the money comes from</strong>
+            <div class="facts">
+              ${row("👤 Individuals", s.individuals, "var(--p-d)")}
+              ${row("🏢 PACs", s.pacs, "var(--p-r)")}
+              ${row("🎗️ Party", s.party, "var(--p-i)")}
+              ${row("💼 Self-funded", s.self, "var(--brass-2)")}
+            </div></div>`;
+        }
         el.innerHTML = `<div class="facts">
             <span class="fact">💰 Raised <b>${usd(m.totals.raised)}</b></span>
             <span class="fact">💸 Spent <b>${usd(m.totals.spent)}</b></span>
             <span class="fact">🏦 Cash on hand <b>${usd(m.totals.cashOnHand)}</b></span>
-          </div>
+          </div>${sources}${outside}
           <div class="src">${m.live === false ? "Demo data — set FEC_API_KEY for live. " : `Cycle ${esc(m.cycle)} · `}Source: ${esc(m.source)}</div>`;
       } catch (_) { el.innerHTML = `<div class="meta">Campaign finance unavailable.</div>`; }
     }

@@ -4,6 +4,15 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.49.0] — build 91 — 2026-06-17 — FEC: who funds them + outside spending (#55)
+### Added
+- **"Where the money comes from"** on the profile — the funding-source mix (Individuals / PACs / Party /
+  Self) as %, straight from the FEC totals (no extra call, fast). Verified: AOC ≈ 99.7% individuals.
+- **Outside spending** — independent expenditures **for vs. against** the member (FEC schedule_e).
+  Verified: $413 for / $54K against AOC. Both timeout-guarded so a profile never hangs on a slow FEC call.
+- (`src/money.ts` getMoney += sources + outside; getDonors/`/api/donors` kept as an optional by-employer
+  deep-dive — FEC's by_employer is slow, so the UI uses the fast source mix instead.) Closes #55. Tests 117/117.
+
 ## [0.48.0] — build 90 — 2026-06-17 — Live city officials (deep local, #19)
 ### Added
 - **City-officials lookup** on `web/local.html` (`GET /api/local/officials?state=&city=`) — real local
