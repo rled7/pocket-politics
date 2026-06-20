@@ -262,6 +262,9 @@ function setSecurityHeaders(res: http.ServerResponse): void {
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
   res.setHeader("Permissions-Policy", "geolocation=(self), microphone=(), camera=()");
   res.setHeader("Content-Security-Policy", CSP);
+  // HTTPS-only once deployed (Cloudflare terminates TLS); harmless over local HTTP. 1 year + preload.
+  res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
 }
 
 const server = http.createServer(async (req, res) => {
@@ -388,9 +391,12 @@ const server = http.createServer(async (req, res) => {
     res.setHeader("X-Cache", "BYPASS");
     res.end(body);
   } catch (err) {
+    // Log the real error server-side, but never echo internal/upstream details (paths, "FEC 429",
+    // stack frames) to the client — that's reconnaissance. Clients get a generic message.
+    console.error("[500]", req.method, req.url, err instanceof Error ? err.stack || err.message : err);
     res.statusCode = 500;
     res.setHeader("Content-Type", "application/json");
-    res.end(JSON.stringify({ error: err instanceof Error ? err.message : "internal" }));
+    res.end(JSON.stringify({ error: "internal server error" }));
   }
 });
 

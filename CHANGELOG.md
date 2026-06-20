@@ -4,6 +4,22 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.53.0] — build 95 — 2026-06-20 — Security hardening pass on the current surface (#16, partial)
+### Security
+- **Stopped internal-error leakage.** The top-level 500 handler echoed `err.message` (upstream details
+  like "FEC 429", request paths) straight to the client — reconnaissance material. Now it logs the full
+  error server-side and returns a generic `{ "error": "internal server error" }`.
+- **Added HSTS + COOP.** `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload` (for
+  the deployed HTTPS site; harmless over local HTTP) and `Cross-Origin-Opener-Policy: same-origin`.
+- **Audit (clean):** new endpoints wrap user path segments in `encodeURIComponent` (no path injection);
+  `.dev.vars*` gitignored with no key in git; `/api/integrations` returns booleans only; every `/api`
+  route validates input (bioguide/state/printNo/dateTime regexes) → clean 400s; writes are rate-limited.
+- Existing CSP confirmed strong (`default-src 'self'`, `object-src 'none'`, locked
+  `base-uri`/`form-action`/`frame-ancestors`). Residual: `script-src 'unsafe-inline'` (the app's inline
+  scripts) — moving to nonces is the remaining CSP hardening, deferred (touches ~25 HTML files).
+- **#16 stays open** by design: the *final* pass must also cover the auth/PII/payment surface from #15
+  (accounts), #46 (IDV), #38 (Stripe) once those are built. This pass hardens everything shipped today.
+
 ## [0.52.0] — build 94 — 2026-06-20 — Agentic personalization: Home learns what you use (#39)
 ### Added
 - **Home reframes itself to you.** The app now quietly records which sections you open and floats your
