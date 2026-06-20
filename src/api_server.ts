@@ -30,6 +30,7 @@ import { getTranslation } from "./translate.ts";
 import { rateLimit } from "./ratelimit.ts";
 import { track, getTrending, validKind } from "./trending.ts";
 import { getRecord } from "./record.ts";
+import { getCommittees, getCrsReports } from "./committees.ts";
 import { SwrCache, mapLimit, type LoadResult } from "./swr_cache.ts";
 import { KEYS, integrations, keySummary } from "./config.ts";
 
@@ -186,6 +187,12 @@ async function route(url: URL, request: Request): Promise<Response> {
   if (segs[0] === "api" && segs[1] === "calendar") {
     const cal = await getCalendar(KEYS.congress);
     return jsonCached({ ...cal, official: OFFICIAL_CALENDARS }, { request, sMaxAge: 3600 });
+  }
+  if (segs[0] === "api" && segs[1] === "committees") {
+    return jsonCached(await getCommittees(KEYS.congress), { request, sMaxAge: 86400 });
+  }
+  if (segs[0] === "api" && segs[1] === "crs") {
+    return jsonCached(await getCrsReports(KEYS.congress, clampLimit(q.get("limit"), 20, 50)), { request, sMaxAge: 3600 });
   }
   if (segs[0] === "api" && segs[1] === "local" && segs[2] === "officials") {
     const st = (q.get("state") ?? "").slice(0, 40).trim(), city = (q.get("city") ?? "").slice(0, 60).trim();
@@ -399,7 +406,7 @@ server.listen(PORT, () => {
 // 3) A refresh loop re-pulls cached keys before they go stale, so data stays fresh (~daily-changing
 //    congressional data; a few-minute freshness window is invisible). Disable with PREWARM=0.
 const PREWARM = process.env.PREWARM !== "0";
-const COMMON_KEYS = ["/api/members?limit=540", "/api/bills?limit=50", "/api/bills?limit=50&sponsors=1", "/api/latest"];
+const COMMON_KEYS = ["/api/members?limit=540", "/api/bills?limit=50", "/api/bills?limit=50&sponsors=1", "/api/latest", "/api/committees"];
 
 async function warm(): Promise<void> {
   if (!PREWARM) return;

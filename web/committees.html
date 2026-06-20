@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocket Politics — Committees &amp; Research</title>
+  <link rel="stylesheet" href="./style.css" />
+  <style>
+    .tabs { display: flex; gap: 8px; margin: 14px 0; }
+    .tabs button { font: inherit; font-weight: 600; padding: 8px 16px; border-radius: 999px; border: 1px solid var(--line);
+      background: var(--paper-2); color: var(--ink-soft); cursor: pointer; }
+    .tabs button.on { background: var(--forest, #2f6b4f); color: #fff; border-color: transparent; }
+    .chamber-h { font-family: "Fraunces", serif; font-size: 20px; margin: 18px 0 8px; }
+    .cm { background: var(--paper-2); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; box-shadow: var(--shadow); }
+    .cm .nm { font-weight: 700; }
+    .cm .subs { margin-top: 6px; font-size: 13px; color: var(--ink-soft); display: flex; flex-wrap: wrap; gap: 6px; }
+    .cm .sub { background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; }
+    .cm .none { font-size: 13px; color: var(--ink-soft); }
+    .rpt { padding: 12px 4px; border-bottom: 1px solid var(--line); }
+    .rpt:last-child { border-bottom: 0; }
+    .rpt a { font-weight: 600; }
+    .rpt .mate { font-size: 12px; color: var(--ink-soft); margin-top: 3px; }
+    .search { width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--line); font: inherit; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="./home.html" class="brand">Pocket Politics</a>
+    <nav class="nav">
+      <a href="./home.html">My Government</a>
+      <a href="./bills.html">Bills</a>
+      <a href="./calendar.html">Calendar</a>
+      <a href="./committees.html" class="on">Committees</a>
+      <a href="./glossary.html">Glossary</a>
+    </nav>
+    <h1>Committees &amp; research</h1>
+    <div class="meta"><b>Committees</b> are where bills actually live or die — almost every bill is "referred to
+      committee" first, and most never leave. <b>CRS reports</b> are the Congressional Research Service's
+      <b>nonpartisan, plain-language</b> briefings on the issues Congress is weighing — some of the most
+      useful, jargon-free writing the government produces.</div>
+
+    <div class="tabs">
+      <button id="tab-cm" class="on">Committees</button>
+      <button id="tab-rpt">Research (CRS)</button>
+    </div>
+
+    <div id="pane-cm">
+      <input class="search" id="cm-q" placeholder="Filter committees… (e.g. judiciary, armed services)" />
+      <div id="cm-list" class="meta">Loading committees…</div>
+    </div>
+    <div id="pane-rpt" style="display:none">
+      <div id="rpt-list" class="meta">Loading recent CRS reports…</div>
+    </div>
+
+    <div class="meta" id="src" style="margin-top:18px"></div>
+  </div>
+
+  <script>
+    const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    let committees = [];
+
+    function renderCommittees(filter = "") {
+      const f = filter.trim().toLowerCase();
+      const rows = committees.filter((c) => !f || c.name.toLowerCase().includes(f) ||
+        c.subcommittees.some((s) => s.name.toLowerCase().includes(f)));
+      const byCh = {};
+      for (const c of rows) (byCh[c.chamber] ||= []).push(c);
+      const order = ["House", "Senate", "Joint", "—"];
+      const chambers = Object.keys(byCh).sort((a, b) => order.indexOf(a) - order.indexOf(b));
+      const el = document.getElementById("cm-list");
+      if (!rows.length) { el.innerHTML = "No committees match that filter."; return; }
+      el.innerHTML = chambers.map((ch) => `<div class="chamber-h">${esc(ch)} — ${byCh[ch].length}</div>` +
+        byCh[ch].map((c) => `<div class="cm"><div class="nm">${esc(c.name)}</div>` +
+          (c.subcommittees.length
+            ? `<div class="subs">${c.subcommittees.map((s) => `<span class="sub">${esc(s.name)}</span>`).join("")}</div>`
+            : `<div class="none">No subcommittees.</div>`) +
+          `</div>`).join("")).join("");
+    }
+
+    (async () => {
+      try {
+        const d = await (await fetch("/api/committees")).json();
+        committees = d.committees || [];
+        renderCommittees();
+        document.getElementById("src").innerHTML =
+          `${d.live === false ? "Demo data — set CONGRESS_API_KEY for live committees. " : ""}` +
+          `${committees.length} committees (${d.total ?? committees.length} incl. subcommittees) · Source: ${esc(d.source || "Congress.gov")}`;
+      } catch (_) { document.getElementById("cm-list").innerHTML = "Committees are unavailable right now."; }
+    })();
+
+    document.getElementById("cm-q").addEventListener("input", (e) => renderCommittees(e.target.value));
+
+    // CRS tab — lazy-load on first open
+    let crsLoaded = false;
+    async function loadCrs() {
+      if (crsLoaded) return; crsLoaded = true;
+      try {
+        const d = await (await fetch("/api/crs?limit=40")).json();
+        const el = document.getElementById("rpt-list");
+        if (!(d.reports || []).length) { el.innerHTML = d.note || "No reports available."; return; }
+        el.innerHTML = d.reports.map((r) => `<div class="rpt">
+          <a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${esc(r.title)} ↗</a>
+          <div class="mate">${r.publishDate ? esc(r.publishDate) + " · " : ""}${esc(r.contentType || "CRS report")} · ${esc(r.id)}</div>
+        </div>`).join("") +
+          `<div class="meta" style="margin-top:10px">Showing recent of ${d.total ?? d.reports.length} reports · nonpartisan analysis · Source: ${esc(d.source || "Congress.gov")}</div>`;
+      } catch (_) { document.getElementById("rpt-list").innerHTML = "Reports are unavailable right now."; }
+    }
+
+    const tabCm = document.getElementById("tab-cm"), tabRpt = document.getElementById("tab-rpt");
+    function show(which) {
+      const cm = which === "cm";
+      tabCm.classList.toggle("on", cm); tabRpt.classList.toggle("on", !cm);
+      document.getElementById("pane-cm").style.display = cm ? "" : "none";
+      document.getElementById("pane-rpt").style.display = cm ? "none" : "";
+      if (!cm) loadCrs();
+    }
+    tabCm.addEventListener("click", () => show("cm"));
+    tabRpt.addEventListener("click", () => show("rpt"));
+  </script>
+  <script src="./app-shell.js" defer></script>
+  <script src="./build-tag.js" defer></script>
+  <script src="./bw-mode.js" defer></script>
+</body>
+</html>

@@ -4,6 +4,20 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.51.0] — build 93 — 2026-06-20 — Committees + nonpartisan CRS research (#56, Congress.gov untapped)
+### Added
+- **Committees & research page** (`web/committees.html`, linked from Home). Two long-untapped
+  Congress.gov surfaces, now that the API is back up:
+  - **Committees** — all 53 standing committees grouped by chamber, each with its subcommittees nested
+    (237 total incl. subs). Where bills live or die ("referred to committee"). Live filter box.
+  - **CRS reports** — a feed of the Congressional Research Service's **nonpartisan, plain-language**
+    policy briefings (13,885 available), linking to the official report. Lazy-loaded on tab open.
+- `src/committees.ts` (`getCommittees`, `getCrsReports`) + routes `/api/committees`, `/api/crs`. Both
+  AbortSignal-timeout-guarded (Problem #001) and degrade to a clean note without CONGRESS_API_KEY.
+- `/api/committees` added to the boot prewarm so the page is instant from the first click.
+- This closes #56. Amendments (the third untapped surface) are wired in the API probe but deferred —
+  they're niche vs. committees/CRS; can surface later if wanted.
+
 ## [0.50.0] — build 92 — 2026-06-20 — Rate-limit governance: keep the cache under every upstream quota
 ### Fixed
 - **Background refresh loop was ~3× over the Congress.gov quota and leaking the OpenStates 500/day.**
