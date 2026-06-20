@@ -170,6 +170,36 @@
         if (el) el.textContent = `Next: ${m.committee || m.title || "committee meeting"}${when ? " · " + when : ""} →`;
       } catch (_) { /* leave the default label */ }
     })();
+
+    // #39 — agentic personalization: the app quietly learns which sections YOU open and floats them
+    // to the top next time. 100% client-side (localStorage) — no account, no key, no data leaves your
+    // browser. This is the "observe → reframe" half on top of the server-side trending rail.
+    (function personalize() {
+      const KEY = "pp_affinity";
+      const list = document.querySelector(".list");
+      if (!list) return;
+      const read = () => { try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (_) { return {}; } };
+      // Record a click before navigation (capture phase) so the count is saved even as the page unloads.
+      list.addEventListener("click", (e) => {
+        const a = e.target.closest("a.row"); if (!a) return;
+        const href = a.getAttribute("href"); if (!href || /^https?:/i.test(href)) return; // skip external links
+        const m = read(); m[href] = (m[href] || 0) + 1;
+        try { localStorage.setItem(KEY, JSON.stringify(m)); } catch (_) {}
+      }, true);
+      // Reorder: most-used sections first; stable for ties and untouched rows keep their original order.
+      const aff = read();
+      const rows = [...list.querySelectorAll("a.row")];
+      const score = (a) => aff[a.getAttribute("href")] || 0;
+      const used = rows.filter((r) => score(r) > 0).sort((a, b) => score(b) - score(a));
+      used.forEach((r, i) => {
+        list.insertBefore(r, list.children[i]);
+        if (i === 0) {
+          const nm = r.querySelector(".nm");
+          if (nm) nm.insertAdjacentHTML("beforeend",
+            ' <span style="font-size:11px;font-weight:600;color:var(--forest,#2f6b4f)">· you visit this often</span>');
+        }
+      });
+    })();
   </script>
   <script src="./app-shell.js" defer></script>
   <script src="./build-tag.js" defer></script>

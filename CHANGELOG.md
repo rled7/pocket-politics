@@ -4,6 +4,15 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.52.0] — build 94 — 2026-06-20 — Agentic personalization: Home learns what you use (#39)
+### Added
+- **Home reframes itself to you.** The app now quietly records which sections you open and floats your
+  most-used ones to the top on your next visit, tagging the top one "· you visit this often". This is
+  the "observe → reframe" half on top of the existing server-side trending rail.
+- **100% client-side** (`localStorage`, key `pp_affinity`) — no account, no API key, no server cost, and
+  no data leaves the browser. External links are excluded from tracking. Stable ordering: untouched rows
+  keep their original order. Closes #39.
+
 ## [0.51.0] — build 93 — 2026-06-20 — Committees + nonpartisan CRS research (#56, Congress.gov untapped)
 ### Added
 - **Committees & research page** (`web/committees.html`, linked from Home). Two long-untapped
