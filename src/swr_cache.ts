@@ -49,6 +49,16 @@ export class SwrCache {
       try {
         const r = await loader();
         if (r && r.resp.status === 200) {
+          // "Only pull new info": these gov upstreams don't honor conditional GET (FEC sends no
+          // validators; senate.gov advertises an ETag but ignores If-None-Match → 200, not 304), so
+          // we can't get a cheap server-side "unchanged". Instead we short-circuit HERE: if the fresh
+          // body is byte-identical to what's cached, the data didn't change — just extend the freshness
+          // window on the EXISTING entry (no object churn, no re-derivation downstream) and move on.
+          const prev = this.store.get(key);
+          if (prev && prev.body === r.resp.body) {
+            prev.freshUntil = Date.now() + r.ttlMs;
+            return prev;
+          }
           const entry: Entry = { ...r.resp, freshUntil: Date.now() + r.ttlMs };
           this.store.set(key, entry);
           return entry;
@@ -68,6 +78,8 @@ export class SwrCache {
 
   keys(): string[] { return [...this.store.keys()]; }
   size(): number { return this.store.size; }
+  /** True if the key is cached but past its freshness window (a no-op refresh would just waste an upstream call). */
+  isStale(key: string): boolean { const e = this.store.get(key); return !!e && e.freshUntil <= Date.now(); }
 }
 
 /** Bounded-concurrency map — same pattern as ingest.ts, so background fill stays polite. */

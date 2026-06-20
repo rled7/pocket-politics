@@ -352,6 +352,24 @@ const rec = await getRecord();
 check("getRecord fixture: issues have volume/issue/date + official url",
   rec.issues.length > 0 && rec.issues.every(i => i.volume != null && !!i.issue && "date" in i && /congress\.gov/.test(i.url)));
 
+// SwrCache — quota-safety invariants (rate-limit governance, Problem #001)
+const { SwrCache } = await import("./swr_cache.ts");
+const sc = new SwrCache();
+const resp = (body: string) => ({ resp: { status: 200, headers: [] as [string, string][], body }, ttlMs: 50 });
+await sc.load("k", async () => resp("v1"));
+check("swr: isStale false right after a fresh load", sc.isStale("k") === false);
+check("swr: isStale false for an unknown key (nothing to refresh)", sc.isStale("nope") === false);
+await new Promise((r) => setTimeout(r, 60)); // pass freshUntil (ttl 50ms)
+check("swr: isStale true once past freshUntil", sc.isStale("k") === true);
+// content-hash short-circuit: identical body on refresh must NOT churn the entry, just re-freshen it
+const before = sc.peek("k")!.entry;
+await sc.load("k", async () => resp("v1")); // same bytes
+check("swr: unchanged body keeps the SAME entry object (no churn)", sc.peek("k")!.entry === before);
+check("swr: unchanged body re-freshens (isStale now false)", sc.isStale("k") === false);
+await new Promise((r) => setTimeout(r, 60));
+await sc.load("k", async () => resp("v2")); // changed bytes
+check("swr: changed body replaces the entry", sc.peek("k")!.entry.body === "v2" && sc.peek("k")!.entry !== before);
+
 // summary
 console.log(`\n  ${pass} passed, ${fails.length} failed`);
 if (fails.length) { console.error("  FAILED: " + fails.join(", ")); process.exit(1); }

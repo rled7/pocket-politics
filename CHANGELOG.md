@@ -4,6 +4,28 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.50.0] — build 92 — 2026-06-20 — Rate-limit governance: keep the cache under every upstream quota
+### Fixed
+- **Background refresh loop was ~3× over the Congress.gov quota and leaking the OpenStates 500/day.**
+  It re-pulled *every* cached key every 4 min behind a fail-open denylist (~540 profiles × 2 calls ×
+  15 cycles ≈ 16k/hr vs. a 5,000/hr ceiling), and newly-added endpoints — `/api/local/officials`
+  (OpenStates **500/day**), `/api/money`/`/api/donors` (FEC), `/api/ny/*` (NY OpenLeg) — were silently
+  hammered too. Replaced with a fail-**safe allowlist**: only generous / no-key upstreams (Congress.gov
+  `COMMON_KEYS` + budget/record/cloture) are proactively refreshed; everything else rides on-access SWR
+  (traffic-bounded, single-flighted). A new endpoint is now quota-safe by default.
+### Added
+- `SwrCache.isStale()` — the refresh loop now skips keys still inside their freshness window, so it
+  never spends an upstream call on a no-op.
+- **Content-hash short-circuit** in `load()` — "only pull new info": these gov APIs don't honor
+  conditional GET (probed: FEC sends no validators; senate.gov advertises an ETag but ignores
+  `If-None-Match` → 200 not 304; NY OpenLeg none), so when a refreshed body is byte-identical to what's
+  cached we extend freshness on the existing entry instead of churning it.
+- `docs/solving-coding-problems.md` — Problem #001 logged in full (symptom, verified limits, dead ends,
+  fix, code). +6 cache invariant tests (123 passing).
+### Verified upstream limits
+- Congress.gov **5,000/hr** · FEC **1,000/hr** (120/min on request) · OpenStates **500/day**, 10/min ·
+  Senate LDA **120/min** · senate.gov XML no key · NY OpenLeg undocumented (treated as modest).
+
 ## [0.49.0] — build 91 — 2026-06-17 — FEC: who funds them + outside spending (#55)
 ### Added
 - **"Where the money comes from"** on the profile — the funding-source mix (Individuals / PACs / Party /

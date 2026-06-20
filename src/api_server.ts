@@ -422,16 +422,26 @@ async function warm(): Promise<void> {
   console.log(`  cache warm: ${ids.length} profiles filled in ${Math.round((Date.now() - t1) / 1000)}s — every page now sub-ms`);
 }
 
-// Keep warm entries fresh: re-pull each cached key on an interval shorter than its TTL.
+// Keep the HOT ENTRY POINTS fresh on a timer — an explicit ALLOWLIST, never "every cached key".
+// Why an allowlist (fail-safe): each upstream has a quota — Congress.gov 5,000/hr, FEC 1,000/hr,
+// OpenStates **500/DAY**, NY OpenLeg/LDA modest. Looping over apiCache.keys() and re-pulling all of
+// them re-hit those quotas hard: ~540 prewarmed profiles × 2 Congress.gov calls × 15 cycles/hr ≈ 16k/hr
+// (3× the limit), and a few cached city lookups (OpenStates) would exhaust the daily 500 by lunch.
+// So we proactively refresh ONLY keys backed by generous / no-key upstreams (Congress.gov + senate.gov).
+// EVERYTHING ELSE — profiles, money(FEC), local officials(OpenStates), ny(OpenLeg), lobbying(LDA) —
+// rides on-access SWR: refreshed only when a real reader views it, single-flighted, so traffic-bounded.
+// A new endpoint added later is quota-safe BY DEFAULT (it just isn't on this list). isStale() skips
+// keys still inside their freshness window so we never spend an upstream call on a no-op.
+const REFRESH_ALLOWLIST = [
+  ...COMMON_KEYS,                 // Congress.gov: members directory + bills feeds (5,000/hr — generous)
+  "/api/budget", "/api/record",  // Congress.gov singletons
+  "/api/cloture",                // senate.gov roll-call XML — no key, no quota
+];
 function startRefreshLoop(): void {
   if (!PREWARM) return;
   setInterval(() => {
-    for (const k of apiCache.keys()) {
-      // Don't proactively re-pull rate-limited upstreams (OpenStates = 500/day) — they refresh
-      // on-access via SWR instead, bounded by real traffic. Re-pulling all states on a timer
-      // would blow the daily quota.
-      if (k.startsWith("/api/state") || k.startsWith("/api/calendar")) continue;
-      apiCache.revalidate(k, () => runRoute(k));
+    for (const k of REFRESH_ALLOWLIST) {
+      if (apiCache.isStale(k)) apiCache.revalidate(k, () => runRoute(k));
     }
   }, 240_000).unref(); // every 4 min; unref so it never holds the process open
 }
