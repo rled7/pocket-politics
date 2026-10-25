@@ -4,6 +4,11 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`apps/api/src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.56.1] — build 99 — 2026-10-25 — CI on Node 22
+### Fixed
+- CI now runs on Node 22. Build 98 added `wrangler` 4.149.0, which requires Node ≥ 22, so the
+  Workers dry-run step failed on CI's Node 20 ("Wrangler requires at least Node.js v22.0.0").
+
 ## [0.56.0] — build 98 — 2026-10-25 — One router on Cloudflare Workers (task 1.2)
 ### Fixed
 - **The 18 API routes missing on Cloudflare now exist.** The Pages path served only 7 of the 25 route

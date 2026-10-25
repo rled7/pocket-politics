@@ -81,3 +81,13 @@ TypeScript-vs-Rust bake-off. See `CHANGELOG.md` and `DONE.md`. Ended at 123/123 
   `.wrangler/` state untracked (a 1.1 follow-up). Follow-ups filed: cache-key normalization,
   `SwrCache` bound, POST size cap and query-free error logs → task 1.3; proxy-only
   `X-Forwarded-For` trust → 5.1; dotfiles on Node and KV write-error handling → EDGE_CASES.md.
+
+## BUILD-099 — CI on Node 22
+
+- **Date:** 2026-10-25
+- **Phase/Task:** 1.2 follow-up (CI fix on PR #2)
+- **Files:** `.github/workflows/ci.yml` (`node-version` 20 → 22, both jobs), `CHANGELOG.md`, `TRACKER.md`,
+  `apps/api/src/build.ts` (0.56.1 / 99)
+- **Summary:** The PR's TypeScript job failed at the Workers dry-run: `wrangler` 4.149.0 requires
+  Node ≥ 22 and CI ran Node 20. Reproduced locally under Node 20; passes under Node 22.
+- **Tests:** 294/294; typecheck clean; `wrangler deploy --dry-run` bundles under Node 22.
