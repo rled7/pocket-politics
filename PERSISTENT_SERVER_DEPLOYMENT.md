@@ -165,5 +165,5 @@ day one and the choice stays reversible.
 2. Point the app at `SelfHostedStore` (env var); deploy the container to Fly/Hetzner/etc.
 3. Put a CDN in front (keep Cloudflare-CDN-only, or Bunny/Fastly); Caddy for TLS if self-hosting.
 4. Move the ingest job to host cron; verify it regenerates L0 static into object storage.
-5. Re-run `bench/run_all.sh` against the new origin to confirm the latency budget (§0 of the
+5. Re-run `tools/bench/run_all.sh` against the new origin to confirm the latency budget (§0 of the
    caching doc) still holds.

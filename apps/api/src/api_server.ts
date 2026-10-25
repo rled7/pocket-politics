@@ -83,7 +83,7 @@ async function runRoute(ckey: string): Promise<LoadResult> {
   }
   return null; // not publicly cacheable (errors, no-store) → caller serves it live, uncached
 }
-const WEB = join(dirname(fileURLToPath(import.meta.url)), "..", "web");
+const WEB = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "web"); // apps/web
 const MIME: Record<string, string> = {
   ".html": "text/html", ".js": "text/javascript", ".json": "application/json",
   ".css": "text/css", ".svg": "image/svg+xml", ".ico": "image/x-icon",

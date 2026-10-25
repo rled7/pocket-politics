@@ -1,7 +1,7 @@
 # Cloudflare Pages config for Pocket Politics.
-# Static client lives in web/; the API is the Pages Functions in functions/.
+# Static client lives in apps/web/; the API is the Pages Functions in functions/.
 name = "pocket-politics"
-pages_build_output_dir = "web"
+pages_build_output_dir = "apps/web"
 compatibility_date = "2026-06-01"
 
 # Hot store for the caching layer (L2) + view instrumentation that drives the optimizer.

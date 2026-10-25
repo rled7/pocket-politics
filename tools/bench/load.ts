@@ -3,7 +3,7 @@
  * percentiles + throughput. No external tools (wrk/ab) needed. Numbers are indicative
  * (single-host, undici keep-alive), used to compare backends apples-to-apples.
  *
- *   npx tsx bench/load.ts <base> <path> [N=2000] [C=50]
+ *   pnpm --filter @pp/bench exec tsx load.ts <base> <path> [N=2000] [C=50]
  */
 const [, , base, path, nArg, cArg] = process.argv;
 if (!base || !path) { console.error("usage: load.ts <base> <path> [N] [C]"); process.exit(2); }

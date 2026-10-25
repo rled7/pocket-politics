@@ -2,7 +2,17 @@
 
 All notable changes to Pocket Politics. Format follows [Keep a Changelog](https://keepachangelog.com);
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
-(`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
+(`apps/api/src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
+
+## [0.55.0] — build 97 — 2026-10-25 — Monorepo layout (task 1.1)
+### Changed
+- **Turborepo + pnpm workspaces**, no behavior change. `src/` + `fixtures/` → `apps/api/` (`@pp/api`),
+  `web/` → `apps/web/`, `rust/` → `apps/api-rust/`, `bench/` → `tools/bench/`. `functions/` stays at the
+  repo root (Cloudflare Pages requires it) with its imports re-pointed; `wrangler.toml` now publishes
+  `apps/web`. Root `pnpm test` / `pnpm typecheck` run through `turbo`; `npm` + `package-lock.json`
+  replaced by `pnpm` + `pnpm-lock.yaml` (same resolved dependency versions). CI moved to pnpm.
+- Verified: 123/123 tests, typecheck clean, Rust conformance 4/4, and the 67-request parity capture
+  identical to build 95.
 
 ## [0.54.0] — build 96 — 2026-10-25 — Plan of record + profiles/affiliations schema
 ### Added

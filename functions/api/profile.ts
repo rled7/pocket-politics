@@ -3,9 +3,9 @@
 // Shared backend for Pocket Politics — ONE API the web + (future) native clients consume.
 // The Congress.gov key stays server-side. Data logic lives in src/handlers.ts so the mutable
 // route here and the immutable versioned route (api/v/[version]/profile) share one source.
-import { getProfile, DEFAULT_BIOGUIDE, isBioguide } from '../../src/handlers.ts';
-import { jsonCached, jsonError } from '../../src/http.ts';
-import { getStore, type KVLike } from '../../src/store.ts';
+import { getProfile, DEFAULT_BIOGUIDE, isBioguide } from '../../apps/api/src/handlers.ts';
+import { jsonCached, jsonError } from '../../apps/api/src/http.ts';
+import { getStore, type KVLike } from '../../apps/api/src/store.ts';
 
 export const onRequestGet: PagesFunction<{ CONGRESS_API_KEY?: string; POCKETPOL_KV?: KVLike }> = async (context) => {
   const { request, env } = context;

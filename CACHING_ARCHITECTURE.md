@@ -192,7 +192,7 @@ both backends. The honest, *measurable* difference is the **cold path**:
 | **Memory / cold-start** | Rust WASM vs TS isolate startup + steady-state footprint |
 | **Tail latency under load** | p95/p99 on the miss path at concurrency (GC pauses vs none) |
 
-So `bench/run_all.sh` (AlgoForge pattern) **isolates each backend (one running at a time —
+So `tools/bench/run_all.sh` (AlgoForge pattern) **isolates each backend (one running at a time —
 your "running only once" reading #2)**, hits the **miss path** with identical fixtures, and
 records p50/p95/p99 + ingest throughput. Conformance gate first (byte-equal to the frozen
 fixtures, per `API_CONTRACT.md`) — a backend that isn't correct never gets ranked. The warm
@@ -223,7 +223,7 @@ path is reported too, but we'll state up front it should tie.
 4. **KV store wrapper** (graceful) wired as the L2 fallback.
 5. **Cron ingest job** — the once-running backend; writes L0/L2/L3, stamps `dataVersion`.
 6. **Tiered Cache + Cache Reserve + Cache-Tags** turned on; SWR-interaction test.
-7. **`bench/run_all.sh`** — conformance + cold-path benchmark; then build the **Rust** backend
+7. **`tools/bench/run_all.sh`** — conformance + cold-path benchmark; then build the **Rust** backend
    to the same contract and run the bake-off.
 
 ---

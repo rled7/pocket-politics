@@ -1,10 +1,10 @@
-/** Minimal static server for the web/ viewer (no deps). `npm run serve` → http://localhost:5174 */
+/** Minimal static server for the apps/web/ viewer (no deps). `pnpm serve` → http://localhost:5174 */
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join, extname } from "node:path";
 
-const webDir = join(dirname(fileURLToPath(import.meta.url)), "..", "web");
+const webDir = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "web");
 const TYPES: Record<string, string> = { ".html": "text/html", ".json": "application/json", ".js": "text/javascript", ".css": "text/css" };
 const PORT = 5174;
 

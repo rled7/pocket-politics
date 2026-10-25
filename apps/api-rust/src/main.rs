@@ -15,10 +15,10 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use serde_json::{json, Map, Value};
 
-const MEMBERS_FIXTURE: &str = include_str!("../../fixtures/members.json");
-const BILLS_FIXTURE: &str = include_str!("../../fixtures/bills.json");
-const MEMBER_FIXTURE: &str = include_str!("../../fixtures/member.json");
-const SPONSORED_FIXTURE: &str = include_str!("../../fixtures/sponsored.json");
+const MEMBERS_FIXTURE: &str = include_str!("../../api/fixtures/members.json");
+const BILLS_FIXTURE: &str = include_str!("../../api/fixtures/bills.json");
+const MEMBER_FIXTURE: &str = include_str!("../../api/fixtures/member.json");
+const SPONSORED_FIXTURE: &str = include_str!("../../api/fixtures/sponsored.json");
 
 const CC_LIST: &str = "public, max-age=60, s-maxage=300, stale-while-revalidate=86400, stale-if-error=86400";
 const CC_POINTER: &str = "public, max-age=30, s-maxage=30, stale-while-revalidate=300";

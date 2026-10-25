@@ -1,8 +1,8 @@
 /// <reference types="@cloudflare/workers-types" />
 
 // GET /api/v/{version}/bills — IMMUTABLE, version-addressed bill list (cache for a year).
-import { getBills, clampLimit } from '../../../../src/handlers.ts';
-import { jsonImmutable, jsonError } from '../../../../src/http.ts';
+import { getBills, clampLimit } from '../../../../apps/api/src/handlers.ts';
+import { jsonImmutable, jsonError } from '../../../../apps/api/src/http.ts';
 
 export const onRequestGet: PagesFunction<{ CONGRESS_API_KEY?: string }> = async (context) => {
   const { request, env } = context;

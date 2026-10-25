@@ -1,10 +1,11 @@
 node_modules/
-web/profile.json
-web/members.json
+apps/web/profile.json
+apps/web/members.json
 .env
 .dev.vars
 .dev.vars.*
 *.log
 .DS_Store
 dist/
-rust/target/
+apps/api-rust/target/
+.turbo/

@@ -54,15 +54,15 @@ The **core** [`API_CONTRACT.md`](./API_CONTRACT.md) (`/api/members`, `/api/bills
 
 | | TypeScript | Rust |
 |---|---|---|
-| Server | `src/api_server.ts` (Cloudflare Functions in prod) | `rust/` (`pp-server`, std HTTP + serde_json) |
-| Run | `npm run api` (:8788) | `cd rust && cargo run --release` (:8787) |
+| Server | `apps/api/src/api_server.ts` (Cloudflare Functions in prod) | `apps/api-rust/` (`pp-server`, std HTTP + serde_json) |
+| Run | `pnpm api` (:8788) | `cd apps/api-rust && cargo run --release` (:8787) |
 | Scope | **feature-complete production backend** (+ votes, comments, money) | **core-contract reference** (proves the perf comparison) |
 
 ```bash
-npm run bench        # conformance gate (core JSON must match) + load test, TS vs Rust
+pnpm bench           # conformance gate (core JSON must match) + load test, TS vs Rust
 ```
 
-Finding (see [`bench/README.md`](./bench/README.md)): on this cache-frontable read workload
+Finding (see [`tools/bench/README.md`](./tools/bench/README.md)): on this cache-frontable read workload
 the language gap is modest — the **caching** dominates. The bake-off's purpose (compare
 language perf on the read path) is met by the core contract; the newer feature endpoints
 (`/api/votes`, `/api/comments`, `/api/money`) are **TypeScript-only**, which is the production
@@ -101,29 +101,29 @@ curl https://pocketpolitics.example/api/profile?bioguide=O000172
 ## Quick start
 
 ```bash
-npm install
+pnpm install          # pnpm 10 (Corepack: `corepack enable`), Node 20+
 
 # Offline — builds a profile from fixtures, then serves the viewer at :5174
-npm run demo
-npm run serve
+pnpm demo
+pnpm serve
 
 # Live data — get a free key at api.congress.gov/sign-up
-CONGRESS_API_KEY=xxxx npm run demo:live
+CONGRESS_API_KEY=xxxx pnpm demo:live
 ```
 
 Run the **full app locally** (web client + live API in one server):
 
 ```bash
-CONGRESS_API_KEY=xxxx npm run api      # http://localhost:8788  (lands on the directory)
+CONGRESS_API_KEY=xxxx pnpm api         # http://localhost:8788  (lands on the directory)
 ```
 
 Other commands:
 
 ```bash
-npm test          # TypeScript unit suite (56 tests)
-npm run typecheck # tsc --noEmit
-npm run ingest    # run the ingest job → static L0 snapshots in dist/
-npm run bench     # the bake-off: conformance + load test, TypeScript vs Rust
+pnpm test         # TypeScript unit suite (56 tests) — via Turborepo
+pnpm typecheck    # tsc --noEmit — via Turborepo
+pnpm ingest       # run the ingest job → static L0 snapshots in apps/api/dist/
+pnpm bench        # the bake-off: conformance + load test, TypeScript vs Rust
 ```
 
 ## Deploy
@@ -136,14 +136,17 @@ Cloudflare) is in [`PERSISTENT_SERVER_DEPLOYMENT.md`](./PERSISTENT_SERVER_DEPLOY
 ## Project structure
 
 ```
-src/         http.ts (caching) · handlers.ts (shared data layer) · congress.ts · profile.ts ·
-             salary.ts · version.ts · store.ts · optimize.ts (knapsack) · ingest.ts ·
-             api_server.ts (TS standalone server) · demo.ts · serve.ts · http.test.ts
-functions/   api/{profile,members,bills,latest}.ts · api/v/[version]/…   (Cloudflare Pages Functions)
-rust/        src/main.rs (Rust backend — bake-off contender) · Cargo.toml
-bench/       conformance.ts · load.ts · run_all.sh · README.md   (the bake-off harness)
-web/         explore.html (directory+search) · index.html (profile + web presence)
-fixtures/    demo data so the no-key build still works
+apps/api/src/        http.ts (caching) · handlers.ts (shared data layer) · congress.ts · profile.ts ·
+                     salary.ts · version.ts · store.ts · optimize.ts (knapsack) · ingest.ts ·
+                     api_server.ts (TS standalone server) · demo.ts · serve.ts · http.test.ts
+apps/api/fixtures/   demo data so the no-key build still works
+apps/web/            explore.html (directory+search) · index.html (profile + web presence)
+apps/api-rust/       src/main.rs (Rust backend — bake-off contender) · Cargo.toml
+functions/           api/{profile,members,bills,latest}.ts · api/v/[version]/…   (Cloudflare Pages Functions —
+                     must stay at the repo root; imports reach into apps/api/src)
+packages/db/         PostgreSQL + PostGIS schema, SQL tests (see packages/db/SCHEMA.md)
+tools/bench/         conformance.ts · load.ts · run_all.sh · README.md   (the bake-off harness)
+package.json · pnpm-workspace.yaml · turbo.json   (Turborepo + pnpm workspaces; see PHASES.md)
 docs:        API_CONTRACT · CACHING_ARCHITECTURE · PERSISTENT_SERVER_DEPLOYMENT ·
              BLUEPRINT · ROADMAP · PROJECT_TRACKER · CHANGELOG · DEPLOY
 ```

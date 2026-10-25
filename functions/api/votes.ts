@@ -3,8 +3,8 @@
 // GET /api/votes?congress=118&type=hr&number=1 — who voted on a bill (per-member roll calls).
 // House positions via Congress.gov's house-vote JSON; Senate per-member positions need LIS XML
 // (listed, members empty for now). Logic in src/handlers.ts.
-import { getBillVotes } from '../../src/handlers.ts';
-import { jsonCached, jsonError } from '../../src/http.ts';
+import { getBillVotes } from '../../apps/api/src/handlers.ts';
+import { jsonCached, jsonError } from '../../apps/api/src/http.ts';
 
 export const onRequestGet: PagesFunction<{ CONGRESS_API_KEY?: string }> = async (context) => {
   const { request, env } = context;

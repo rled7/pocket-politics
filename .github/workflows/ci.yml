@@ -11,19 +11,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4        # pnpm version comes from "packageManager" in package.json
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm install
-      - run: npm run typecheck
-      - run: npm test
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm test
 
   rust:
     name: Rust — build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: cd rust && cargo build --release
+      - run: cd apps/api-rust && cargo build --release
 
   bakeoff:
     name: Bake-off — Rust conforms to the TypeScript reference
@@ -31,13 +33,16 @@ jobs:
     needs: [typescript, rust]
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm install
-      - run: cd rust && cargo build --release
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: cd apps/api-rust && cargo build --release
       - name: Start Rust backend + run conformance gate
         run: |
-          PORT=8787 ./rust/target/release/pp-server &
+          PORT=8787 ./apps/api-rust/target/release/pp-server &
           sleep 3
-          BASE=http://localhost:8787 npx tsx bench/conformance.ts
+          # runs tools/bench/conformance.ts with the workspace-pinned tsx
+          BASE=http://localhost:8787 pnpm --filter @pp/bench conformance

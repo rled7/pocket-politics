@@ -7,7 +7,7 @@ This file covers Cloudflare Pages. Steps marked 🔑 need your Cloudflare accoun
 ## 1. First deploy (gets you live in minutes)
 1. 🔑 Push this repo to GitHub (already at `github.com/rled7/pocket-politics`).
 2. 🔑 Cloudflare dashboard → **Workers & Pages → Create → Pages → Connect to Git** → pick the repo.
-3. Build settings: **Build command:** *(none)* · **Output directory:** `web`. Functions in
+3. Build settings: **Build command:** *(none)* · **Output directory:** `apps/web`. Functions in
    `functions/` are auto-discovered. Deploy.
 4. 🔑 Add the API key (the app works on fixtures without it, live with it):
    ```bash
@@ -35,7 +35,7 @@ This file covers Cloudflare Pages. Steps marked 🔑 need your Cloudflare accoun
 ## 3. Schedule ingest (pre-generate L0 snapshots)
 Pages Functions don't run cron; use a small **scheduled Worker** (or any cron host) to run the
 ingest on a timer and write KV + the static snapshots:
-- Quick start: run it manually / from CI: `CONGRESS_API_KEY=… npm run ingest` (writes `dist/`).
+- Quick start: run it manually / from CI: `CONGRESS_API_KEY=… pnpm ingest` (writes `apps/api/dist/`).
 - Production: a Worker with a `[triggers] crons = ["0 */6 * * *"]` calling the same logic, or
   a GitHub Action on a schedule. (Tracked as a follow-up; the read path works without it —
   endpoints fall back to live + fixtures.)

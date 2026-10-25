@@ -4,8 +4,8 @@
 // POST /api/comments  {bill, author, text}  → add a comment
 // Stored in KV (POCKETPOL_KV). Comments are self-attested USER OPINION, separate from the
 // official record. Registered-voter verification is future work (needs an identity provider).
-import { getStore, type KVLike } from '../../src/store.ts';
-import { getComments, addComment, validBillId } from '../../src/comments.ts';
+import { getStore, type KVLike } from '../../apps/api/src/store.ts';
+import { getComments, addComment, validBillId } from '../../apps/api/src/comments.ts';
 
 const json = (status: number, obj: unknown) =>
   new Response(JSON.stringify(obj), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });

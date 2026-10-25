@@ -5,8 +5,8 @@
 // revalidate (CACHING_ARCHITECTURE.md §4). In fixture mode the data is constant, so any
 // version serves the current fixture; once the ingest job lands, {version} selects the
 // matching snapshot.
-import { getProfile, DEFAULT_BIOGUIDE, isBioguide } from '../../../../../src/handlers.ts';
-import { jsonImmutable, jsonError } from '../../../../../src/http.ts';
+import { getProfile, DEFAULT_BIOGUIDE, isBioguide } from '../../../../../apps/api/src/handlers.ts';
+import { jsonImmutable, jsonError } from '../../../../../apps/api/src/http.ts';
 
 export const onRequestGet: PagesFunction<{ CONGRESS_API_KEY?: string }> = async (context) => {
   const { request, params, env } = context;

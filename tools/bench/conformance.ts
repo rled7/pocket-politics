@@ -4,9 +4,9 @@
  * data layer, semantically (order-independent, ignoring the volatile `generatedAt`). A
  * backend must pass this before its benchmark numbers count (API_CONTRACT.md §Conformance).
  *
- *   RUST: cargo run --release  (in rust/)   then:   BASE=http://localhost:8787 npx tsx bench/conformance.ts
+ *   RUST: cargo run --release  (in apps/api-rust/)   then:   BASE=http://localhost:8787 pnpm --filter @pp/bench conformance
  */
-import { getMembers, getBills, getProfile } from "../src/handlers.ts";
+import { getMembers, getBills, getProfile } from "../../apps/api/src/handlers.ts";
 
 const BASE = process.env.BASE ?? "http://localhost:8787";
 

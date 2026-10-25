@@ -1,9 +1,9 @@
 /**
  * Phase 0 demo runner.
- *   npm run demo        → builds a profile from the offline fixture (no key/network)
- *   npm run demo:live   → pulls a REAL member from Congress.gov (needs CONGRESS_API_KEY)
+ *   pnpm demo           → builds a profile from the offline fixture (no key/network)
+ *   pnpm demo:live      → pulls a REAL member from Congress.gov (needs CONGRESS_API_KEY)
  *
- * Writes web/profile.json (consumed by the web viewer) and prints a summary.
+ * Writes apps/web/profile.json (consumed by the web viewer) and prints a summary.
  */
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
@@ -24,13 +24,13 @@ async function load(): Promise<Profile> {
     const [member, sponsored] = await Promise.all([fetchMember(BIOGUIDE, KEY), fetchSponsored(BIOGUIDE, KEY)]);
     return buildProfile(member, sponsored);
   }
-  console.log("→ Offline: building from fixtures/ (run with `npm run demo:live` for real data)");
+  console.log("→ Offline: building from fixtures/ (run with `pnpm demo:live` for real data)");
   const member = JSON.parse(await readFile(join(root, "fixtures/member.json"), "utf8"));
   const sponsored = JSON.parse(await readFile(join(root, "fixtures/sponsored.json"), "utf8"));
   return buildProfile(member, sponsored);
 }
 
-// Also populate the Explore directory (web/members.json) so the static viewer can browse.
+// Also populate the Explore directory (apps/web/members.json) so the static viewer can browse.
 async function loadMembers() {
   if (useLive && KEY) {
     const members = await fetchMembers(KEY, 250);
@@ -42,9 +42,10 @@ async function loadMembers() {
 
 const profile = await load();
 const directory = await loadMembers();
-await mkdir(join(root, "web"), { recursive: true });
-await writeFile(join(root, "web/profile.json"), JSON.stringify(profile, null, 2));
-await writeFile(join(root, "web/members.json"), JSON.stringify(directory));
+const webDir = join(root, "..", "web"); // apps/web (root = apps/api)
+await mkdir(webDir, { recursive: true });
+await writeFile(join(webDir, "profile.json"), JSON.stringify(profile, null, 2));
+await writeFile(join(webDir, "members.json"), JSON.stringify(directory));
 
 console.log("\n  ───────────────────────────────────────────");
 console.log(`  ${profile.name}`);
@@ -53,5 +54,5 @@ console.log(`  ─────────────────────�
 console.log(`  Legislative record (sponsored): ${profile.record.length} items\n`);
 for (const r of profile.record) console.log(`   • ${r.date}  ${r.id}\n     ${r.title}`);
 console.log(`\n  Source: ${profile.sources.join("; ")}`);
-console.log(`  → wrote web/profile.json + web/members.json (${directory.count} members)`);
-console.log("  → run `npm run serve`, open /explore.html to browse\n");
+console.log(`  → wrote apps/web/profile.json + apps/web/members.json (${directory.count} members)`);
+console.log("  → run `pnpm serve`, open /explore.html to browse\n");

@@ -2,9 +2,9 @@
 
 // GET /api/money?bioguide=O000172 — campaign finance (FEC). Maps bioguide → FEC candidate id
 // via the @unitedstates dataset, then FEC totals. Demo fixture when FEC_API_KEY isn't set.
-import { getMoney } from '../../src/money.ts';
-import { jsonCached, jsonError } from '../../src/http.ts';
-import { isBioguide, DEFAULT_BIOGUIDE } from '../../src/handlers.ts';
+import { getMoney } from '../../apps/api/src/money.ts';
+import { jsonCached, jsonError } from '../../apps/api/src/http.ts';
+import { isBioguide, DEFAULT_BIOGUIDE } from '../../apps/api/src/handlers.ts';
 
 export const onRequestGet: PagesFunction<{ FEC_API_KEY?: string }> = async (context) => {
   const { request, env } = context;

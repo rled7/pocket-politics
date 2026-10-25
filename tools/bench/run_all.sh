@@ -4,15 +4,18 @@
 # in fixture mode (fair: both do the same work, no network). Pattern mirrors AlgoForge's
 # benchmarks/run_all.sh.
 #
-#   bash bench/run_all.sh            # N=2000 C=50 defaults
+#   bash tools/bench/run_all.sh      # N=2000 C=50 defaults  (or: pnpm bench)
 set -uo pipefail
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 source "$HOME/.cargo/env" 2>/dev/null || true
+
+# Use the workspace-pinned tsx (pnpm install); fall back to npx if it is not installed.
+TSX="$PWD/tools/bench/node_modules/.bin/tsx"; [ -x "$TSX" ] || TSX="npx tsx"
 
 N=${N:-2000}; C=${C:-50}
 
 echo "building rust backend (release)…"
-( cd rust && cargo build --release -q )
+( cd apps/api-rust && cargo build --release -q )
 
 bench_backend() {
   local name="$1" port="$2"; shift 2
@@ -20,15 +23,15 @@ bench_backend() {
   "$@" >"/tmp/pp_${name}.log" 2>&1 & local pid=$!
   sleep 4
   echo "── conformance (vs TypeScript reference) ──"
-  BASE="http://localhost:$port" npx tsx bench/conformance.ts 2>&1 | grep -E "✓|✗|passed|conforms" || true
+  BASE="http://localhost:$port" $TSX tools/bench/conformance.ts 2>&1 | grep -E "✓|✗|passed|conforms" || true
   echo "── load (N=$N, C=$C, fixture mode) ──"
   for p in "/api/members" "/api/bills" "/api/profile?bioguide=O000172"; do
-    npx tsx bench/load.ts "http://localhost:$port" "$p" "$N" "$C"
+    $TSX tools/bench/load.ts "http://localhost:$port" "$p" "$N" "$C"
   done
   kill "$pid" 2>/dev/null; wait "$pid" 2>/dev/null
 }
 
-bench_backend ts   8788 env PORT=8788 npx tsx src/api_server.ts
-bench_backend rust 8787 env PORT=8787 ./rust/target/release/pp-server
+bench_backend ts   8788 env PORT=8788 $TSX apps/api/src/api_server.ts
+bench_backend rust 8787 env PORT=8787 ./apps/api-rust/target/release/pp-server
 
 echo; echo "bake-off complete — conformance must pass before comparing the load numbers."
