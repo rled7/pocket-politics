@@ -150,6 +150,11 @@ docs:        API_CONTRACT · CACHING_ARCHITECTURE · PERSISTENT_SERVER_DEPLOYMEN
 
 ## Docs
 
+- [`PHASES.md`](./PHASES.md) — **plan of record**: the 5-phase build plan, architecture, open decisions.
+- [`TRACKER.md`](./TRACKER.md) — build log (one entry per build).
+- [`EDGE_CASES.md`](./EDGE_CASES.md) — known edge cases and their test status.
+- [`COMPLIANCE.md`](./COMPLIANCE.md) — privacy, terms, data inventory, name clearance.
+- [`packages/db/SCHEMA.md`](./packages/db/SCHEMA.md) — profiles + affiliations database design.
 - [`PROJECT_TRACKER.md`](./PROJECT_TRACKER.md) — the thorough plan: all levels, every
   feature, the data-source reality, and the full **How To** civic-action catalog.
 - [`CHANGELOG.md`](./CHANGELOG.md) — what shipped, when.

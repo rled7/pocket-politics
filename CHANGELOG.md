@@ -4,6 +4,23 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.54.0] — build 96 — 2026-10-25 — Plan of record + profiles/affiliations schema
+### Added
+- **`PHASES.md`** — the plan of record: monorepo layout, one router deployable to Cloudflare Workers
+  or any container, adapters for every outside service, OpenAPI contract, PostgreSQL on Neon, then
+  the people's-ideas feature and profiles with overlapping affiliations. Maps every open
+  `REMAINING.md` item to a task.
+- **`packages/db/`** — PostgreSQL + PostGIS schema for profiles and affiliations: districts derived
+  from a home address (versioned boundaries for redistricting), unions/tenant associations/town
+  halls with parent organizations, officials and terms, private-by-default memberships, and
+  small-group suppression for overlap counts. 20 SQL tests.
+- **`TRACKER.md`**, **`EDGE_CASES.md`**, **`COMPLIANCE.md`** (including an inventory of data the
+  app already collects).
+### Found (fixed in build 98, task 1.2)
+- On the Cloudflare Pages path, 18 of the 25 API routes the web pages call don't exist, and posting
+  a bill comment always fails ("Your name is required") because the handler calls `addComment`
+  with the old argument list. The local server is unaffected.
+
 ## [0.53.0] — build 95 — 2026-06-20 — Security hardening pass on the current surface (#16, partial)
 ### Security
 - **Stopped internal-error leakage.** The top-level 500 handler echoed `err.message` (upstream details
