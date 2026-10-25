@@ -7,9 +7,11 @@
  * Verified live: returns future-dated "Scheduled" hearings/markups with committee + room.
  *
  * NOTE: this is N+1 (one list + a handful of detail fetches). It's cached with a long TTL and
- * excluded from the background refresh loop (see api_server) so it isn't re-pulled on a timer.
+ * excluded from the background refresh loop (see node.ts) so it isn't re-pulled on a timer.
  * api.data.gov blocks default agents, so we send an explicit User-Agent.
  */
+
+import calendarFixture from "../fixtures/calendar.json";
 
 const API = "https://api.congress.gov/v3";
 const UA = { "User-Agent": "PocketPolitics/0.1 (civic transparency)" };
@@ -73,14 +75,7 @@ export async function getCalendar(key?: string): Promise<CalendarResult> {
     try { return { ...base, live: true, meetings: (await fetchCalendar(key)).slice(0, 12) }; }
     catch (e) { return { ...base, note: `Live calendar unavailable (${e instanceof Error ? e.message : "error"}).` }; }
   }
-  try {
-    const { readFile } = await import("node:fs/promises");
-    const { fileURLToPath } = await import("node:url");
-    const { dirname, join } = await import("node:path");
-    const path = join(dirname(fileURLToPath(import.meta.url)), "..", "fixtures", "calendar.json");
-    const fx = JSON.parse(await readFile(path, "utf8")) as { meetings: Meeting[] };
-    return { ...base, meetings: fx.meetings, note: "Demo data — set CONGRESS_API_KEY for the live calendar." };
-  } catch {
-    return { ...base, note: "Demo data unavailable. Set CONGRESS_API_KEY for the live calendar." };
-  }
+  // Fixture / demo mode — the JSON is bundled as a module (no filesystem on Workers).
+  const fx = calendarFixture as unknown as { meetings: Meeting[] };
+  return { ...base, meetings: fx.meetings, note: "Demo data — set CONGRESS_API_KEY for the live calendar." };
 }

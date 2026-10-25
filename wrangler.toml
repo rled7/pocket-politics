@@ -1,15 +1,29 @@
-# Cloudflare Pages config for Pocket Politics.
-# Static client lives in apps/web/; the API is the Pages Functions in functions/.
+# Cloudflare Workers config for Pocket Politics (moved from Pages in build 98).
+#   - the API is ONE Hono app (apps/api/src/app.ts) run by the Worker entry below
+#   - the static web client (apps/web/) is served by Workers Static Assets
+#   - local dev:  pnpm worker:dev      deploy:  pnpm worker:deploy   (see DEPLOY.md)
 name = "pocket-politics"
-pages_build_output_dir = "apps/web"
+main = "apps/api/src/worker.ts"
 compatibility_date = "2026-06-01"
 
-# Hot store for the caching layer (L2) + view instrumentation that drives the optimizer.
-# Create it once:  wrangler kv namespace create POCKETPOL_KV
-# then paste the returned id below. Until bound, the app gracefully runs without it.
+[assets]
+directory = "apps/web"
+binding = "ASSETS"
+# Serve files exactly as named, like the Node server: /ideas.html stays /ideas.html (the default
+# "auto-trailing-slash" would 307 it to /ideas and serve index.html at /).
+html_handling = "none"
+# A path with no matching file reaches the Worker, which answers with the same plain 404 as Node.
+not_found_handling = "none"
+# Static pages are served WITHOUT running the Worker, so their security headers come from
+# apps/web/_headers and "/" → home.html comes from apps/web/_redirects.
+
+# Hot store for the caching layer (L2) + view instrumentation that drives the optimizer, and the
+# comments/reactions/trending data. Create it once:  wrangler kv namespace create POCKETPOL_KV
+# then paste the returned id below. Until bound, the app gracefully runs on the in-memory store.
 [[kv_namespaces]]
 binding = "POCKETPOL_KV"
 id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
 
-# Secrets are NOT set here — set CONGRESS_API_KEY via the dashboard or:
-#   wrangler pages secret put CONGRESS_API_KEY
+# Secrets are NOT set here — set CONGRESS_API_KEY (and the other keys in apps/api/src/config.ts)
+# via the dashboard or:
+#   wrangler secret put CONGRESS_API_KEY

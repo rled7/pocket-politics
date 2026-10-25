@@ -43,3 +43,41 @@ TypeScript-vs-Rust bake-off. See `CHANGELOG.md` and `DONE.md`. Ended at 123/123 
   exactly from the old `package-lock.json`; `turbo` 2.11.10 added. CI now uses pnpm + turbo.
 - **Tests:** 123/123 TypeScript; typecheck clean; Rust release build OK, conformance 4/4; 67-request
   parity capture identical to the build-95 golden.
+
+## BUILD-098 — One router on Cloudflare Workers
+
+- **Date:** 2026-10-25
+- **Phase/Task:** 1.2 (One router on Cloudflare Workers)
+- **Files:** new — `apps/api/src/{app,worker,node,edge_cache,views,security_headers}.ts`,
+  `app.test.ts`, `edge_cache.test.ts`, `apps/api/tsconfig.worker.json`,
+  `apps/web/{_headers,_redirects,.assetsignore}`. Removed — `functions/` (all 8 handlers),
+  `apps/api/src/api_server.ts` (→ `node.ts`, `git mv`), the committed `.wrangler/` state.
+  Rewritten — `wrangler.toml` (Pages → Workers + Static Assets), `DEPLOY.md`, `apps/api/src/config.ts`
+  (`loadConfig`). Updated — `payments.ts`, `translate.ts` (injected config); `budget`, `calendar`,
+  `cloture`, `record`, `lobbying`, `nystate`, `openstates` (fixtures as JSON modules); `geo`, `money`,
+  `nystate` (type-only `json()` casts for Workers types); `http.test.ts` (new signatures);
+  `apps/api/package.json` (`hono`, `wrangler`, `@cloudflare/workers-types`, scripts), root `package.json`
+  (`worker:dev`, `worker:deploy`, `wrangler`), `pnpm-lock.yaml`, `.gitignore`, `.github/workflows/ci.yml`
+  (Workers dry-run), `tools/bench/{run_all.sh,README.md}`, `README.md`, `SECURITY.md`, `API_CONTRACT.md`,
+  `PROJECT_TRACKER.md`, `CACHING_ARCHITECTURE.md`, `PERSISTENT_SERVER_DEPLOYMENT.md`, `EDGE_CASES.md`
+  (5 Platform-migration items ticked), `CHANGELOG.md`, `TRACKER.md`, `apps/api/src/build.ts`
+  (0.56.0 / 98). **`PHASES.md`:** task 1.2 row updated — edge response caching via the Cache API added
+  to the deliverable; parity on Node *and* `wrangler dev` plus a cache-layer test added to the acceptance.
+- **Summary:** Every route (the Node server's ~30 plus `/healthz`) is now one Hono app built by
+  `createApp({ config, store, rateLimit, clientIp })`; `node.ts` and `worker.ts` are thin hosts. Fixes
+  the 18 routes missing on Cloudflare and the comment-argument bug (it was a different handler). Workers
+  get edge caching through the Cache API, static security headers via `_headers`, and `/` → `home.html`
+  via a `_redirects` rewrite. `hono` 4.13.13, `wrangler` 4.149.0, `@cloudflare/workers-types`
+  5.20261010.1 (all exact, ≥ 2 weeks old).
+- **Tests:** 294/294 TypeScript (123 existing + 117 route tests + 54 cache/instrumentation); typecheck
+  clean on both configs; 67-request parity capture identical to the build-95 golden on Node and under
+  `wrangler dev` (only static `Cache-Control` and `text/css; charset=utf-8` differ — Workers asset
+  defaults); `wrangler deploy --dry-run` bundles (205 KiB, 49 KiB gzip); Rust conformance 4/4.
+- **Review (main session):** re-ran install, typecheck and all 294 tests; Node parity identical on
+  67/67; `wrangler dev` parity differs only in Cloudflare's static-asset `Cache-Control` and CSS
+  charset; confirmed edge cache MISS → HIT, `/api/reps` BYPASS, and comment posting on Workers.
+  Accepted deviations: extra path segments (`/api/members/foo`) now 404 instead of matching
+  `/api/members`; Node 500s carry `X-Cache: BYPASS`; failed background refreshes are logged;
+  `.wrangler/` state untracked (a 1.1 follow-up). Follow-ups filed: cache-key normalization,
+  `SwrCache` bound, POST size cap and query-free error logs → task 1.3; proxy-only
+  `X-Forwarded-For` trust → 5.1; dotfiles on Node and KV write-error handling → EDGE_CASES.md.

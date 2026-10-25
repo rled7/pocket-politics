@@ -1,7 +1,7 @@
 # Pocket Politics — Persistent-Server Deployment (provider-portable, "in case we leave Cloudflare")
 
-> Companion to `CACHING_ARCHITECTURE.md`. That doc assumes Cloudflare primitives (Pages
-> Functions, KV, D1, R2). This doc lays out the **persistent-server** path so we are **never
+> Companion to `CACHING_ARCHITECTURE.md`. That doc assumes Cloudflare primitives (Workers,
+> KV, D1, R2). This doc lays out the **persistent-server** path so we are **never
 > locked in** — the same TS and Rust backends run on any container host, with the *identical*
 > caching behavior, by swapping a few infrastructure pieces for portable equivalents.
 >
@@ -15,7 +15,7 @@
 
 | Concern | Cloudflare way | Portable persistent-server way |
 |---|---|---|
-| **Compute** | Pages Functions (ephemeral isolates) | **One long-lived process** in a Docker container (Node or Rust) |
+| **Compute** | Workers (`apps/api/src/worker.ts`; ephemeral isolates) | **One long-lived process** in a Docker container (Node: `apps/api/src/node.ts`, or Rust) |
 | **In-memory cache (L-1)** | ❌ doesn't exist (isolates die) | ✅ **per-process LRU** (the unlock) |
 | **Hot store (L2)** | KV (global) | **Redis / Valkey** (or Postgres) |
 | **Relational/search (L3)** | D1 (SQLite) | **Postgres** |

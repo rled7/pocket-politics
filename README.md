@@ -19,7 +19,7 @@ A **multi-platform app on a single shared backend**:
 
 ```
                   ┌──────────── Web  (this repo, /web) ────────────┐
-  Congress.gov ──▶│  Cloudflare Pages Functions  (/functions/api)  │──▶ iOS — Swift / SwiftUI   (planned)
+  Congress.gov ──▶│  Cloudflare Workers  (one Hono app, apps/api)  │──▶ iOS — Swift / SwiftUI   (planned)
   + public data   │   /api/profile   /api/members   /api/bills      │──▶ Android — Kotlin/Compose (planned)
                   └─────────────────────────────────────────────────┘
 ```
@@ -54,8 +54,8 @@ The **core** [`API_CONTRACT.md`](./API_CONTRACT.md) (`/api/members`, `/api/bills
 
 | | TypeScript | Rust |
 |---|---|---|
-| Server | `apps/api/src/api_server.ts` (Cloudflare Functions in prod) | `apps/api-rust/` (`pp-server`, std HTTP + serde_json) |
-| Run | `pnpm api` (:8788) | `cd apps/api-rust && cargo run --release` (:8787) |
+| Server | `apps/api/src/app.ts` — one Hono app; `node.ts` (container) and `worker.ts` (Cloudflare Workers, prod) run it | `apps/api-rust/` (`pp-server`, std HTTP + serde_json) |
+| Run | `pnpm api` (:8788) · `pnpm worker:dev` (:8787) | `cd apps/api-rust && cargo run --release` (:8787) |
 | Scope | **feature-complete production backend** (+ votes, comments, money) | **core-contract reference** (proves the perf comparison) |
 
 ```bash
@@ -120,17 +120,18 @@ CONGRESS_API_KEY=xxxx pnpm api         # http://localhost:8788  (lands on the di
 Other commands:
 
 ```bash
-pnpm test         # TypeScript unit suite (56 tests) — via Turborepo
+pnpm test         # TypeScript suite (294 tests: units, every route, edge cache) — via Turborepo
 pnpm typecheck    # tsc --noEmit — via Turborepo
 pnpm ingest       # run the ingest job → static L0 snapshots in apps/api/dist/
+pnpm worker:dev   # the Cloudflare Workers build locally (wrangler dev) · pnpm worker:deploy to ship it
 pnpm bench        # the bake-off: conformance + load test, TypeScript vs Rust
 ```
 
 ## Deploy
 
-Full turnkey steps in **[`DEPLOY.md`](./DEPLOY.md)** (Cloudflare Pages: set the
-`CONGRESS_API_KEY` secret, bind `POCKETPOL_KV`, schedule ingest, turn on Tiered Cache).
-`wrangler.toml` holds the Pages config + KV binding. The persistent-server path (off
+Full turnkey steps in **[`DEPLOY.md`](./DEPLOY.md)** (Cloudflare Workers: `pnpm worker:deploy`,
+`wrangler secret put CONGRESS_API_KEY`, bind `POCKETPOL_KV`, connect the GitHub repo so pushes deploy).
+`wrangler.toml` holds the Workers config, the static-assets directory and the KV binding. The persistent-server path (off
 Cloudflare) is in [`PERSISTENT_SERVER_DEPLOYMENT.md`](./PERSISTENT_SERVER_DEPLOYMENT.md).
 
 ## Project structure
@@ -138,12 +139,14 @@ Cloudflare) is in [`PERSISTENT_SERVER_DEPLOYMENT.md`](./PERSISTENT_SERVER_DEPLOY
 ```
 apps/api/src/        http.ts (caching) · handlers.ts (shared data layer) · congress.ts · profile.ts ·
                      salary.ts · version.ts · store.ts · optimize.ts (knapsack) · ingest.ts ·
-                     api_server.ts (TS standalone server) · demo.ts · serve.ts · http.test.ts
+                     app.ts (the ONE Hono router) · node.ts (Node entry) · worker.ts (Workers entry) ·
+                     edge_cache.ts (Workers Cache API layer) · config.ts (injected config) ·
+                     demo.ts · serve.ts · http.test.ts · app.test.ts (every route) · edge_cache.test.ts
 apps/api/fixtures/   demo data so the no-key build still works
-apps/web/            explore.html (directory+search) · index.html (profile + web presence)
+apps/web/            explore.html (directory+search) · index.html (profile + web presence) ·
+                     _headers · _redirects · .assetsignore (static-asset config for Workers)
 apps/api-rust/       src/main.rs (Rust backend — bake-off contender) · Cargo.toml
-functions/           api/{profile,members,bills,latest}.ts · api/v/[version]/…   (Cloudflare Pages Functions —
-                     must stay at the repo root; imports reach into apps/api/src)
+wrangler.toml        Cloudflare Workers config (entry apps/api/src/worker.ts, static assets apps/web, KV)
 packages/db/         PostgreSQL + PostGIS schema, SQL tests (see packages/db/SCHEMA.md)
 tools/bench/         conformance.ts · load.ts · run_all.sh · README.md   (the bake-off harness)
 package.json · pnpm-workspace.yaml · turbo.json   (Turborepo + pnpm workspaces; see PHASES.md)

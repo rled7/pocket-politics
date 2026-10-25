@@ -3,19 +3,26 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Pocket Politics — TypeScript backend (data layer, handlers, standalone server, ingest)",
+  "description": "Pocket Politics — TypeScript backend (one Hono app, Workers + Node entries, data layer, ingest)",
   "scripts": {
     "demo": "tsx src/demo.ts",
     "demo:live": "USE_LIVE=1 tsx src/demo.ts",
     "serve": "tsx src/serve.ts",
-    "test": "tsx src/http.test.ts",
+    "test": "tsx src/http.test.ts && tsx src/app.test.ts && tsx src/edge_cache.test.ts",
     "ingest": "tsx src/ingest.ts",
-    "typecheck": "tsc --noEmit",
-    "api": "tsx src/api_server.ts"
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.worker.json",
+    "api": "tsx src/node.ts",
+    "worker:dev": "wrangler dev",
+    "worker:deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "hono": "4.13.13"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "5.20261010.1",
     "@types/node": "^22.0.0",
     "tsx": "^4.19.0",
-    "typescript": "^5.6.0"
+    "typescript": "^5.6.0",
+    "wrangler": "4.149.0"
   }
 }

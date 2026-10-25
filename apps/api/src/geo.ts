@@ -21,7 +21,7 @@ export interface District { state: string; stateName: string; district: string; 
 export async function geocodeDistrict(address: string): Promise<District | null> {
   const url = "https://geocoding.geo.census.gov/geocoder/geographies/onelineaddress" +
     `?address=${encodeURIComponent(address)}&benchmark=Public_AR_Current&vintage=Current_Current&layers=all&format=json`;
-  const data = await fetch(url).then((r) => r.json()).catch(() => null);
+  const data = await fetch(url).then((r) => r.json() as Promise<any>).catch(() => null);
   const m = data?.result?.addressMatches?.[0];
   if (!m) return null;
   const state: string = m.addressComponents?.state ?? "";
@@ -37,7 +37,7 @@ export async function geocodeDistrict(address: string): Promise<District | null>
 export async function geocodeCoords(lat: number, lon: number): Promise<District | null> {
   const url = "https://geocoding.geo.census.gov/geocoder/geographies/coordinates" +
     `?x=${lon}&y=${lat}&benchmark=Public_AR_Current&vintage=Current_Current&layers=all&format=json`;
-  const data = await fetch(url).then((r) => r.json()).catch(() => null);
+  const data = await fetch(url).then((r) => r.json() as Promise<any>).catch(() => null);
   const geos = data?.result?.geographies ?? {};
   const stKey = Object.keys(geos).find((k) => /^States$/i.test(k) || /States/i.test(k));
   const st = stKey && Array.isArray(geos[stKey]) ? geos[stKey][0] : null;

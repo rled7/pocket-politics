@@ -1,0 +1,2 @@
+# Files in this folder that must NOT be published as public static assets.
+package.json

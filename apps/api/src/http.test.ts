@@ -207,15 +207,16 @@ check("getMoney fixture: totals have raised/spent/cashOnHand",
 check("getMoney echoes the requested bioguide", money.bioguide === "O000172");
 
 // config — integrations registry (secrets-safe status, never exposes values)
-const { integrations, keySummary } = await import("./config.ts");
-const intg = integrations();
+const { integrations, keySummary, loadConfig } = await import("./config.ts");
+const noKeys = loadConfig({});
+const intg = integrations(noKeys);
 const ids = intg.map(i => i.id);
 check("integrations lists congress, fec, lda, nyOpenLeg",
   ["congress", "fec", "lda", "nyOpenLeg"].every(id => ids.includes(id)));
 check("integrations entries are secrets-safe (no value field)",
   intg.every(i => !("value" in i) && typeof i.configured === "boolean" && !!i.signup));
 check("keySummary marks each id with ✓/✗ and never leaks a key",
-  /congress[✓✗]/.test(keySummary()) && !/=/.test(keySummary()));
+  /congress[✓✗]/.test(keySummary(noKeys)) && !/=/.test(keySummary(noKeys)));
 
 // lobbying — fixture mode (no LDA key) returns the bundled real sample, clearly marked
 const { getLobbying, LDA_SEARCH_URL } = await import("./lobbying.ts");
@@ -282,10 +283,11 @@ const fp = new URLSearchParams(form);
 check("buildCheckoutForm encodes price/mode/urls correctly",
   fp.get("line_items[0][price]") === "price_123" && fp.get("mode") === "subscription" && fp.get("success_url") === "https://x/ok");
 check("createCheckout without a key returns a clean not-configured error",
-  /not configured/i.test((await createCheckout("plus", "http://x", undefined)).error ?? ""));
-check("createCheckout rejects an unknown plan", /unknown plan/i.test((await createCheckout("bogus", "http://x", "sk_test_x")).error ?? ""));
+  /not configured/i.test((await createCheckout("plus", "http://x", noKeys)).error ?? ""));
+const stripeCfg = loadConfig({ STRIPE_SECRET_KEY: "sk_test_x" });
+check("createCheckout rejects an unknown plan", /unknown plan/i.test((await createCheckout("bogus", "http://x", stripeCfg)).error ?? ""));
 check("createCheckout flags a missing price id (no network call)",
-  /STRIPE_PRICE_PLUS/.test((await createCheckout("plus", "http://x", "sk_test_x")).error ?? ""));
+  /STRIPE_PRICE_PLUS/.test((await createCheckout("plus", "http://x", stripeCfg)).error ?? ""));
 
 // Filibuster / cloture — validate the captured fixture shape (no network)
 {
@@ -313,8 +315,8 @@ check("translate caps input length sent", aBody.messages[0].content.length < 700
 const oBody = JSON.parse(buildBody("hi", { kind: "openai", key: "k", base: "b", model: "gpt-4o-mini" }));
 check("translate OpenAI body: system+user messages (OpenAI-compatible shape)", oBody.messages.length === 2 && oBody.messages[0].role === "system" && oBody.messages[1].role === "user");
 const tstore = new MemoryStore();
-const noKey = await getTranslation("119-hr-1", "some bill text", tstore);
-check("getTranslation without any provider key is cleanly disabled", noKey.enabled === false && /API_KEY/.test(noKey.note ?? "") && providerName() === null);
+const noKey = await getTranslation("119-hr-1", "some bill text", tstore, loadConfig({}));
+check("getTranslation without any provider key is cleanly disabled", noKey.enabled === false && /API_KEY/.test(noKey.note ?? "") && providerName(loadConfig({})) === null);
 
 // Comment moderation — rules-based spam/promo/nonsense filter (no key)
 const { moderate } = await import("./moderation.ts");

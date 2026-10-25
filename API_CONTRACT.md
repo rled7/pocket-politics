@@ -6,8 +6,8 @@
 > via a base-URL switch, so we can plug implementations in and out with zero frontend
 > change — and benchmark them apples-to-apples on identical inputs.
 >
-> Extracted 2026-06-13 from the existing TypeScript reference (`functions/api/*.ts`,
-> `apps/api/src/profile.ts`, `apps/api/src/congress.ts`) and the demo fixtures. **This file is the source
+> Extracted 2026-06-13 from the existing TypeScript reference (`functions/api/*.ts`, since
+> replaced by `apps/api/src/app.ts`; `apps/api/src/profile.ts`, `apps/api/src/congress.ts`) and the demo fixtures. **This file is the source
 > of truth; the TS code is reference implementation #1, not the spec.**
 
 ## Conventions (all endpoints)

@@ -15,7 +15,7 @@ mode. A backend's numbers only count if conformance passes.
 ## Files
 - `conformance.ts` — semantic JSON equality vs the TS data layer (ignores volatile `generatedAt`).
 - `load.ts` — N requests at concurrency C; reports rps + p50/p95/p99.
-- `run_all.sh` — orchestrates both backends (TS `apps/api/src/api_server.ts` :8788, Rust `pp-server` from `apps/api-rust` :8787).
+- `run_all.sh` — orchestrates both backends (TS `apps/api/src/node.ts` :8788, Rust `pp-server` from `apps/api-rust` :8787).
 
 ## Honest reading of the results
 - **Compare only after conformance passes** — a fast wrong answer is disqualified.

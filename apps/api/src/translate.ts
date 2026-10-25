@@ -11,7 +11,7 @@
  * Store (translate once, serve free forever — the token-saving core of pricing #38), usage logged.
  */
 import type { Store } from "./store.ts";
-import { KEYS } from "./config.ts";
+import type { Config } from "./config.ts";
 
 const MAX_INPUT = 6000, MAX_TOKENS = 1024, CACHE_TTL = 60 * 60 * 24 * 30;
 
@@ -25,13 +25,13 @@ export interface KeyPoint { plain: string; legalese: string; }
 export interface Translation { plainEnglish: string; keyPoints: KeyPoint[]; }
 export interface TranslateResult extends Partial<Translation> { enabled: boolean; cached?: boolean; model?: string; note?: string; }
 
-/** Resolve which provider to use from configured keys. Anthropic wins if both are set. */
-function provider() {
-  if (KEYS.anthropic) return { kind: "anthropic" as const, key: KEYS.anthropic, base: "https://api.anthropic.com/v1", model: KEYS.llmModel || "claude-sonnet-4-6" };
-  if (KEYS.openai) return { kind: "openai" as const, key: KEYS.openai, base: (KEYS.openaiBase || "https://api.openai.com/v1").replace(/\/$/, ""), model: KEYS.llmModel || "gpt-4o-mini" };
+/** Resolve which provider to use from the injected config. Anthropic wins if both are set. */
+function provider(config: Config) {
+  if (config.anthropic) return { kind: "anthropic" as const, key: config.anthropic, base: "https://api.anthropic.com/v1", model: config.llmModel || "claude-sonnet-4-6" };
+  if (config.openai) return { kind: "openai" as const, key: config.openai, base: (config.openaiBase || "https://api.openai.com/v1").replace(/\/$/, ""), model: config.llmModel || "gpt-4o-mini" };
   return null;
 }
-export function providerName(): string | null { return provider()?.kind ?? null; }
+export function providerName(config: Config): string | null { return provider(config)?.kind ?? null; }
 
 /** Pure, unit-testable request builder for each provider. */
 export function buildBody(text: string, p: NonNullable<ReturnType<typeof provider>>): string {
@@ -62,10 +62,10 @@ async function callLLM(text: string, p: NonNullable<ReturnType<typeof provider>>
 }
 
 /** Translate a bill, cached per bill id; serves cache-hits free; cleanly disabled with no provider key. */
-export async function getTranslation(billId: string, text: string, store: Store): Promise<TranslateResult> {
+export async function getTranslation(billId: string, text: string, store: Store, config: Config): Promise<TranslateResult> {
   const cacheKey = `tr:${billId}`;
   const hit = await store.get(cacheKey);
-  const p = provider();
+  const p = provider(config);
   if (hit) { try { return { enabled: true, cached: true, model: p?.model, ...(JSON.parse(hit) as Translation) }; } catch { /* re-translate */ } }
   if (!p) return { enabled: false, note: "AI translation isn't enabled yet — set ANTHROPIC_API_KEY or OPENAI_API_KEY (OpenRouter works too)." };
   if (!text.trim()) return { enabled: true, note: "No bill text available to translate yet.", plainEnglish: "", keyPoints: [] };

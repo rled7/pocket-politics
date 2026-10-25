@@ -5,10 +5,12 @@
  * ⚠️ RATE LIMITS (free/default tier): 500 requests/day, 1 request/sec. So:
  *   - On-demand only — NEVER prewarm (prewarming 50 states would blow the daily budget instantly).
  *   - Long cache TTL (see the route's sMaxAge) so a viewed state is refetched rarely.
- *   - EXCLUDED from the background refresh loop (api_server) so cached states aren't re-pulled.
+ *   - EXCLUDED from the background refresh loop (node.ts) so cached states aren't re-pulled.
  *   - The two calls per state (bills + people) run SEQUENTIALLY to stay under 1 req/sec.
  * Fixture fallback (a real captured sample) keeps the page working with no key / offline.
  */
+
+import stateFixture from "../fixtures/state.json";
 
 const API = "https://v3.openstates.org";
 const SOURCE = "OpenStates (Plural)";
@@ -111,12 +113,7 @@ export async function getStateData(state: string, key?: string): Promise<StateDa
   return { ...base, note: "Demo data unavailable. Set OPENSTATES_API_KEY for live state data." };
 }
 
+// The fixture is bundled as a JSON module (no filesystem on Workers); one sample serves every state.
 async function loadFixture(_state: string): Promise<{ state?: string; legislators: StateLegislator[]; bills: StateBill[] } | null> {
-  try {
-    const { readFile } = await import("node:fs/promises");
-    const { fileURLToPath } = await import("node:url");
-    const { dirname, join } = await import("node:path");
-    const path = join(dirname(fileURLToPath(import.meta.url)), "..", "fixtures", "state.json");
-    return JSON.parse(await readFile(path, "utf8"));
-  } catch { return null; }
+  return stateFixture as unknown as { state?: string; legislators: StateLegislator[]; bills: StateBill[] };
 }

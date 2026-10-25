@@ -31,7 +31,7 @@ bench_backend() {
   kill "$pid" 2>/dev/null; wait "$pid" 2>/dev/null
 }
 
-bench_backend ts   8788 env PORT=8788 $TSX apps/api/src/api_server.ts
+bench_backend ts   8788 env PORT=8788 $TSX apps/api/src/node.ts
 bench_backend rust 8787 env PORT=8787 ./apps/api-rust/target/release/pp-server
 
 echo; echo "bake-off complete — conformance must pass before comparing the load numbers."

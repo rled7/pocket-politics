@@ -7,9 +7,12 @@
  *   1. STRIPE_SECRET_KEY (sk_live_… / sk_test_…) in .dev.vars / Cloudflare secrets.
  *   2. Create Products + Prices in the Stripe dashboard, then set their Price IDs:
  *        STRIPE_PRICE_PLUS, STRIPE_PRICE_PRO, STRIPE_PRICE_UNLIMITED
+ *      (both are read by `loadConfig` in config.ts and arrive here through the injected config).
  *   3. (Later, for fulfillment) STRIPE_WEBHOOK_SECRET to verify webhook events.
  * Until the secret key is set, the API returns a clean "payments not configured" — nothing breaks.
  */
+
+import type { Config } from "./config.ts";
 
 const STRIPE_API = "https://api.stripe.com/v1/checkout/sessions";
 
@@ -50,13 +53,15 @@ export interface CheckoutResult { url?: string; error?: string; }
 
 /**
  * Create a Stripe Checkout Session for a tier and return the hosted-checkout URL.
- * `priceId` comes from the tier's env var (set after you create Prices in Stripe).
+ * The secret key and the tier's Price ID come from the injected config (set after you create
+ * Prices in Stripe).
  */
-export async function createCheckout(tierId: string, origin: string, secret?: string): Promise<CheckoutResult> {
+export async function createCheckout(tierId: string, origin: string, config: Pick<Config, "stripeSecret" | "stripePrices">): Promise<CheckoutResult> {
+  const secret = config.stripeSecret;
   if (!secret) return { error: "Payments are not configured yet (no Stripe key)." };
   const tier = TIERS.find(t => t.id === tierId);
   if (!tier) return { error: "Unknown plan." };
-  const priceId = process.env[tier.priceEnv]?.trim();
+  const priceId = (config.stripePrices as Record<string, string | undefined>)[tier.id];
   if (!priceId) return { error: `This plan isn't set up yet (missing ${tier.priceEnv}).` };
 
   const body = buildCheckoutForm(priceId, tier.mode, `${origin}/pricing.html?paid=1`, `${origin}/pricing.html?canceled=1`);

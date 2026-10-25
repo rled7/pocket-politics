@@ -19,6 +19,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm test
+      - name: Workers bundle (wrangler deploy --dry-run)
+        run: pnpm worker:deploy --dry-run --outdir "$RUNNER_TEMP/worker-bundle"
 
   rust:
     name: Rust — build

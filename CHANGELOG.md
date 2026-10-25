@@ -4,6 +4,53 @@ All notable changes to Pocket Politics. Format follows [Keep a Changelog](https:
 this project uses date-stamped milestones while pre-1.0. Each release also carries a **build number**
 (`apps/api/src/build.ts`, mirrored at `/api/version` and in the page footer) tracking the commit count at release.
 
+## [0.56.0] — build 98 — 2026-10-25 — One router on Cloudflare Workers (task 1.2)
+### Fixed
+- **The 18 API routes missing on Cloudflare now exist.** The Pages path served only 7 of the 25 route
+  families the web pages call; the other 18 — `/api/bill`, `/api/budget`, `/api/calendar`, `/api/checkout`, `/api/cloture` (+ `/vote`),
+  `/api/committees`, `/api/crs`, `/api/lobbying`, `/api/local/officials`, `/api/ny/*` (7 routes),
+  `/api/pricing`, `/api/reactions`, `/api/record`, `/api/state`, `/api/track`, `/api/translate`,
+  `/api/trending` and `/api/version` — 404'd in production. Every route now lives in one router (as do
+  `/api/integrations`, `/api/donors` and `/healthz`).
+- **Comment posting on Cloudflare.** `functions/api/comments.ts` called `addComment(store, bill, author, text)`
+  with the old argument list, so every comment was rejected ("Your name is required"). Both hosts now run
+  the one handler; clients still sending the old `{bill, author, text}` payload get a clear `400`
+  ("Your district number is required to comment"), never a `500`.
+### Added
+- **`apps/api/src/app.ts`** — `createApp({ config, store, rateLimit, clientIp })`: one Hono app with every
+  route, the JSON 404, the generic 500 (logged server-side), and the security headers as middleware.
+  Config, store, limiter and client IP are injected — no `process.env`, no `node:*` in anything it imports
+  (a test scans the import graph and fails if that changes).
+- **`apps/api/src/worker.ts`** — the Cloudflare Workers entry: env bindings → `loadConfig`, KV (or memory) →
+  Store, `CF-Connecting-IP` → client IP, `ctx.waitUntil` profile-view counting (KV failures never fail a
+  request). Static pages are served by Workers Static Assets; `apps/web/_headers` carries the same security
+  headers, `_redirects` rewrites `/` to `home.html` (URL stays `/`), `.assetsignore` keeps `package.json` out.
+- **Edge response caching** (`apps/api/src/edge_cache.ts`) — Workers don't cache their own responses from
+  `Cache-Control`, so successful public `GET /api/*` responses are stored with the Cache API and the
+  government APIs are hit only on a miss. Never stored: non-GET, `/api/comments`, `/api/reactions`,
+  `/api/reps` (address in the URL), `no-store` or non-200 responses. `If-None-Match` is answered with a 304
+  from the stored copy; responses carry `X-Cache: HIT|MISS|BYPASS`. Per data center; see `DEPLOY.md` §3.
+- **`apps/api/src/node.ts`** (replaces `api_server.ts`) — the Node entry, behavior unchanged: static files,
+  SWR memory cache + prewarm + refresh loop, per-IP limits, one MemoryStore; it now forwards to the app.
+- **Tests: 294 (was 123).** `app.test.ts` exercises every route through `app.request()` (happy path +
+  validation errors; comment/reaction writes; spam, bad ids, old payloads; reactions set/move/retract;
+  translate/checkout with and without keys; 404, security headers, 429 + `Retry-After`, 500 hygiene) and
+  fails if any registered route has no test. `edge_cache.test.ts` drives the cache layer with a fake
+  Cache API: a repeat GET never re-runs the app; POST, `/api/reps`, `/api/comments`, `/api/reactions`,
+  `no-store` and non-200 are never stored.
+### Changed
+- `functions/` deleted. `wrangler.toml` moved from Pages to Workers (`main`, `[assets]`, same KV binding);
+  `pnpm worker:dev` / `pnpm worker:deploy`; `DEPLOY.md` rewritten (secrets, KV, connect the GitHub repo).
+- Config is injected: `config.ts` is now `loadConfig(source)` (Workers `env` or `process.env`);
+  `payments.ts` takes Stripe price ids and `translate.ts` its AI keys from that config. All fixtures
+  (budget, calendar, cloture, record, lobbying, NY, OpenStates) are bundled JSON modules, not `readFile`.
+- Typecheck covers all of `apps/api` — the Workers entry (and everything it imports) against Workers types
+  in `tsconfig.worker.json`, everything else against Node types. CI also runs `wrangler deploy --dry-run`.
+- Extra path segments after a route (`/api/members/foo`) now 404; the old hand-rolled router matched only
+  the first two segments. A trailing slash still works.
+- Verified: parity capture identical to the build-95 baseline on Node and under `wrangler dev` (static
+  `Cache-Control` and the `text/css` charset suffix differ — Workers asset defaults).
+
 ## [0.55.0] — build 97 — 2026-10-25 — Monorepo layout (task 1.1)
 ### Changed
 - **Turborepo + pnpm workspaces**, no behavior change. `src/` + `fixtures/` → `apps/api/` (`@pp/api`),

@@ -47,11 +47,11 @@ export async function getMoney(bioguide: string, fecKey?: string, cycle = 2024):
     fetch(`${FEC}/schedules/schedule_e/by_candidate/?candidate_id=${fecId}&cycle=${cycle}&api_key=${fecKey}&per_page=100`, { signal: AbortSignal.timeout(8000) }).catch(() => null),
   ]);
   if (!tRes.ok) throw new Error(`FEC ${tRes.status}`);
-  const t = ((await tRes.json()).results ?? [])[0] ?? {};
+  const t = (((await tRes.json()) as any).results ?? [])[0] ?? {};
   let outside: { support: number; oppose: number } | null = null;
   try {
     if (oRes && oRes.ok) {
-      const rows = (await oRes.json()).results ?? [];
+      const rows = ((await oRes.json()) as any).results ?? [];
       outside = { support: 0, oppose: 0 };
       for (const r of rows) (r.support_oppose_indicator === "S" ? outside.support += (r.total ?? 0) : outside.oppose += (r.total ?? 0));
     }
@@ -81,10 +81,10 @@ export async function getDonors(bioguide: string, fecKey?: string, cycle = 2024)
   if (!fecId) return { ...base, note: "No FEC candidate id for this member." };
   const t = () => AbortSignal.timeout(14000); // FEC by_employer aggregates server-side — can be slow; cap it
   try {
-    const cm = (await (await fetch(`${FEC}/candidate/${fecId}/committees/?api_key=${fecKey}&cycle=${cycle}`, { signal: t() })).json()).results ?? [];
+    const cm = ((await (await fetch(`${FEC}/candidate/${fecId}/committees/?api_key=${fecKey}&cycle=${cycle}`, { signal: t() })).json()) as any).results ?? [];
     const committee = (cm.find((c: any) => /principal/i.test(c.designation_full ?? "")) ?? cm[0])?.committee_id;
     if (!committee) return { ...base, live: true, note: "No campaign committee found." };
-    const emp = (await (await fetch(`${FEC}/schedules/schedule_a/by_employer/?committee_id=${committee}&cycle=${cycle}&api_key=${fecKey}&per_page=10&sort=-total`, { signal: t() })).json()).results ?? [];
+    const emp = ((await (await fetch(`${FEC}/schedules/schedule_a/by_employer/?committee_id=${committee}&cycle=${cycle}&api_key=${fecKey}&per_page=10&sort=-total`, { signal: t() })).json()) as any).results ?? [];
     return { bioguide, live: true, topEmployers: emp.map((e: any) => ({ employer: e.employer ?? "—", total: e.total ?? 0 })).filter((e: any) => e.employer && e.employer !== "—") };
   } catch (e) { return { ...base, note: `Donor data unavailable (${e instanceof Error ? e.message : "error"}).` }; }
 }

@@ -16,6 +16,8 @@
  * a member's legislation. Response: { count, next, previous, results: [...] }.
  */
 
+import lobbyingFixture from "../fixtures/lobbying.json";
+
 export interface LobbyingFiling {
   registrant: string | null;   // the lobbying firm that filed
   client: string | null;       // who they lobby for (the paying interest)
@@ -104,14 +106,6 @@ export async function getLobbying(query: string | undefined, key?: string, year 
     }
   }
   // Fixture / demo mode — bundled real sample, clearly not live.
-  try {
-    const { readFile } = await import("node:fs/promises");
-    const { fileURLToPath } = await import("node:url");
-    const { dirname, join } = await import("node:path");
-    const path = join(dirname(fileURLToPath(import.meta.url)), "..", "fixtures", "lobbying.json");
-    const fx = JSON.parse(await readFile(path, "utf8")) as { count?: number; filings: LobbyingFiling[] };
-    return { ...base, count: fx.count, filings: fx.filings, note: "Demo data — set LDA_API_KEY for live lobbying disclosure." };
-  } catch {
-    return { ...base, note: "Demo data unavailable. Set LDA_API_KEY for live lobbying disclosure." };
-  }
+  const fx = lobbyingFixture as unknown as { count?: number; filings: LobbyingFiling[] };
+  return { ...base, count: fx.count, filings: fx.filings, note: "Demo data — set LDA_API_KEY for live lobbying disclosure." };
 }

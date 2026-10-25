@@ -1,0 +1,3 @@
+# "/" lands on the personalized home, exactly like the Node server does. Status 200 = a REWRITE
+# (proxy to the same-site file), so the URL stays "/" and no redirect hop is added.
+/  /home.html  200

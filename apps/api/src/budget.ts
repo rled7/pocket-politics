@@ -8,6 +8,8 @@
  * of truth for where funding stands. Plus a plain explainer of how a shutdown happens.
  */
 
+import budgetFixture from "../fixtures/budget.json";
+
 const API = "https://api.congress.gov/v3";
 const UA = { "User-Agent": "PocketPolitics/0.1 (civic transparency)" };
 const SLUG: Record<string, string> = {
@@ -59,14 +61,7 @@ export async function getBudgetWatch(key?: string, congress = 119): Promise<Budg
       return { ...base, note: `Live appropriations lookup unavailable (${e instanceof Error ? e.message : "error"}).` };
     }
   }
-  try {
-    const { readFile } = await import("node:fs/promises");
-    const { fileURLToPath } = await import("node:url");
-    const { dirname, join } = await import("node:path");
-    const path = join(dirname(fileURLToPath(import.meta.url)), "..", "fixtures", "budget.json");
-    const fx = JSON.parse(await readFile(path, "utf8")) as { appropriations: AppropBill[] };
-    return { ...base, appropriations: fx.appropriations, note: "Demo data — set CONGRESS_API_KEY for live appropriations bills." };
-  } catch {
-    return { ...base, note: "Demo data unavailable. Set CONGRESS_API_KEY for live appropriations bills." };
-  }
+  // Fixture / demo mode — the JSON is bundled as a module (no filesystem on Workers).
+  const fx = budgetFixture as unknown as { appropriations: AppropBill[] };
+  return { ...base, appropriations: fx.appropriations, note: "Demo data — set CONGRESS_API_KEY for live appropriations bills." };
 }

@@ -103,7 +103,7 @@ post-expiry request returns instantly with stale data; if Tiered Cache breaks SW
 account, we choose one deliberately rather than discover it in prod.
 
 > ⚠️ **L1 is UNVERIFIED until we curl it — do not treat as load-bearing yet.** Async SWR is
-> documented for `Cache-Control` "set by your origin." A **Pages Function** response is
+> documented for `Cache-Control` "set by your origin." A **Worker** response is
 > *dynamic* and is **not** automatically stored in the CDN cache the way a static asset is —
 > it may return `cf-cache-status: DYNAMIC` (never cached, never SWR). The standard way to
 > cache a dynamic Function response is the Cache API, which (per §3) does **not** support SWR.
@@ -113,6 +113,10 @@ account, we choose one deliberately rather than discover it in prod.
 > **L0 / immutable path (§2, §4), which is real static-asset caching where `Cache-Control`
 > genuinely applies** and which already carries the hot path. Net: lean on L0/immutable;
 > keep dynamic-L1-SWR provisional until the curl passes.
+>
+> **Build 98:** the Workers entry now stores cacheable `GET /api/*` responses with the Cache API
+> (`apps/api/src/edge_cache.ts`, `X-Cache: HIT|MISS|BYPASS`) — no SWR, per-data-center. Verify it on
+> your hostname per `DEPLOY.md` §3.
 
 ---
 

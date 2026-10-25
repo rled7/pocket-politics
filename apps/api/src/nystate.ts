@@ -32,6 +32,12 @@ export interface NyBillsResult {
   bills: NyBill[];
 }
 
+import nyBillsFixture from "../fixtures/ny_bills.json";
+import nyLawsFixture from "../fixtures/ny_laws.json";
+import nyTranscriptsFixture from "../fixtures/ny_transcripts.json";
+import nyCalendarsFixture from "../fixtures/ny_calendars.json";
+import nyAgendasFixture from "../fixtures/ny_agendas.json";
+
 const API = "https://legislation.nysenate.gov/api/3";
 const SOURCE = "NY Senate Open Legislation";
 
@@ -88,14 +94,16 @@ export async function getNyBills(limit = 20, key?: string, session = nySession()
 
 const DEMO_NOTE = "Demo data — set NY_OPENLEG_API_KEY for live NY legislation.";
 
+// Fixtures are bundled as JSON modules (no filesystem on Workers), looked up by their file name.
+const FIXTURES: Record<string, unknown> = {
+  "ny_bills.json": nyBillsFixture,
+  "ny_laws.json": nyLawsFixture,
+  "ny_transcripts.json": nyTranscriptsFixture,
+  "ny_calendars.json": nyCalendarsFixture,
+  "ny_agendas.json": nyAgendasFixture,
+};
 async function loadFixture<T>(file: string): Promise<T | null> {
-  try {
-    const { readFile } = await import("node:fs/promises");
-    const { fileURLToPath } = await import("node:url");
-    const { dirname, join } = await import("node:path");
-    const path = join(dirname(fileURLToPath(import.meta.url)), "..", "fixtures", file);
-    return JSON.parse(await readFile(path, "utf8")) as T;
-  } catch { return null; }
+  return (FIXTURES[file] as T | undefined) ?? null;
 }
 
 // ── NY Laws (codified) ────────────────────────────────────────────────────────────────────────
@@ -168,7 +176,7 @@ export async function getNyBill(session: number, printNo: string, key?: string):
   try {
     const res = await fetch(`${API}/bills/${session}/${encodeURIComponent(printNo)}?key=${encodeURIComponent(key)}`);
     if (!res.ok) throw new Error(`OpenLeg ${res.status}`);
-    const r: any = (await res.json())?.result ?? {};
+    const r: any = ((await res.json()) as any)?.result ?? {};
     const st = r?.status ?? {};
     return {
       ...base, live: true,
@@ -190,7 +198,7 @@ export async function getNyTranscript(dateTime: string, key?: string): Promise<N
   try {
     const res = await fetch(`${API}/transcripts/${encodeURIComponent(dateTime)}?key=${encodeURIComponent(key)}`);
     if (!res.ok) throw new Error(`OpenLeg ${res.status}`);
-    const r: any = (await res.json())?.result ?? {};
+    const r: any = ((await res.json()) as any)?.result ?? {};
     return { dateTime, sessionType: r.sessionType, location: r.location, text: r.text ?? "", live: true };
   } catch (e) { return { dateTime, live: false, note: `Transcript unavailable (${e instanceof Error ? e.message : "error"}).` }; }
 }

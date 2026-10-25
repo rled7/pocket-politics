@@ -13,7 +13,10 @@
     "demo:live": "pnpm --filter @pp/api run demo:live",
     "serve": "pnpm --filter @pp/api run serve",
     "ingest": "pnpm --filter @pp/api run ingest",
-    "bench": "pnpm --filter @pp/bench run bench"
+    "bench": "pnpm --filter @pp/bench run bench",
+    "worker:dev": "pnpm --filter @pp/api run worker:dev",
+    "worker:deploy": "pnpm --filter @pp/api run worker:deploy",
+    "wrangler": "pnpm --filter @pp/api exec wrangler"
   },
   "devDependencies": {
     "turbo": "2.11.10"

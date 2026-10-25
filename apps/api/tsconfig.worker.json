@@ -1,0 +1,14 @@
+{
+  // The Workers entry (src/worker.ts) is typechecked against the Workers runtime types ONLY.
+  // @types/node and @cloudflare/workers-types both declare Request/Response/fetch/etc., so they
+  // can't share one program — hence a second config. Everything worker.ts imports (app.ts, the
+  // handlers, config, store, edge cache…) is checked here too, which proves that app code
+  // reachable from the Worker uses no Node-only API (`process`, `node:fs`, … don't exist here).
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ES2022"],
+    "types": ["@cloudflare/workers-types"]
+  },
+  "include": ["src/worker.ts"],
+  "exclude": []
+}

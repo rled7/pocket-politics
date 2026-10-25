@@ -4,6 +4,8 @@
  * (#32). We surface daily issues + a link to the official record now; plain-language AI summaries
  * ("in lay terms") layer on via the translator once ANTHROPIC_API_KEY is set — same scaffold pattern.
  */
+import recordFixture from "../fixtures/record.json";
+
 const API = "https://api.congress.gov/v3";
 const UA = { "User-Agent": "PocketPolitics/0.1 (civic transparency)" };
 
@@ -28,14 +30,7 @@ export async function getRecord(limit = 14, key?: string): Promise<RecordResult>
       return { ...base, live: true, total: d?.pagination?.count, issues };
     } catch (e) { return { ...base, note: `Live record unavailable (${e instanceof Error ? e.message : "error"}).` }; }
   }
-  try {
-    const { readFile } = await import("node:fs/promises");
-    const { fileURLToPath } = await import("node:url");
-    const { dirname, join } = await import("node:path");
-    const path = join(dirname(fileURLToPath(import.meta.url)), "..", "fixtures", "record.json");
-    const fx = JSON.parse(await readFile(path, "utf8")) as { total?: number; issues: RecordIssue[] };
-    return { ...base, total: fx.total, issues: fx.issues, note: "Demo data — set CONGRESS_API_KEY for the live record." };
-  } catch {
-    return { ...base, note: "Demo data unavailable. Set CONGRESS_API_KEY for the live record." };
-  }
+  // Fixture / demo mode — the JSON is bundled as a module (no filesystem on Workers).
+  const fx = recordFixture as unknown as { total?: number; issues: RecordIssue[] };
+  return { ...base, total: fx.total, issues: fx.issues, note: "Demo data — set CONGRESS_API_KEY for the live record." };
 }

@@ -51,7 +51,7 @@ data layer once, consume everywhere.
 | Area | State | Notes |
 |---|---|---|
 | API contract | ✅ | `API_CONTRACT.md` (frozen v1) |
-| TypeScript backend | ✅ | `functions/` (Pages) + `src/api_server.ts` (standalone + static) |
+| TypeScript backend | ✅ | `apps/api/src/app.ts` (one Hono router) + `worker.ts` (Cloudflare Workers) / `node.ts` (standalone + static) |
 | Rust backend | ✅ | `rust/` — std HTTP + serde_json, keep-alive |
 | Conformance gate | ✅ | `bench/conformance.ts` — Rust JSON == TS (4/4) |
 | Benchmark harness | ✅ | `bench/load.ts` + `bench/run_all.sh` |

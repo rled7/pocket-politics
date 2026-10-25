@@ -10,6 +10,8 @@
  * with a long TTL (votes change a few times a day).
  */
 
+import clotureFixture from "../fixtures/cloture.json";
+
 const BASE = "https://www.senate.gov/legislative/LIS/roll_call_lists";
 const UA = { "User-Agent": "PocketPolitics/0.1 (civic transparency)" };
 
@@ -90,15 +92,7 @@ export async function getCloture(congress = 119, session = 2): Promise<ClotureRe
     if (!votes.length && session > 1) { session = 1; votes = await fetchCloture(congress, session); }
     return summarize(congress, session, votes);
   } catch {
-    try {
-      const { readFile } = await import("node:fs/promises");
-      const { fileURLToPath } = await import("node:url");
-      const { dirname, join } = await import("node:path");
-      const path = join(dirname(fileURLToPath(import.meta.url)), "..", "fixtures", "cloture.json");
-      const fx = JSON.parse(await readFile(path, "utf8")) as ClotureResult;
-      return { ...fx, live: false, note: "Demo data — live cloture votes load from senate.gov." };
-    } catch {
-      return { congress, session, source: "U.S. Senate roll-call votes", live: false, note: "Cloture data unavailable.", total: 0, invoked: 0, blocked: 0, votes: [] };
-    }
+    // Fixture / demo mode — the JSON is bundled as a module (no filesystem on Workers).
+    return { ...(clotureFixture as unknown as ClotureResult), live: false, note: "Demo data — live cloture votes load from senate.gov." };
   }
 }

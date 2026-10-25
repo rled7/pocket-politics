@@ -8,7 +8,7 @@
  *   - STALE entry  → serve the stale copy instantly (STALE) AND refresh it in the background,
  *                    so a reader NEVER waits on a refetch once an entry exists.
  *   - MISS (cold)  → the only blocking path; eliminated for the common+prewarmed set by warm()
- *                    + the background fill in api_server.ts.
+ *                    + the background fill in node.ts.
  * Single-flight (`inflight`) collapses concurrent refreshes of the same key into one upstream
  * call, so background revalidation can't stampede the gov API. See CACHING_ARCHITECTURE.md (L1).
  */
