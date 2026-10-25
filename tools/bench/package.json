@@ -1,0 +1,15 @@
+{
+  "name": "@pp/bench",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Pocket Politics — conformance gate + load tests (TypeScript vs Rust)",
+  "scripts": {
+    "bench": "bash run_all.sh",
+    "conformance": "tsx conformance.ts",
+    "load": "tsx load.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0"
+  }
+}

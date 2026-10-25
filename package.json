@@ -3,20 +3,22 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Pocket Politics — Phase 0: verified politician profile from Congress.gov",
+  "description": "Pocket Politics — monorepo root (Turborepo + pnpm workspaces)",
+  "packageManager": "pnpm@10.28.0",
   "scripts": {
-    "demo": "tsx src/demo.ts",
-    "demo:live": "USE_LIVE=1 tsx src/demo.ts",
-    "serve": "tsx src/serve.ts",
-    "test": "tsx src/http.test.ts",
-    "ingest": "tsx src/ingest.ts",
-    "typecheck": "tsc --noEmit",
-    "api": "tsx src/api_server.ts",
-    "bench": "bash bench/run_all.sh"
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "api": "pnpm --filter @pp/api run api",
+    "demo": "pnpm --filter @pp/api run demo",
+    "demo:live": "pnpm --filter @pp/api run demo:live",
+    "serve": "pnpm --filter @pp/api run serve",
+    "ingest": "pnpm --filter @pp/api run ingest",
+    "bench": "pnpm --filter @pp/bench run bench",
+    "worker:dev": "pnpm --filter @pp/api run worker:dev",
+    "worker:deploy": "pnpm --filter @pp/api run worker:deploy",
+    "wrangler": "pnpm --filter @pp/api exec wrangler"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
-    "tsx": "^4.19.0",
-    "typescript": "^5.6.0"
+    "turbo": "2.11.10"
   }
 }

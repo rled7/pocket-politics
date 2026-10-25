@@ -1,0 +1,6 @@
+{
+  "name": "@pp/web",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Pocket Politics — static web client (no build step; served as-is)"
+}

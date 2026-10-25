@@ -103,7 +103,7 @@ post-expiry request returns instantly with stale data; if Tiered Cache breaks SW
 account, we choose one deliberately rather than discover it in prod.
 
 > ⚠️ **L1 is UNVERIFIED until we curl it — do not treat as load-bearing yet.** Async SWR is
-> documented for `Cache-Control` "set by your origin." A **Pages Function** response is
+> documented for `Cache-Control` "set by your origin." A **Worker** response is
 > *dynamic* and is **not** automatically stored in the CDN cache the way a static asset is —
 > it may return `cf-cache-status: DYNAMIC` (never cached, never SWR). The standard way to
 > cache a dynamic Function response is the Cache API, which (per §3) does **not** support SWR.
@@ -113,6 +113,10 @@ account, we choose one deliberately rather than discover it in prod.
 > **L0 / immutable path (§2, §4), which is real static-asset caching where `Cache-Control`
 > genuinely applies** and which already carries the hot path. Net: lean on L0/immutable;
 > keep dynamic-L1-SWR provisional until the curl passes.
+>
+> **Build 98:** the Workers entry now stores cacheable `GET /api/*` responses with the Cache API
+> (`apps/api/src/edge_cache.ts`, `X-Cache: HIT|MISS|BYPASS`) — no SWR, per-data-center. Verify it on
+> your hostname per `DEPLOY.md` §3.
 
 ---
 
@@ -192,7 +196,7 @@ both backends. The honest, *measurable* difference is the **cold path**:
 | **Memory / cold-start** | Rust WASM vs TS isolate startup + steady-state footprint |
 | **Tail latency under load** | p95/p99 on the miss path at concurrency (GC pauses vs none) |
 
-So `bench/run_all.sh` (AlgoForge pattern) **isolates each backend (one running at a time —
+So `tools/bench/run_all.sh` (AlgoForge pattern) **isolates each backend (one running at a time —
 your "running only once" reading #2)**, hits the **miss path** with identical fixtures, and
 records p50/p95/p99 + ingest throughput. Conformance gate first (byte-equal to the frozen
 fixtures, per `API_CONTRACT.md`) — a backend that isn't correct never gets ranked. The warm
@@ -223,7 +227,7 @@ path is reported too, but we'll state up front it should tie.
 4. **KV store wrapper** (graceful) wired as the L2 fallback.
 5. **Cron ingest job** — the once-running backend; writes L0/L2/L3, stamps `dataVersion`.
 6. **Tiered Cache + Cache Reserve + Cache-Tags** turned on; SWR-interaction test.
-7. **`bench/run_all.sh`** — conformance + cold-path benchmark; then build the **Rust** backend
+7. **`tools/bench/run_all.sh`** — conformance + cold-path benchmark; then build the **Rust** backend
    to the same contract and run the bake-off.
 
 ---

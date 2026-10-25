@@ -19,7 +19,7 @@ A **multi-platform app on a single shared backend**:
 
 ```
                   ┌──────────── Web  (this repo, /web) ────────────┐
-  Congress.gov ──▶│  Cloudflare Pages Functions  (/functions/api)  │──▶ iOS — Swift / SwiftUI   (planned)
+  Congress.gov ──▶│  Cloudflare Workers  (one Hono app, apps/api)  │──▶ iOS — Swift / SwiftUI   (planned)
   + public data   │   /api/profile   /api/members   /api/bills      │──▶ Android — Kotlin/Compose (planned)
                   └─────────────────────────────────────────────────┘
 ```
@@ -54,15 +54,15 @@ The **core** [`API_CONTRACT.md`](./API_CONTRACT.md) (`/api/members`, `/api/bills
 
 | | TypeScript | Rust |
 |---|---|---|
-| Server | `src/api_server.ts` (Cloudflare Functions in prod) | `rust/` (`pp-server`, std HTTP + serde_json) |
-| Run | `npm run api` (:8788) | `cd rust && cargo run --release` (:8787) |
+| Server | `apps/api/src/app.ts` — one Hono app; `node.ts` (container) and `worker.ts` (Cloudflare Workers, prod) run it | `apps/api-rust/` (`pp-server`, std HTTP + serde_json) |
+| Run | `pnpm api` (:8788) · `pnpm worker:dev` (:8787) | `cd apps/api-rust && cargo run --release` (:8787) |
 | Scope | **feature-complete production backend** (+ votes, comments, money) | **core-contract reference** (proves the perf comparison) |
 
 ```bash
-npm run bench        # conformance gate (core JSON must match) + load test, TS vs Rust
+pnpm bench           # conformance gate (core JSON must match) + load test, TS vs Rust
 ```
 
-Finding (see [`bench/README.md`](./bench/README.md)): on this cache-frontable read workload
+Finding (see [`tools/bench/README.md`](./tools/bench/README.md)): on this cache-frontable read workload
 the language gap is modest — the **caching** dominates. The bake-off's purpose (compare
 language perf on the read path) is met by the core contract; the newer feature endpoints
 (`/api/votes`, `/api/comments`, `/api/money`) are **TypeScript-only**, which is the production
@@ -101,55 +101,66 @@ curl https://pocketpolitics.example/api/profile?bioguide=O000172
 ## Quick start
 
 ```bash
-npm install
+pnpm install          # pnpm 10 (Corepack: `corepack enable`), Node 20+
 
 # Offline — builds a profile from fixtures, then serves the viewer at :5174
-npm run demo
-npm run serve
+pnpm demo
+pnpm serve
 
 # Live data — get a free key at api.congress.gov/sign-up
-CONGRESS_API_KEY=xxxx npm run demo:live
+CONGRESS_API_KEY=xxxx pnpm demo:live
 ```
 
 Run the **full app locally** (web client + live API in one server):
 
 ```bash
-CONGRESS_API_KEY=xxxx npm run api      # http://localhost:8788  (lands on the directory)
+CONGRESS_API_KEY=xxxx pnpm api         # http://localhost:8788  (lands on the directory)
 ```
 
 Other commands:
 
 ```bash
-npm test          # TypeScript unit suite (56 tests)
-npm run typecheck # tsc --noEmit
-npm run ingest    # run the ingest job → static L0 snapshots in dist/
-npm run bench     # the bake-off: conformance + load test, TypeScript vs Rust
+pnpm test         # TypeScript suite (294 tests: units, every route, edge cache) — via Turborepo
+pnpm typecheck    # tsc --noEmit — via Turborepo
+pnpm ingest       # run the ingest job → static L0 snapshots in apps/api/dist/
+pnpm worker:dev   # the Cloudflare Workers build locally (wrangler dev) · pnpm worker:deploy to ship it
+pnpm bench        # the bake-off: conformance + load test, TypeScript vs Rust
 ```
 
 ## Deploy
 
-Full turnkey steps in **[`DEPLOY.md`](./DEPLOY.md)** (Cloudflare Pages: set the
-`CONGRESS_API_KEY` secret, bind `POCKETPOL_KV`, schedule ingest, turn on Tiered Cache).
-`wrangler.toml` holds the Pages config + KV binding. The persistent-server path (off
+Full turnkey steps in **[`DEPLOY.md`](./DEPLOY.md)** (Cloudflare Workers: `pnpm worker:deploy`,
+`wrangler secret put CONGRESS_API_KEY`, bind `POCKETPOL_KV`, connect the GitHub repo so pushes deploy).
+`wrangler.toml` holds the Workers config, the static-assets directory and the KV binding. The persistent-server path (off
 Cloudflare) is in [`PERSISTENT_SERVER_DEPLOYMENT.md`](./PERSISTENT_SERVER_DEPLOYMENT.md).
 
 ## Project structure
 
 ```
-src/         http.ts (caching) · handlers.ts (shared data layer) · congress.ts · profile.ts ·
-             salary.ts · version.ts · store.ts · optimize.ts (knapsack) · ingest.ts ·
-             api_server.ts (TS standalone server) · demo.ts · serve.ts · http.test.ts
-functions/   api/{profile,members,bills,latest}.ts · api/v/[version]/…   (Cloudflare Pages Functions)
-rust/        src/main.rs (Rust backend — bake-off contender) · Cargo.toml
-bench/       conformance.ts · load.ts · run_all.sh · README.md   (the bake-off harness)
-web/         explore.html (directory+search) · index.html (profile + web presence)
-fixtures/    demo data so the no-key build still works
+apps/api/src/        http.ts (caching) · handlers.ts (shared data layer) · congress.ts · profile.ts ·
+                     salary.ts · version.ts · store.ts · optimize.ts (knapsack) · ingest.ts ·
+                     app.ts (the ONE Hono router) · node.ts (Node entry) · worker.ts (Workers entry) ·
+                     edge_cache.ts (Workers Cache API layer) · config.ts (injected config) ·
+                     demo.ts · serve.ts · http.test.ts · app.test.ts (every route) · edge_cache.test.ts
+apps/api/fixtures/   demo data so the no-key build still works
+apps/web/            explore.html (directory+search) · index.html (profile + web presence) ·
+                     _headers · _redirects · .assetsignore (static-asset config for Workers)
+apps/api-rust/       src/main.rs (Rust backend — bake-off contender) · Cargo.toml
+wrangler.toml        Cloudflare Workers config (entry apps/api/src/worker.ts, static assets apps/web, KV)
+packages/db/         PostgreSQL + PostGIS schema, SQL tests (see packages/db/SCHEMA.md)
+tools/bench/         conformance.ts · load.ts · run_all.sh · README.md   (the bake-off harness)
+package.json · pnpm-workspace.yaml · turbo.json   (Turborepo + pnpm workspaces; see PHASES.md)
 docs:        API_CONTRACT · CACHING_ARCHITECTURE · PERSISTENT_SERVER_DEPLOYMENT ·
              BLUEPRINT · ROADMAP · PROJECT_TRACKER · CHANGELOG · DEPLOY
 ```
 
 ## Docs
 
+- [`PHASES.md`](./PHASES.md) — **plan of record**: the 5-phase build plan, architecture, open decisions.
+- [`TRACKER.md`](./TRACKER.md) — build log (one entry per build).
+- [`EDGE_CASES.md`](./EDGE_CASES.md) — known edge cases and their test status.
+- [`COMPLIANCE.md`](./COMPLIANCE.md) — privacy, terms, data inventory, name clearance.
+- [`packages/db/SCHEMA.md`](./packages/db/SCHEMA.md) — profiles + affiliations database design.
 - [`PROJECT_TRACKER.md`](./PROJECT_TRACKER.md) — the thorough plan: all levels, every
   feature, the data-source reality, and the full **How To** civic-action catalog.
 - [`CHANGELOG.md`](./CHANGELOG.md) — what shipped, when.

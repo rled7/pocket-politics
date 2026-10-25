@@ -5,7 +5,7 @@ mitigations to add as the gated features (accounts, payments, identity verificat
 full red/blue pass (#16) runs after the feature set locks; this documents where things stand now.
 
 ## Architecture (attack-surface relevant)
-- **Server**: a single Node `http` server (`src/api_server.ts`) that serves the static `web/` client and
+- **Server**: a single Node `http` server (`apps/api/src/node.ts`) that serves the static `web/` client and
   the `/api/*` endpoints. No database — state lives in a KV/JSON `Store` (`src/store.ts`).
 - **Secrets**: all API keys read server-side from a gitignored `.dev.vars` (local) / Cloudflare secrets
   (prod) via `src/config.ts`. **Keys are never sent to the client** — every third-party call is made

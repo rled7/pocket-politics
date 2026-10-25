@@ -1,5 +1,8 @@
 # Pocket Politics — what's left (snapshot 2026-06-20, build 94)
 
+> **Superseded by [`PHASES.md`](./PHASES.md) as of build 96.** Every item below is mapped to a
+> PHASES task by its `#NN` number. Kept for history.
+
 45 of 58 tracked tasks done. **Every remaining item is blocked on a user-provided key or decision** —
 there is no unblocked coding work left. Listed with the exact thing that unblocks each.
 

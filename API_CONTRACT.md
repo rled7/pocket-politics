@@ -6,8 +6,8 @@
 > via a base-URL switch, so we can plug implementations in and out with zero frontend
 > change — and benchmark them apples-to-apples on identical inputs.
 >
-> Extracted 2026-06-13 from the existing TypeScript reference (`functions/api/*.ts`,
-> `src/profile.ts`, `src/congress.ts`) and the demo fixtures. **This file is the source
+> Extracted 2026-06-13 from the existing TypeScript reference (`functions/api/*.ts`, since
+> replaced by `apps/api/src/app.ts`; `apps/api/src/profile.ts`, `apps/api/src/congress.ts`) and the demo fixtures. **This file is the source
 > of truth; the TS code is reference implementation #1, not the spec.**
 
 ## Conventions (all endpoints)
@@ -181,7 +181,7 @@ Same payloads as the mutable endpoints, but pinned to a `{version}` so they cach
 
 ## Conformance & bake-off harness (planned)
 
-`bench/run_all.sh` (AlgoForge pattern) will, for each backend:
+`tools/bench/run_all.sh` (AlgoForge pattern) will, for each backend:
 1. boot it on a clean port in an identical container (no key → fixture mode),
 2. fire the same request set at `/api/profile`, `/api/members`, `/api/bills`,
 3. assert each response is byte-equal to the frozen fixtures (conformance gate),
